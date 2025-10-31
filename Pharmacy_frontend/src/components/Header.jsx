@@ -8,6 +8,10 @@ const Header = () => {
                 <ul className="flex space-x-4">
                     <li><a href="/" className="hover:underline">Home</a></li>
                     <li><a href="/pharmacy" className="hover:underline">Pharmacy</a></li>
+                    <li> <a href="/masters/vendors" className="text-blue-600 hover:underline">Vendors</a></li>
+                    <li> <a href="/masters/customers" className="text-blue-600 hover:underline">customers</a></li>
+                    <li> <a href="/masters/categories" className="text-blue-600 hover:underline">categories</a></li>
+                    
                 </ul>
             </nav>
         </header>
