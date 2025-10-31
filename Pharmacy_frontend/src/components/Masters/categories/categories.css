@@ -1,5 +1,5 @@
-.customer-container {
-  max-width: 900px;
+.category-container {
+  max-width: 800px;
   margin: 30px auto;
   background: #ffffff;
   padding: 25px;
@@ -7,21 +7,21 @@
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
-.customer-container h2 {
+.category-container h2 {
   text-align: center;
   color: #1e3a8a;
   margin-bottom: 20px;
 }
 
-.customer-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.category-form {
+  display: flex;
+  flex-direction: column;
   gap: 15px;
   margin-bottom: 20px;
 }
 
-.customer-form input,
-.customer-form textarea {
+.category-form input,
+.category-form textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #d1d5db;
@@ -30,19 +30,13 @@
   outline: none;
 }
 
-.customer-form input:focus,
-.customer-form textarea:focus {
+.category-form input:focus,
+.category-form textarea:focus {
   border-color: #2563eb;
   box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
 }
 
-.customer-form textarea {
-  grid-column: span 2;
-  resize: none;
-}
-
-.customer-form button {
-  grid-column: span 2;
+.category-form button {
   background-color: #2563eb;
   color: white;
   padding: 12px;
@@ -53,32 +47,32 @@
   font-weight: 600;
 }
 
-.customer-form button:hover {
+.category-form button:hover {
   background-color: #1e40af;
 }
 
-.customer-table {
+.category-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.customer-table th,
-.customer-table td {
+.category-table th,
+.category-table td {
   border: 1px solid #e5e7eb;
   padding: 10px;
   text-align: left;
 }
 
-.customer-table th {
+.category-table th {
   background: #2563eb;
   color: white;
 }
 
-.customer-table tr:nth-child(even) {
+.category-table tr:nth-child(even) {
   background: #f3f4f6;
 }
 
-.customer-table button {
+.category-table button {
   padding: 6px 10px;
   margin-right: 5px;
   border: none;
@@ -86,12 +80,12 @@
   cursor: pointer;
 }
 
-.customer-table button:first-child {
+.category-table button:first-child {
   background: #10b981;
   color: white;
 }
 
-.customer-table .delete-btn {
+.category-table .delete-btn {
   background: #ef4444;
   color: white;
 }

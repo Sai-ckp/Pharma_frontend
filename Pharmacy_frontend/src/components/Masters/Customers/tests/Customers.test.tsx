@@ -1,5 +1,5 @@
 import React from 'react';
 
-import {Customers} from '../Customers';
+import {customers} from '../customers';
 
-describe('<Customers />', () => {});
+describe('<customers />', () => {});

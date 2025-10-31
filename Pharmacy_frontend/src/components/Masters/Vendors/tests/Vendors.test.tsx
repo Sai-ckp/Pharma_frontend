@@ -1,5 +1,5 @@
 import React from 'react';
 
-import {Vendors} from '../Vendors';
+import {vendors} from '../vendors';
 
-describe('<Vendors />', () => {});
+describe('<vendors />', () => {});

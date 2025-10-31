@@ -1,3 +1,54 @@
-.Vendors {
-  
+.vendor-container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: auto;
+}
+
+.vendor-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.vendor-form input,
+.vendor-form textarea {
+  flex: 1 1 45%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.vendor-form button {
+  padding: 10px 20px;
+  background-color: #0078d7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.vendor-form button:hover {
+  background-color: #005ea6;
+}
+
+.vendor-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vendor-table th,
+.vendor-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.delete-btn {
+  background-color: crimson;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
 }

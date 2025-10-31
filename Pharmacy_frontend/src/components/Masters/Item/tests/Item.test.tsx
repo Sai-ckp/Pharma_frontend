@@ -1,5 +1,5 @@
 import React from 'react';
 
-import {Item} from '../Item';
+import {item} from '../item';
 
-describe('<Item />', () => {});
+describe('<item />', () => {});
