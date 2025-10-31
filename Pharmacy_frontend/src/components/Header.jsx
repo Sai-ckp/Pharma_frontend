@@ -11,6 +11,9 @@ const Header = () => {
                     <li> <a href="/masters/vendors" className="text-blue-600 hover:underline">Vendors</a></li>
                     <li> <a href="/masters/customers" className="text-blue-600 hover:underline">customers</a></li>
                     <li> <a href="/masters/categories" className="text-blue-600 hover:underline">categories</a></li>
+                    <li> <a href="/masters/item" className="text-blue-600 hover:underline">Items</a></li>
+                    <li> <a href="/masters/unit" className="text-blue-600 hover:underline">unit</a></li>
+                    
                     
                 </ul>
             </nav>

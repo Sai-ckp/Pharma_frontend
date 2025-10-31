@@ -6,13 +6,14 @@ import Home from "./pages/Home";
 import Pharmacy from "./pages/Pharmacy";
 
 // Master modules
-import Vendors from "./components/masters/vendors/vendors.jsx"; // ✅ full path
+import Vendors from "./components/masters/vendors/vendors.jsx";
 import Customers from "./components/masters/customers/customers.jsx";
 import Categories from "./components/masters/categories/categories.jsx";
+import Unit from "./components/masters/unit/unit.jsx";
+import Item from "./components/masters/item/item.jsx";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-
 
 const App = () => {
   return (
@@ -30,6 +31,8 @@ const App = () => {
             <Route path="/masters/vendors" element={<Vendors />} />
             <Route path="/masters/customers" element={<Customers />} />
             <Route path="/masters/categories" element={<Categories />} />
+            <Route path="/masters/unit" element={<Unit />} />
+            <Route path="/masters/item" element={<Item />} />
           </Routes>
         </main>
 
