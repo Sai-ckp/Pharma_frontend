@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "./vendors.css";
 
+const API_URL = "http://127.0.0.1:8000/api/vendors/";
+
 const Vendors = () => {
   const [vendors, setVendors] = useState([]);
   const [formData, setFormData] = useState({
@@ -9,17 +11,22 @@ const Vendors = () => {
     email: "",
     address: "",
   });
-
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch vendor data from backend API
+  // ✅ Fetch all vendors from backend
   const fetchVendors = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/vendors/");
+      setLoading(true);
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error("Failed to fetch vendors");
       const data = await res.json();
       setVendors(data);
     } catch (error) {
       console.error("Error fetching vendors:", error);
+      alert("❌ Failed to load vendor data. Please check your backend API.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -27,48 +34,67 @@ const Vendors = () => {
     fetchVendors();
   }, []);
 
-  // Handle form input changes
+  // ✅ Handle input changes
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // Handle Add or Update vendor
+  // ✅ Handle Add or Update vendor
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const method = editingId ? "PUT" : "POST";
-      const url = editingId
-        ? `http://127.0.0.1:8000/api/vendors/${editingId}/`
-        : "http://127.0.0.1:8000/api/vendors/";
-      await fetch(url, {
+      const url = editingId ? `${API_URL}${editingId}/` : API_URL;
+
+      const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+
+      if (!res.ok) throw new Error("Failed to save vendor");
+
+      // Reset form
       setFormData({ name: "", contact_number: "", email: "", address: "" });
       setEditingId(null);
       fetchVendors();
+      alert(editingId ? "✅ Vendor updated successfully!" : "✅ Vendor added successfully!");
     } catch (error) {
       console.error("Error saving vendor:", error);
+      alert("❌ Failed to save vendor. Please try again.");
     }
   };
 
-  // Edit vendor
+  // ✅ Edit vendor
   const handleEdit = (vendor) => {
-    setFormData(vendor);
+    setFormData({
+      name: vendor.name,
+      contact_number: vendor.contact_number,
+      email: vendor.email,
+      address: vendor.address,
+    });
     setEditingId(vendor.id);
   };
 
-  // Delete vendor
+  // ✅ Delete vendor
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this vendor?")) {
-      await fetch(`http://127.0.0.1:8000/api/vendors/${id}/`, {
-        method: "DELETE",
-      });
-      fetchVendors();
+      try {
+        const res = await fetch(`${API_URL}${id}/`, { method: "DELETE" });
+        if (res.ok) {
+          fetchVendors();
+          alert("🗑️ Vendor deleted successfully!");
+        } else {
+          throw new Error("Failed to delete vendor");
+        }
+      } catch (error) {
+        console.error("Error deleting vendor:", error);
+        alert("❌ Failed to delete vendor.");
+      }
     }
   };
 
@@ -111,6 +137,10 @@ const Vendors = () => {
         </button>
       </form>
 
+      <h3 className="vendor-list-title">
+        {loading ? "Loading Vendors..." : "Vendor List"}
+      </h3>
+
       <table className="vendor-table">
         <thead>
           <tr>
@@ -123,24 +153,34 @@ const Vendors = () => {
           </tr>
         </thead>
         <tbody>
-          {vendors.map((vendor, index) => (
-            <tr key={vendor.id}>
-              <td>{index + 1}</td>
-              <td>{vendor.name}</td>
-              <td>{vendor.contact_number}</td>
-              <td>{vendor.email}</td>
-              <td>{vendor.address}</td>
-              <td>
-                <button onClick={() => handleEdit(vendor)}>Edit</button>
-                <button
-                  className="delete-btn"
-                  onClick={() => handleDelete(vendor.id)}
-                >
-                  Delete
-                </button>
+          {vendors.length > 0 ? (
+            vendors.map((vendor, index) => (
+              <tr key={vendor.id}>
+                <td>{index + 1}</td>
+                <td>{vendor.name}</td>
+                <td>{vendor.contact_number}</td>
+                <td>{vendor.email}</td>
+                <td>{vendor.address}</td>
+                <td>
+                  <button className="edit-btn" onClick={() => handleEdit(vendor)}>
+                    Edit
+                  </button>
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDelete(vendor.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="6" style={{ textAlign: "center" }}>
+                No vendors found.
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
