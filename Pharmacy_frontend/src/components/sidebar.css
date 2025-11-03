@@ -1,0 +1,83 @@
+/* --- Sidebar core (ensure fixed and on top) --- */
+.sidebar-container {
+  width: 240px;
+  height: 100vh;
+  background-color: #f9fafb;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 15px 12px;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+  font-family: "Inter", sans-serif;
+
+  position: fixed;      /* keep fixed on left */
+  left: 0;
+  top: 0;
+  z-index: 1000;        /* IMPORTANT: above main content */
+  pointer-events: auto; /* ensure clickable */
+}
+
+/* Make main links clearly clickable (ensure above any overlays) */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  color: #c0c0c0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.20s ease-in-out;
+  position: relative;
+  z-index: 1010;        /* above container background */
+  pointer-events: auto; /* allow clicks */
+}
+
+/* Sub-links inside masters */
+.sidebar-submenu .sidebar-sublink {
+  position: relative;
+  z-index: 1010;
+  pointer-events: auto;
+}
+
+/* If you used a parent .sidebar-dropdown that toggles open, ensure it doesn't block children */
+.sidebar-dropdown {
+  position: relative;
+  z-index: 1005;
+  pointer-events: auto;
+}
+
+/* Main area margin — ensure main content doesn't sit under the sidebar */
+.app-main {
+  margin-left: 240px; /* must match sidebar width */
+}
+
+/* Hover / active styles (keep your theme) */
+.sidebar-link:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.sidebar-link.active {
+  background-color: #007bff;
+  color: #fff;
+}
+
+/* submenu visuals */
+.sidebar-submenu {
+  margin-left: 8px;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 6px;
+}
+
+/* Sub-link hover/active */
+.sidebar-sublink:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.sidebar-sublink.active {
+  background-color: #0066cc;
+  color: #fff;
+}
