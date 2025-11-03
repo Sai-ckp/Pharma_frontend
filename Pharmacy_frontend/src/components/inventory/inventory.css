@@ -1,0 +1,111 @@
+.inventory-root {
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 16px;
+}
+
+.tab-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.tab-header button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+}
+
+.tab-header button.active {
+  background: #1e90ff;
+  color: white;
+}
+
+.btn {
+  border: 1px solid #bbb;
+  background: white;
+  padding: 6px 10px;
+  margin-right: 6px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.btn.primary {
+  background: #1e90ff;
+  color: white;
+  border-color: #1e90ff;
+}
+
+.btn.danger {
+  background: #ff6b6b;
+  color: white;
+  border-color: #ff6b6b;
+}
+
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.inv-table th,
+.inv-table td {
+  border: 1px solid #eee;
+  padding: 8px;
+  text-align: left;
+}
+
+.inv-table th {
+  background: #fafafa;
+}
+
+.inv-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 90;
+}
+
+.inv-form-card {
+  background: white;
+  padding: 18px;
+  width: 480px;
+  max-width: 95%;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.inv-form-card form label {
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #333;
+}
+
+.inv-form-card input,
+.inv-form-card textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  margin-top: 4px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.inv-error {
+  color: #a94442;
+  background: #f9e6e6;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
