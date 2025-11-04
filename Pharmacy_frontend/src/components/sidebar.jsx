@@ -10,15 +10,15 @@ import {
   ChevronRight,
 } from "lucide-react";
 import "./Sidebar.css";
-
+ 
 const Sidebar = () => {
   const [isMastersOpen, setIsMastersOpen] = useState(false);
-
+ 
   const menuItems = [
     { path: "/", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { path: "/pharmacy", label: "Pharmacy", icon: <ShoppingCart size={18} /> },
   ];
-
+ 
   const masterItems = [
     { path: "/masters/vendors", label: "Vendors", icon: <Users size={18} /> },
     { path: "/masters/customers", label: "Customers", icon: <Users size={18} /> },
@@ -26,14 +26,24 @@ const Sidebar = () => {
     { path: "/masters/item", label: "Items", icon: <Package size={18} /> },
     { path: "/masters/unit", label: "Units", icon: <Settings size={18} /> },
   ];
-
+ 
   return (
     <div className="sidebar-container">
+ 
       <div className="sidebar-header">
-        <h2 className="sidebar-title">Keshav Medical</h2>
-        <p className="sidebar-subtitle">Management System</p>
+        <div className="sidebar-logo-wrap">
+          <img
+            src="https://image2url.com/images/1762228868711-92532987-d9ed-48dc-902b-ffb845d41cdc.jpeg"
+            alt="logo"
+            className="sidebar-logo"
+          />
+         <div className="sidebar-brand-multi">
+      <span className="brand-line1">Keshav Medicals</span>
+      <span className="brand-line2">Management System</span>
+    </div>
+        </div>
       </div>
-
+ 
       <nav className="sidebar-menu">
         {menuItems.map((item, index) => (
           <NavLink
@@ -47,7 +57,7 @@ const Sidebar = () => {
             <span className="sidebar-label">{item.label}</span>
           </NavLink>
         ))}
-
+ 
         {/* Masters Dropdown */}
         <div
           className="sidebar-link sidebar-dropdown"
@@ -63,7 +73,7 @@ const Sidebar = () => {
             {isMastersOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </span>
         </div>
-
+ 
         {isMastersOpen && (
           <div className="sidebar-submenu">
             {masterItems.map((item, index) => (
@@ -85,5 +95,6 @@ const Sidebar = () => {
     </div>
   );
 };
-
+ 
 export default Sidebar;
+ 

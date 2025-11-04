@@ -1,83 +1,127 @@
-/* --- Sidebar core (ensure fixed and on top) --- */
+/* sidebar container */
 .sidebar-container {
   width: 240px;
   height: 100vh;
-  background-color: #f9fafb;
-  color: #fff;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
-  padding: 15px 12px;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+  padding: 18px 12px;
   font-family: "Inter", sans-serif;
-
-  position: fixed;      /* keep fixed on left */
-  left: 0;
+  position: fixed;
   top: 0;
-  z-index: 1000;        /* IMPORTANT: above main content */
-  pointer-events: auto; /* ensure clickable */
+  left: 0;
+  z-index: 1000;
 }
-
-/* Make main links clearly clickable (ensure above any overlays) */
+ 
+/* header branding */
+.sidebar-header {
+  margin-bottom: 25px;
+}
+ 
+/* header branding */
+.sidebar-header {
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5e7eb; /* ---- divider line like screenshot ---- */
+}
+ 
+.sidebar-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+ 
+.sidebar-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+ 
+.sidebar-brand-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+ 
+/* menu */
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+ 
 .sidebar-link {
   display: flex;
   align-items: center;
-  color: #c0c0c0;
+  gap: 12px;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   text-decoration: none;
-  transition: all 0.20s ease-in-out;
-  position: relative;
-  z-index: 1010;        /* above container background */
-  pointer-events: auto; /* allow clicks */
+  color: #475569;
+  font-size: 14px;
+  transition: 0.2s;
+  cursor: pointer;
 }
-
-/* Sub-links inside masters */
-.sidebar-submenu .sidebar-sublink {
-  position: relative;
-  z-index: 1010;
-  pointer-events: auto;
-}
-
-/* If you used a parent .sidebar-dropdown that toggles open, ensure it doesn't block children */
-.sidebar-dropdown {
-  position: relative;
-  z-index: 1005;
-  pointer-events: auto;
-}
-
-/* Main area margin — ensure main content doesn't sit under the sidebar */
-.app-main {
-  margin-left: 240px; /* must match sidebar width */
-}
-
-/* Hover / active styles (keep your theme) */
+ 
+/* hover */
 .sidebar-link:hover {
-  background-color: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: #f1f5f9;
+  color: #111827;
 }
-
+ 
+/* active state */
 .sidebar-link.active {
-  background-color: #007bff;
+  background: #10b981e6;
   color: #fff;
+  font-weight: 600;
 }
-
-/* submenu visuals */
+ 
+/* submenu */
 .sidebar-submenu {
-  margin-left: 8px;
+  margin-left: 14px;
   margin-top: 6px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-left: 6px;
+  gap: 4px;
 }
-
-/* Sub-link hover/active */
-.sidebar-sublink:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: #fff;
+ 
+/* sublink */
+.sidebar-sublink {
+  padding-left: 12px;
+  font-size: 13px;
 }
-
-.sidebar-sublink.active {
-  background-color: #0066cc;
-  color: #fff;
+ 
+/* icon */
+.sidebar-icon svg {
+  stroke-width: 1.8px;
 }
+ 
+.sidebar-dropdown {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sidebar-brand-multi {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.1;
+}
+.brand-line1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #10b981e6;
+ 
+}
+ 
+.brand-line2 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+ 
+}
+ 
+ 
