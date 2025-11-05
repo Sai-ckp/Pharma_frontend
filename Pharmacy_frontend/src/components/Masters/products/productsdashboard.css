@@ -1,0 +1,138 @@
+/* Copy EXACT same styling from vendorsdashboard.css because theme is same */
+
+.customers-container {
+  padding: 24px;
+  font-family: "Inter", sans-serif;
+}
+
+.customers-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.customers-heading {
+  font-size: 12px;
+  font-weight: 300;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.customers-description {
+  font-size: 14px;
+  color: #475569;
+  margin-bottom: 22px;
+}
+
+/* KPI cards */
+.grid {
+  display: grid;
+}
+
+.bg-white {
+  background: #fff;
+}
+
+.shadow {
+  box-shadow: rgba(0,0,0,0.06) 0px 2px 8px;
+}
+
+.rounded-xl {
+  border-radius: 16px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-lg {
+  font-size: 17px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.text-3xl {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0d9488;
+}
+
+/* Dashboard Table Area */
+.customers-list {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 30px;
+  box-shadow: rgba(0,0,0,0.05) 0px 2px 8px;
+}
+
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.customers-table th,
+.customers-table td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px;
+  font-size: 14px;
+  color: #334155;
+  text-align: center;
+}
+
+.customers-table th {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.no-data {
+  padding: 18px;
+  font-size: 14px;
+}
+
+/* Buttons */
+.edit-btn, .delete-btn {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.edit-btn {
+  background: #facc15;
+  color: #1e293b;
+}
+
+.edit-btn:hover {
+  background: #eab308;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: #fff;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+.add-btn {
+  background: #10b981;
+  color: white;
+  padding: 7px 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.add-btn:hover {
+  background: #0d9488;
+}

@@ -24,6 +24,11 @@ import AddRole from "./components/Masters/roles/addroles.jsx";
 import LocationsDashboard from "./components/Masters/locations/locationsdashboard.jsx";
 import AddLocation from "./components/Masters/locations/addlocations.jsx";
 
+//products imports
+import ProductsDashboard from "./components/Masters/products/productsdashboard.jsx";
+import AddProduct from "./components/Masters/products/addproducts.jsx";
+
+
 import Dashboard from "./components/dashboard/dashboard.jsx"; 
 import Inventory from "./components/inventory/inventory.jsx";
 import Billing from "./components/billing/billing.jsx";
@@ -57,6 +62,9 @@ const App = () => {
              
               <Route path="/masters/locations" element={<LocationsDashboard />} />
               <Route path="/masters/locations/add" element={<AddLocation />} />
+
+              <Route path="/masters/products" element={<ProductsDashboard />} />
+              <Route path="/masters/products/add" element={<AddProduct />} />
 
 
               <Route path="/dashboard" element={<Dashboard />} />
