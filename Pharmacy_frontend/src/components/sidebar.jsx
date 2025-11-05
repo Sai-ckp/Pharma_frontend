@@ -18,13 +18,11 @@ const Sidebar = () => {
   const menuItems = [
     { path: "/", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { path: "/pharmacy", label: "Pharmacy", icon: <ShoppingCart size={18} /> },
+     { path: "/user-devices", label: "UserDevices", icon: <Smartphone size={18} /> },
+
   ];
    // 👇 User submenu (your new group)
-  const userItems = [
-    { path: "/user-devices", label: "UserDevices", icon: <Smartphone size={18} /> },
-
-    // add more user-related pages here later
-  ];
+  
 
   const masterItems = [
     { path: "/masters/vendors", label: "Vendors", icon: <Users size={18} /> },
