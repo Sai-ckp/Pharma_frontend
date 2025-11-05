@@ -11,22 +11,22 @@ import Pharmacy from "./pages/Pharmacy";
 
 // Master modules
 //vendors imports
-import Vendorsdashboard from "./components/Masters/Vendors/vendorsdashboard.jsx";
-import AddVendors from "./components/Masters/Vendors/addvendors.jsx";
+import Vendorsdashboard from "./components/masters/vendors/vendorsdashboard.jsx";
+import AddVendors from "./components/masters/vendors/addvendors.jsx";
  //customers imports             
-import AddCustomers from "./components/Masters/Customers/addcustomers.jsx";        // add new customer form
-import CustomersDashboard from "./components/Masters/Customers/customersdashboard.jsx"; // dashboard with KPI cards
+import AddCustomers from "./components/masters/customers/addcustomers.jsx";        // add new customer form
+import CustomersDashboard from "./components/masters/customers/customersdashboard.jsx"; // dashboard with KPI cards
 //roles imports
-import  RolesDashboard from "./components/Masters/roles/rolesdashboard.jsx";
-import AddRole from "./components/Masters/roles/addroles.jsx";
+import  RolesDashboard from "./components/masters/roles/rolesdashboard.jsx";
+import AddRole from "./components/masters/roles/addroles.jsx";
 
 //locations imports
-import LocationsDashboard from "./components/Masters/locations/locationsdashboard.jsx";
-import AddLocation from "./components/Masters/locations/addlocations.jsx";
+import LocationsDashboard from "./components/masters/locations/locationsdashboard.jsx";
+import AddLocation from "./components/masters/locations/addlocations.jsx";
 
 //products imports
-import ProductsDashboard from "./components/Masters/products/productsdashboard.jsx";
-import AddProduct from "./components/Masters/products/addproducts.jsx";
+import ProductsDashboard from "./components/masters/products/productsdashboard.jsx";
+import AddProduct from "./components/masters/products/addproducts.jsx";
 
 
 import Dashboard from "./components/dashboard/dashboard.jsx"; 
