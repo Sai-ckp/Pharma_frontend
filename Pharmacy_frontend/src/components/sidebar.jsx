@@ -8,6 +8,7 @@ import {
   ShoppingCart,
   ChevronDown,
   ChevronRight,
+  Smartphone,
 } from "lucide-react";
 import "./Sidebar.css";
  
@@ -18,13 +19,19 @@ const Sidebar = () => {
     { path: "/", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { path: "/pharmacy", label: "Pharmacy", icon: <ShoppingCart size={18} /> },
   ];
- 
+   // 👇 User submenu (your new group)
+  const userItems = [
+    { path: "/user-devices", label: "UserDevices", icon: <Smartphone size={18} /> },
+
+    // add more user-related pages here later
+  ];
+
   const masterItems = [
     { path: "/masters/vendors", label: "Vendors", icon: <Users size={18} /> },
     { path: "/masters/customers", label: "Customers", icon: <Users size={18} /> },
-    { path: "/masters/categories", label: "Categories", icon: <Package size={18} /> },
-    { path: "/masters/item", label: "Items", icon: <Package size={18} /> },
-    { path: "/masters/unit", label: "Units", icon: <Settings size={18} /> },
+    { path: "/masters/roles", label: "Roles", icon: <Package size={18} /> },
+    { path: "/masters/locations", label: "Locations", icon: <Package size={18} /> },
+    { path: "/masters/products", label: "products", icon: <Settings size={18} /> },
   ];
  
   return (

@@ -1,1 +1,1 @@
-export {dashboard} from './dashboard';
+export {user} from './user';
