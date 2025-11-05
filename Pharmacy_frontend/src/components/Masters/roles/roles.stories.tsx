@@ -1,14 +1,14 @@
 import React from 'react';
 import type {Meta, StoryObj} from '@storybook/react';
 
-import {item} from './item';
+import {roles} from './roles';
 
-const meta: Meta<typeof item> = {
-  component: item,
+const meta: Meta<typeof roles> = {
+  component: roles,
 };
 
 export default meta;
 
-type Story = StoryObj<typeof item>;
+type Story = StoryObj<typeof roles>;
 
 export const Basic: Story = {args: {}};

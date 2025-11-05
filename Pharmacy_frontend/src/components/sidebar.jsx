@@ -22,9 +22,9 @@ const Sidebar = () => {
   const masterItems = [
     { path: "/masters/vendors", label: "Vendors", icon: <Users size={18} /> },
     { path: "/masters/customers", label: "Customers", icon: <Users size={18} /> },
-    { path: "/masters/categories", label: "Categories", icon: <Package size={18} /> },
-    { path: "/masters/item", label: "Items", icon: <Package size={18} /> },
-    { path: "/masters/unit", label: "Units", icon: <Settings size={18} /> },
+    { path: "/masters/roles", label: "Roles", icon: <Package size={18} /> },
+    { path: "/masters/locations", label: "Locations", icon: <Package size={18} /> },
+    { path: "/masters/products", label: "products", icon: <Settings size={18} /> },
   ];
  
   return (
