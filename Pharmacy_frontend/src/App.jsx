@@ -32,6 +32,7 @@ import AddProduct from "./components/masters/products/addproducts.jsx";
 import Dashboard from "./components/dashboard/dashboard.jsx"; 
 import Inventory from "./components/inventory/inventory.jsx";
 import Billing from "./components/billing/billing.jsx";
+import UserDevices from "./components/user/user_devices/user_devices.jsx";
 
 const App = () => {
   return (
@@ -47,7 +48,8 @@ const App = () => {
               <Route path="/" element={<Dashboard />} />
               <Route path="/home" element={<Home />} />
               <Route path="/pharmacy" element={<Pharmacy />} />
-
+              {/* User Section */}
+              <Route path="/user-devices" element={<UserDevices />} />
               {/* Master Modules */}
               <Route path="/masters/vendors" element={<Vendorsdashboard />} />
               <Route path="/masters/vendors/add" element={<AddVendors />} />
