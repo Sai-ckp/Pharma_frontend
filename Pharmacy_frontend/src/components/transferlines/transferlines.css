@@ -1,0 +1,83 @@
+.transferlines {
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  max-width: 900px;
+  margin: 30px auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.transferlines h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.transferLineForm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 15px;
+}
+
+.formGroup label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.submitBtn {
+  grid-column: 1 / -1;
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.submitBtn:hover {
+  background-color: #0056b3;
+}
+
+/* ===== LIST SECTION ===== */
+.transferLineList {
+  margin-top: 40px;
+}
+
+.transferLineList h3 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #222;
+}
+
+.transferLineList table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.transferLineList th,
+.transferLineList td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.transferLineList th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.noRecords {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
