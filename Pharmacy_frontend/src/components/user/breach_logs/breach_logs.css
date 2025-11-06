@@ -1,0 +1,110 @@
+.breach-logs-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.breach-logs-container h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+/* Match Transfer Vouchers grid & spacing 1:1 */
+.breach-logs-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: start;
+}
+
+.breach-logs-form input,
+.breach-logs-form textarea,
+.breach-logs-form button,
+.breach-logs-form label {
+  font-size: 1rem;
+}
+
+.breach-logs-form input[type="text"],
+.breach-logs-form input[type="datetime-local"],
+.breach-logs-form textarea {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.breach-logs-form input:focus,
+.breach-logs-form textarea:focus {
+  border-color: #10b981e6;
+  outline: none;
+}
+
+/* Button on a new line, same tone & hover */
+.breach-logs-form button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  background-color: #059669;
+  color: white;
+  padding: 0.45rem 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+.breach-logs-form button:hover { background-color: #10b981e6; }
+
+.breach-logs-list-title {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  color: #444;
+  border-bottom: 2px solid #10b981e6;
+  padding-bottom: 0.4rem;
+}
+
+/* Table visuals identical to Transfer Vouchers */
+.breach-logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+.breach-logs-table th,
+.breach-logs-table td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
+}
+.breach-logs-table th {
+  background-color: #10b981e6;
+  color: white;
+  font-weight: 600;
+}
+.breach-logs-table tr:nth-child(even) { background-color: #f9f9f9; }
+.breach-logs-table tr:hover { background-color: #f1f1f1; }
+
+/* Action buttons mirrored */
+.edit-btn,
+.delete-btn {
+  padding: 0.4rem 0.8rem;
+  margin-right: 0.4rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+.edit-btn { background-color: #ffc107; color: #000; }
+.edit-btn:hover { background-color: #e0a800; }
+.delete-btn { background-color: #dc3545; color: white; }
+.delete-btn:hover { background-color: #b02a37; }

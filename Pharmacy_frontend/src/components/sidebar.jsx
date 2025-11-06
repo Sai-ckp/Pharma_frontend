@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Settings,
+  Package,
   ChevronDown,
   ChevronRight,
   Smartphone,
@@ -24,6 +25,7 @@ import {
   MapPin,
   ShoppingCart,
   FlaskRound,
+ 
 } from "lucide-react";
 import "./Sidebar.css";
 
@@ -38,13 +40,22 @@ const Sidebar = () => {
     { path: "/masters/products", label: "Products", icon: <FlaskRound size={18} /> },
     { path: "/users", label: "Users", icon: <UserCog size={18} /> },
   ];
+  const userItems = [
+    { path: "/user-devices", label: "UserDevices", icon: <Smartphone size={18} /> },
+    { path: "/inventory-ledger", label: "InventoryLedger", icon: <Package size={18} /> },
+    { path: "/transfer-vouchers", label: "TransferVouchers", icon: <Package size={18} /> },
+    { path: "/breach-logs", label: "BreachLogs", icon: <Package size={18} /> },
+    { path: "/audit-logs", label: "AuditLogs", icon: <Package size={18} /> }, // ⬅️ NEW
+    { path: "/recall-events", label: "RecallEvents", icon: <Package size={18} /> }, // ⬅️ NEW
+    { path: "/purchase-lines", label: "PurchaseLines", icon: <Package size={18} /> }, // ⬅️ new
+    { path: "/sales-invoices", label: "SalesInvoices", icon: <Package size={18} /> },
 
+  ];
   const otherMenuItems = [
 
     { path: "/settings", label: "settings", icon: <ShoppingCart size={18} /> },
     { path: "/retention-policies", label: "retention-policies", icon: <ShoppingCart size={18} /> },
     { path: "/pharmacy", label: "Pharmacy", icon: <Pill size={18} /> },
-    { path: "/user-devices", label: "User Devices", icon: <Smartphone size={18} /> },
     { path: "/rackrules", label: "Rack Rules", icon: <Layers size={18} /> },
     { path: "/batchlots", label: "Batch Lots", icon: <Box size={18} /> },
     { path: "/purchases", label: "Purchases", icon: <ShoppingBag size={18} /> },

@@ -1,0 +1,109 @@
+.inventory-ledger-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.inventory-ledger-container h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+/* same feel as user_devices */
+.inventory-ledger-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: start;
+}
+
+.inventory-ledger-form input,
+.inventory-ledger-form textarea,
+.inventory-ledger-form button,
+.inventory-ledger-form label {
+  font-size: 1rem;
+}
+
+.inventory-ledger-form input[type="text"],
+.inventory-ledger-form input[type="number"],
+.inventory-ledger-form input[type="datetime-local"],
+.inventory-ledger-form textarea {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.inventory-ledger-form input:focus,
+.inventory-ledger-form textarea:focus {
+  border-color: #10b981e6;
+  outline: none;
+}
+
+/* button on new line */
+.inventory-ledger-form button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  background-color: #059669;
+  color: white;
+  padding: 0.45rem 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+.inventory-ledger-form button:hover { background-color: #10b981e6; }
+
+.inventory-ledger-list-title {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  color: #444;
+  border-bottom: 2px solid #10b981e6;
+  padding-bottom: 0.4rem;
+}
+
+.inventory-ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+.inventory-ledger-table th,
+.inventory-ledger-table td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
+}
+.inventory-ledger-table th {
+  background-color: #10b981e6;
+  color: white;
+  font-weight: 600;
+}
+.inventory-ledger-table tr:nth-child(even) { background-color: #f9f9f9; }
+.inventory-ledger-table tr:hover { background-color: #f1f1f1; }
+
+.edit-btn,
+.delete-btn {
+  padding: 0.4rem 0.8rem;
+  margin-right: 0.4rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+.edit-btn { background-color: #ffc107; color: #000; }
+.edit-btn:hover { background-color: #e0a800; }
+.delete-btn { background-color: #dc3545; color: white; }
+.delete-btn:hover { background-color: #b02a37; }

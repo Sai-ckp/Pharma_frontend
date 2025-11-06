@@ -16,7 +16,6 @@ import Pharmacy from "./pages/Pharmacy";
 import Dashboard from "./components/dashboard/dashboard.jsx";
 import Inventory from "./components/inventory/inventory.jsx";
 import Billing from "./components/billing/billing.jsx";
-import UserDevices from "./components/user/user_devices/user_devices.jsx";
 
 // Masters
 import Vendorsdashboard from "./components/Masters/Vendors/vendorsdashboard.jsx";
@@ -29,6 +28,17 @@ import LocationsDashboard from "./components/Masters/locations/locationsdashboar
 import AddLocation from "./components/Masters/locations/addlocations.jsx";
 import ProductsDashboard from "./components/Masters/products/productsdashboard.jsx";
 import AddProduct from "./components/Masters/products/addproducts.jsx";
+
+//User
+import UserDevices from "./components/user/user_devices/user_devices.jsx";
+import InventoryLedger from "./components/user/inventory_ledger/inventory_ledger.jsx";
+import TransferVouchers from "./components/user/transfer_vouchers/transfer_vouchers.jsx"; // ⬅️ NEW
+import BreachLogs from "./components/user/breach_logs/breach_logs.jsx";
+import AuditLogs from "./components/user/audit_logs/audit_logs.jsx"; // ⬅️ NEW
+import RecallEvents from "./components/user/recall_events/recall_events.jsx";
+import PurchaseLines from "./components/user/purchase_lines/purchase_lines.jsx";
+import SalesInvoices from "./components/user/sales_invoices/sales_invoices.jsx";
+
 
 // Settings / retention
 import SettingsDashboard from "./components/settings/settingsdashboard.jsx";
@@ -47,6 +57,7 @@ import Prescriptions from "./components/prescriptions/prescriptions.jsx";
 import Saleslines from "./components/saleslines/saleslines.jsx";
 import H1registerentries from "./components/h1registerentries/h1registerentries.jsx";
 import Ndpsdailyentries from "./components/ndpsdailyentries/ndpsdailyentries.jsx";
+
 
 /** Shell for authenticated pages */
 function AppLayout() {
@@ -73,6 +84,16 @@ function AppLayout() {
             <Route path="/masters/locations/add" element={<AddLocation />} />
             <Route path="/masters/products" element={<ProductsDashboard />} />
             <Route path="/masters/products/add" element={<AddProduct />} />
+          
+            {/* User Section */}
+            <Route path="/user-devices" element={<UserDevices />} />
+            <Route path="/inventory-ledger" element={<InventoryLedger />} />
+            <Route path="/transfer-vouchers" element={<TransferVouchers />} />
+            <Route path="/breach-logs" element={<BreachLogs />} />
+            <Route path="/audit-logs" element={<AuditLogs />} />
+            <Route path="/recall-events" element={<RecallEvents />} />
+            <Route path="/purchase-lines" element={<PurchaseLines />} />
+            <Route path="/sales-invoices" element={<SalesInvoices />} />
 
             {/* Core */}
             <Route path="/dashboard" element={<Dashboard />} />
@@ -97,6 +118,9 @@ function AppLayout() {
             <Route path="/ndpsdailyentries" element={<Ndpsdailyentries />} />
 
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
+
+            
           </Routes>
         </main>
         <Footer />

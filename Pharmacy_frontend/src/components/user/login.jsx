@@ -24,34 +24,85 @@ function useBeep() {
   };
 }
 
-/* centered carousel shown ONLY after success */
-function CenterCarousel({ show, slides }) {
-  const [i, setI] = useState(0);
+/* ===== soft, pharmacy-themed animated background (inline SVG icons) ===== */
+function MedicalIconField() {
+  const icons = useMemo(() => {
+    const items = [];
+    const Svg = ({ children, w = 36, h = 18 }) => (
+      <svg width={w} height={h} viewBox={`0 0 ${w*2} ${h*2}`} fill="none">{children}</svg>
+    );
+    const Pill = () => (
+      <Svg w={36} h={16}>
+        <rect x="2" y="2" width="68" height="28" rx="14" fill="#fff" stroke="#cbd5e1"/>
+        <rect x="2" y="2" width="34" height="28" rx="14" fill="#22c55e" opacity=".25"/>
+      </Svg>
+    );
+    const Cross = () => (
+      <Svg w={22} h={22}>
+        <rect x="12" y="4" width="20" height="36" rx="4" fill="#10b981" opacity=".35"/>
+        <rect x="4" y="12" width="36" height="20" rx="4" fill="#10b981" opacity=".35"/>
+      </Svg>
+    );
+    const Syringe = () => (
+      <Svg w={36} h={18}>
+        <rect x="12" y="10" width="70" height="16" rx="6" fill="#e2e8f0" stroke="#94a3b8"/>
+        <rect x="80" y="14" width="28" height="8" rx="4" fill="#94a3b8"/>
+        <rect x="2" y="14" width="14" height="8" rx="2" fill="#cbd5e1"/>
+      </Svg>
+    );
+    const Bottle = () => (
+      <Svg w={22} h={28}>
+        <rect x="10" y="6" width="24" height="8" rx="3" fill="#cbd5e1" stroke="#94a3b8"/>
+        <rect x="8" y="14" width="28" height="36" rx="6" fill="#eef2f7" stroke="#94a3b8"/>
+        <rect x="12" y="38" width="20" height="10" rx="2" fill="#34d399" opacity=".4"/>
+      </Svg>
+    );
+    const parts = [Pill, Cross, Syringe, Bottle, Pill, Cross, Syringe, Bottle];
+    for (let i = 0; i < 18; i++) items.push(parts[i % parts.length]);
+    return items;
+  }, []);
 
-  useEffect(() => {
-    if (!show || !slides?.length) return;
-    const t = setInterval(() => setI((p) => (p + 1) % slides.length), 900);
-    return () => clearInterval(t);
-  }, [show, slides]);
+  return (
+    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-2xl">
+      <div className="absolute inset-0 bg-[#BEE3F8]/70" />
+      <div className="absolute inset-0">
+        {icons.map((Ico, idx) => (
+          <div
+            key={idx}
+            className="absolute animate-float-slow opacity-70"
+            style={{
+              left: `${(idx * 7 + 5) % 95}%`,
+              top: `${(idx * 11 + 8) % 90}%`,
+              animationDelay: `${(idx % 10) * 300}ms`,
+            }}
+          >
+            <Ico />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
+/* ===== centered logo-only carousel overlay shown ONLY after success ===== */
+function CenterLogoCarousel({ show }) {
   if (!show) return null;
+
+  // Mini logo chips (emoji here; swap to brand SVGs easily)
+  const Row = () => (
+    <div className="flex items-center gap-4 px-4">
+      {["💊","💉","🩺","➕","🧴","🔬","🛡️","🧪"].map((em, i) => (
+        <div key={i} className="logo-chip text-xl">{em}</div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="pointer-events-none absolute inset-0 grid place-items-center z-40">
-      <div className="w-[520px] h-[300px] rounded-xl overflow-hidden ring-1 ring-black/5 shadow-2xl relative animate-carousel-enter bg-white/40 backdrop-blur">
-        {slides.map((src, idx) => (
-          <img
-            key={src}
-            src={src}
-            alt=""
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[1000ms] ease-out ${i === idx ? "opacity-100" : "opacity-0"}`}
-          />
-        ))}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent" />
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-          {slides.map((_, d) => (
-            <span key={d} className={`h-2 w-2 rounded-full ${i === d ? "bg-white" : "bg-white/50"}`} />
-          ))}
+      <div className="w-[520px] rounded-xl overflow-hidden ring-1 ring-black/5 shadow-2xl bg-white/70 backdrop-blur animate-carousel-enter">
+        {/* duplicate rows for seamless loop */}
+        <div className="flex whitespace-nowrap animate-logo-marquee">
+          <Row /><Row />
         </div>
       </div>
     </div>
@@ -65,7 +116,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
-  const [showSuccessCarousel, setShowSuccessCarousel] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
   const { success: playSuccess, fail: playFail } = useBeep();
 
@@ -74,13 +125,6 @@ export default function Login() {
     const n = performance.getEntriesByType("navigation")[0];
     if (n && n.type === "reload") sessionStorage.removeItem(SESSION_TOKEN_KEY);
   }, []);
-
-  const slides = useMemo(() => [
-    "/assets/carousel/01.jpg",
-    "/assets/carousel/02.jpg",
-    "/assets/carousel/03.jpg",
-    "/assets/carousel/04.jpg",
-  ], []);
 
   const onChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -92,11 +136,9 @@ export default function Login() {
       const res = await login(form.username, form.password);
       sessionStorage.setItem(SESSION_TOKEN_KEY, res.token || "ok");
 
-      // show centered carousel RIGHT AWAY
-      setShowSuccessCarousel(true);
+      // show LOGO-ONLY carousel RIGHT AWAY (no big photos)
+      setShowSuccess(true);
       playSuccess();
-
-      // navigate after carousel plays a bit
       setTimeout(() => navigate("/dashboard", { replace: true }), 1800);
     } catch (error) {
       setErr(error?.message || "Invalid credentials");
@@ -108,18 +150,13 @@ export default function Login() {
 
   return (
     <div className="relative min-h-screen w-full px-6 py-6">
-      {/* Background from /public/assets */}
-      <div
-        className="absolute inset-0 -z-10 bg-cover bg-center rounded-2xl"
-        style={{ backgroundImage: "url('/assets/medical-bg.jpg')" }}
-        aria-hidden="true"
-      />
-      <div className="absolute inset-0 -z-10 bg-[#BEE3F8]/70 rounded-2xl" aria-hidden="true" />
+      {/* Soft animated icon background */}
+      <MedicalIconField />
 
       <Logo />
 
-      {/* Success carousel overlay (center) */}
-      <CenterCarousel show={showSuccessCarousel} slides={slides} />
+      {/* Success logo strip overlay (center) */}
+      <CenterLogoCarousel show={showSuccess} />
 
       <div className="relative mx-auto max-w-3xl pt-28">
         <div className="flex flex-col items-center justify-center">
@@ -141,7 +178,7 @@ export default function Login() {
                     value={form.username}
                     onChange={onChange}
                     placeholder="Enter your user name"
-                    className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.15)]"
+                    className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.15)] animate-focus-glow"
                   />
                 </div>
 
@@ -158,7 +195,7 @@ export default function Login() {
                       value={form.password}
                       onChange={onChange}
                       placeholder="Enter password"
-                      className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 pr-10"
+                      className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 pr-10 animate-focus-glow"
                     />
                     <button
                       type="button"
@@ -191,8 +228,6 @@ export default function Login() {
               </form>
             </div>
           </div>
-
-          {/* (No side carousel here) */}
         </div>
       </div>
     </div>

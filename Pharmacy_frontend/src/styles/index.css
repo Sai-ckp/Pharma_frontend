@@ -2,35 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-
-@keyframes carouselEnter {
-  0% {
-    opacity: 0;
-    transform: translateY(22px) scale(0.97);
-    filter: blur(4px);
-  }
-  60% { filter: blur(0); }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-.animate-carousel-enter {
-  animation: carouselEnter 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-
 :root { --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
 html { font-family: var(--font-sans); }
+
+/* ==== entrance for success overlay ==== */
+@keyframes carouselEnter {
+  0% { opacity: 0; transform: translateY(22px) scale(0.97); filter: blur(4px); }
+  60% { filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-carousel-enter { animation: carouselEnter 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
 
 /* focus glow pulse */
 @keyframes focusGlow {
   0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.18); }
   50%      { box-shadow: 0 0 0 6px rgba(16,185,129,0.12); }
 }
-.animate-focus-glow:focus {
-  animation: focusGlow 900ms ease-out 1;
-}
+.animate-focus-glow:focus { animation: focusGlow 900ms ease-out 1; }
 
 /* --- Fail burst --- */
 .fail-ring {
@@ -38,10 +26,7 @@ html { font-family: var(--font-sans); }
   border-radius:9999px; border:6px solid rgba(244,63,94,.3);
   animation: failRing 600ms ease-out forwards;
 }
-@keyframes failRing {
-  from { transform: scale(.4); opacity:.9; }
-  to   { transform: scale(3.2); opacity:0; }
-}
+@keyframes failRing { from { transform: scale(.4); opacity:.9; } to { transform: scale(3.2); opacity:0; } }
 
 /* pills */
 .pill-burst { position:absolute; width:14px; height:30px; background:#fff; border:1px solid #cbd5e1; border-radius:9999px; opacity:0; }
@@ -49,11 +34,10 @@ html { font-family: var(--font-sans); }
 .pill-2 { animation: pillOut2 740ms cubic-bezier(.2,.65,.25,1) forwards; }
 .pill-3 { animation: pillOut3 780ms cubic-bezier(.2,.65,.25,1) forwards; background:linear-gradient(90deg,#fff,#fecaca); }
 .pill-4 { animation: pillOut4 820ms cubic-bezier(.2,.65,.25,1) forwards; background:linear-gradient(180deg,#fff,#bfdbfe); }
-
-@keyframes pillOut {    0% {opacity:0; transform:translate(0,0) rotate(0) scale(.4);} 100% {opacity:1; transform:translate(56px,-36px) rotate(540deg) scale(1);} }
-@keyframes pillOut2 {   0% {opacity:0; transform:translate(0,0) rotate(0) scale(.4);} 100% {opacity:1; transform:translate(-64px,-10px) rotate(-520deg) scale(1);} }
-@keyframes pillOut3 {   0% {opacity:0; transform:translate(0,0) rotate(0) scale(.4);} 100% {opacity:1; transform:translate(48px,34px) rotate(560deg) scale(1);} }
-@keyframes pillOut4 {   0% {opacity:0; transform:translate(0,0) rotate(0) scale(.4);} 100% {opacity:1; transform:translate(-44px,28px) rotate(-540deg) scale(1);} }
+@keyframes pillOut  { 0% {opacity:0; transform:translate(0,0) rotate(0) scale(.4);} 100% {opacity:1; transform:translate(56px,-36px) rotate(540deg) scale(1);} }
+@keyframes pillOut2 { 0% {opacity:0; transform:translate(0,0) rotate(0) scale(.4);} 100% {opacity:1; transform:translate(-64px,-10px) rotate(-520deg) scale(1);} }
+@keyframes pillOut3 { 0% {opacity:0; transform:translate(0,0) rotate(0) scale(.4);} 100% {opacity:1; transform:translate(48px,34px) rotate(560deg) scale(1);} }
+@keyframes pillOut4 { 0% {opacity:0; transform:translate(0,0) rotate(0) scale(.4);} 100% {opacity:1; transform:translate(-44px,28px) rotate(-540deg) scale(1);} }
 
 /* syringe (small block) */
 .syringe-icon {
@@ -72,17 +56,15 @@ html { font-family: var(--font-sans); }
   width:78px; height:110px; border-radius:10px; background:#eef2f7; border:1px solid #94a3b8; position:relative; overflow:hidden;
 }
 .bottle:before { content:""; position:absolute; top:-14px; left:18px; width:42px; height:20px; border-radius:6px; background:#cbd5e1; border:1px solid #94a3b8; }
-.liquid {
-  position:absolute; left:6px; right:6px; bottom:6px; height:0; background:#10b981; border-radius:6px;
-  animation: fillUp .7s ease-out forwards;
-}
+.liquid { position:absolute; left:6px; right:6px; bottom:6px; height:0; background:#10b981; border-radius:6px; animation: fillUp .7s ease-out forwards; }
 @keyframes fillUp { from { height:0 } to { height:52% } }
 .pill-pop { position:absolute; width:28px; height:12px; border-radius:9999px; right:-8px; bottom:10px; background:linear-gradient(90deg,#fff,#fecaca); border:1px solid #cbd5e1; animation: pillPop .7s ease-out forwards; }
 @keyframes pillPop { from { transform: translateX(-10px) scale(.6); opacity:.3 } to { transform: translateX(6px) scale(1); opacity:1 } }
 
 /* ambulance slide */
 @keyframes ambulance { 0% { transform: translateX(0) } 100% { transform: translateX(calc(100vw + 200px)) } }
-.ambulance-run { width:140px; height:48px; background:
+.ambulance-run {
+  width:140px; height:48px; background:
   linear-gradient(#f8fafc,#f8fafc) 20px 24px/200px 48px no-repeat,
   linear-gradient(#e2e8f0,#e2e8f0) 200px 34px/40px 38px no-repeat,
   radial-gradient(#0f172a 60%, transparent 61%) 76px 80px/24px 24px no-repeat,
@@ -92,3 +74,19 @@ html { font-family: var(--font-sans); }
   linear-gradient(#22c55e,#22c55e) 84px 46px/24px 12px no-repeat;
   border:1px solid #94a3b8; border-radius:8px; animation: ambulance 1.2s ease-in-out forwards;
 }
+
+/* ==== NEW: subtle floating medical icon background ==== */
+@keyframes floatSlow {
+  0% { transform: translateY(0) rotate(0deg); opacity:.35; }
+  50% { transform: translateY(-10px) rotate(5deg); opacity:.55; }
+  100% { transform: translateY(0) rotate(0deg); opacity:.35; }
+}
+.animate-float-slow { animation: floatSlow 7s ease-in-out infinite; }
+
+/* ==== NEW: mini logo-only marquee used in success overlay ==== */
+@keyframes logoMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-logo-marquee { animation: logoMarquee 16s linear infinite; }
+.logo-chip { @apply flex items-center justify-center w-12 h-12 rounded-lg bg-white/90 ring-1 ring-slate-200 shadow-sm; }
