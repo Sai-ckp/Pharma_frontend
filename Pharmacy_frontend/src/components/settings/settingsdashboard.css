@@ -91,3 +91,9 @@
   background: #dc2626;
   color: white;
 }
+
+.action-icons svg:hover {
+  transform: scale(1.15);
+  transition: 0.2s;
+}
+

@@ -2,10 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./addsettings.css";
 
-const AddSetting = () => {
+const EditSetting = () => {
   const navigate = useNavigate();
   const { key } = useParams();
-  const [isEditMode, setIsEditMode] = useState(false);
 
   const [formData, setFormData] = useState({
     key: "",
@@ -14,61 +13,49 @@ const AddSetting = () => {
   });
 
   useEffect(() => {
-    if (key) {
-      setIsEditMode(true);
-      fetch(`http://127.0.0.1:8000/api/v1/settings/settings/${encodeURIComponent(key)}/`)
-        .then(res => res.json())
-        .then(data => {
-          setFormData({
-            key: data.key || "",
-            value: data.value || "",
-            description: data.description || ""
-          });
-        })
-        .catch(err => console.error("Failed to fetch setting", err));
-    }
+    fetch(`http://127.0.0.1:8000/api/v1/settings/settings/${encodeURIComponent(key)}/`)
+      .then(res => res.json())
+      .then(data => {
+        setFormData({
+          key: data.key || "",
+          value: data.value || "",
+          description: data.description || ""
+        });
+      })
+      .catch(err => console.error("Failed to load setting", err));
   }, [key]);
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
 
     try {
-      const url = isEditMode
-        ? `http://127.0.0.1:8000/api/v1/settings/settings/${encodeURIComponent(key)}/`
-        : `http://127.0.0.1:8000/api/v1/settings/settings/`;
-
-      const method = isEditMode ? "PUT" : "POST";
-      
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(`http://127.0.0.1:8000/api/v1/settings/settings/${encodeURIComponent(key)}/`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)
       });
 
       if (res.ok) {
-        alert(isEditMode ? "Setting Updated!" : "Setting Added!");
-        navigate("/settings");   // redirect to settings dashboard
+        alert("Setting Updated!");
+        navigate("/settings");
       } else {
-        alert("Save failed");
+        alert("Update Failed");
       }
     } catch (error) {
       console.error(error);
-      alert("Save failed");
+      alert("Update Failed");
     }
   };
 
   return (
     <div className="customers-container">
-      <h1 className="customers-title">
-        {isEditMode ? "Edit Setting" : "Add Setting"}
-      </h1>
+      <h1 className="customers-title">Edit Setting</h1>
 
-      <form className="customers-form" onSubmit={handleSubmit}>
-
+      <form className="customers-form" onSubmit={handleUpdate}>
         <div className="form-row">
           <div className="form-group">
             <label>Key</label>
@@ -76,10 +63,7 @@ const AddSetting = () => {
               type="text"
               name="key"
               value={formData.key}
-              onChange={handleChange}
-              placeholder="config.key.name"
-              required
-              readOnly={isEditMode}
+              readOnly
             />
           </div>
 
@@ -90,7 +74,6 @@ const AddSetting = () => {
               name="value"
               value={formData.value}
               onChange={handleChange}
-              placeholder="value"
               required
             />
           </div>
@@ -103,7 +86,6 @@ const AddSetting = () => {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Short description (optional)"
             />
           </div>
         </div>
@@ -113,7 +95,7 @@ const AddSetting = () => {
             Cancel
           </button>
           <button type="submit" className="submit-btn">
-            {isEditMode ? "Update" : "Save"}
+            Update
           </button>
         </div>
       </form>
@@ -121,4 +103,4 @@ const AddSetting = () => {
   );
 };
 
-export default AddSetting;
+export default EditSetting;

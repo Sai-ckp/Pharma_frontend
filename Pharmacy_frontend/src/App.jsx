@@ -20,6 +20,8 @@ import Billing from "./components/billing/billing.jsx";
 // Masters
 import Vendorsdashboard from "./components/Masters/Vendors/vendorsdashboard.jsx";
 import AddVendors from "./components/Masters/Vendors/addvendors.jsx";
+import ViewVendor from "./components/Masters/Vendors/viewvendor.jsx";
+import EditVendor from "./components/Masters/Vendors/editvendor.jsx";
 import AddCustomers from "./components/Masters/Customers/addcustomers.jsx";
 import CustomersDashboard from "./components/Masters/Customers/customersdashboard.jsx";
 import RolesDashboard from "./components/Masters/roles/rolesdashboard.jsx";
@@ -48,6 +50,10 @@ import SalesInvoices from "./components/user/sales_invoices/sales_invoices.jsx";
 // Settings / retention
 import SettingsDashboard from "./components/settings/settingsdashboard.jsx";
 import AddSetting from "./components/settings/addsettings.jsx";
+import EditSetting from "./components/settings/EditSettings.jsx";
+import ViewSetting from "./components/settings/ViewSetting.jsx";
+
+
 import RetentionDashboard from "./components/retention_policies/retentiondashboard.jsx";
 import AddRetention from "./components/retention_policies/addretention.jsx";
 
@@ -81,6 +87,10 @@ function AppLayout() {
             {/* Masters */}
             <Route path="/masters/vendors" element={<Vendorsdashboard />} />
             <Route path="/masters/vendors/add" element={<AddVendors />} />
+            <Route path="/masters/vendors/view/:id" element={<ViewVendor />} />
+            <Route path="/masters/vendors/edit/:id" element={<EditVendor />} />
+
+
             <Route path="/masters/customers" element={<CustomersDashboard />} />
             <Route path="/masters/customers/add" element={<AddCustomers />} />
             <Route path="/masters/roles" element={<RolesDashboard />} />
@@ -112,6 +122,8 @@ function AppLayout() {
             <Route path="/billing" element={<Billing />} />
             <Route path="/settings" element={<SettingsDashboard />} />
             <Route path="/settings/add" element={<AddSetting />} />
+            <Route path="/settings/edit/:key" element={<EditSetting />} />
+            <Route path="/settings/view/:key" element={<ViewSetting />} />
             <Route path="/retention-policies" element={<RetentionDashboard />} />
             <Route path="/retention-policies/add" element={<AddRetention />} />
 

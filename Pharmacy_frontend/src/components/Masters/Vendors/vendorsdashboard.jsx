@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./vendorsdashboard.css";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+
 
 const VendorsDashboard = () => {
   const [vendors, setVendors] = useState([]);
@@ -8,9 +10,9 @@ const VendorsDashboard = () => {
 
   const fetchVendors = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/vendors/");
+      const res = await fetch("http://127.0.0.1:8000/api/v1/procurement/vendors/");
       const data = await res.json();
-      setVendors(data);
+      setVendors(data.results);
     } catch (error) {
       console.error("Error fetching vendors:", error);
     }
@@ -22,7 +24,7 @@ const VendorsDashboard = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this vendor?")) {
-      await fetch(`http://127.0.0.1:8000/api/vendors/${id}/`, {
+      await fetch(`http://127.0.0.1:8000/api/v1/procurement/vendors/${id}/`, {
         method: "DELETE",
       });
       fetchVendors();
@@ -87,20 +89,10 @@ const VendorsDashboard = () => {
                 <td>{vendor.is_active ? "Active" : "Inactive"}</td>
 
                 <td>
-                  <button className="edit-btn" onClick={() => alert("Vendor View Screen Coming!")}>
-                    View
-                  </button>
+                 <Eye onClick={() => navigate(`/masters/vendors/view/${vendor.id}`)} className="icon-btn" />
+                 <Pencil onClick={() => navigate(`/masters/vendors/edit/${vendor.id}`)} className="icon-btn" />
+                 <Trash2 onClick={() => handleDelete(vendor.id)} className="icon-btn delete" />
 
-                  <button
-                    className="edit-btn"
-                    onClick={() => navigate(`/masters/vendors/edit/${vendor.id}`)}
-                  >
-                    Edit
-                  </button>
-
-                  <button className="delete-btn" onClick={() => handleDelete(vendor.id)}>
-                    Delete
-                  </button>
                 </td>
               </tr>
             ))}

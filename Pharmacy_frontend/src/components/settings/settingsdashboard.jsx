@@ -2,15 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./settingsdashboard.css";
 
+import { Eye, Pencil, Trash2 } from "lucide-react";
+
 const SettingsDashboard = () => {
   const [settings, setSettings] = useState([]);
   const navigate = useNavigate();
 
   const fetchSettings = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/settings/");
+      const res = await fetch("http://127.0.0.1:8000/api/v1/settings/settings/");
       const data = await res.json();
-      setSettings(data);
+      setSettings(data.results);
     } catch (error) {
       console.error("Error fetching settings:", error);
     }
@@ -23,11 +25,19 @@ const SettingsDashboard = () => {
   const handleDelete = async (key) => {
     if (!window.confirm("Are you sure you want to delete this setting?")) return;
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/settings/${encodeURIComponent(key)}/`, {
+      const res = await fetch(`http://127.0.0.1:8000/api/v1/settings/settings/${encodeURIComponent(key)}/`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        }
       });
-      if (res.ok) fetchSettings();
-      else alert("Delete failed");
+
+      if (res.ok) {
+        alert("Deleted successfully");
+        fetchSettings();
+      } else {
+        alert("Delete failed");
+      }
     } catch (err) {
       console.error(err);
       alert("Delete failed");
@@ -95,14 +105,24 @@ const SettingsDashboard = () => {
                 <td style={{ textAlign: "left", paddingLeft: 12 }}>{s.value}</td>
                 <td style={{ textAlign: "left", paddingLeft: 12 }}>{s.description}</td>
                 <td>{s.updated_at ? new Date(s.updated_at).toLocaleString() : "-"}</td>
-                <td>
-                  <button className="edit-btn" onClick={() => navigate(`/masters/settings/edit/${encodeURIComponent(s.key)}`)}>
-                    Edit
-                  </button>
+                <td className="action-icons">
+                  <Eye
+                    size={20}
+                    style={{ cursor: "pointer", marginRight: 10 }}
+                    onClick={() => navigate(`/settings/view/${encodeURIComponent(s.key)}`)}
+                  />
 
-                  <button className="delete-btn" onClick={() => handleDelete(s.key)}>
-                    Delete
-                  </button>
+                  <Pencil
+                    size={20}
+                    style={{ cursor: "pointer", marginRight: 10 }}
+                    onClick={() => navigate(`/settings/edit/${encodeURIComponent(s.key)}`)}
+                  />
+
+                  <Trash2
+                    size={20}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleDelete(s.key)}
+                  />
                 </td>
               </tr>
             ))}
