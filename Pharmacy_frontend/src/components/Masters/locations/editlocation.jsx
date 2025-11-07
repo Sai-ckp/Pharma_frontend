@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import "./addlocations.css";
 
-const AddLocation = () => {
+const EditLocation = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -14,6 +15,16 @@ const AddLocation = () => {
     is_active: true,
   });
 
+  const fetchLocation = async () => {
+    const res = await fetch(`http://127.0.0.1:8000/api/v1/locations/locations/${id}/`);
+    const data = await res.json();
+    setFormData(data);
+  };
+
+  useEffect(() => {
+    fetchLocation();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -22,9 +33,9 @@ const AddLocation = () => {
     });
   };
 
-  const handleSubmit = async () => {
-    await fetch("http://127.0.0.1:8000/api/v1/locations/locations/", {
-      method: "POST",
+  const handleUpdate = async () => {
+    await fetch(`http://127.0.0.1:8000/api/v1/locations/locations/${id}/`, {
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
     });
@@ -34,7 +45,7 @@ const AddLocation = () => {
 
   return (
     <div className="customers-container">
-      <h1 className="customers-title">Add Location</h1>
+      <h1 className="customers-title">Edit Location</h1>
 
       <div className="customers-form">
 
@@ -79,7 +90,7 @@ const AddLocation = () => {
 
         <div className="form-actions">
           <button className="cancel-btn" onClick={() => navigate("/masters/locations")}>Cancel</button>
-          <button className="submit-btn" onClick={handleSubmit}>Save</button>
+          <button className="submit-btn" onClick={handleUpdate}>Update</button>
         </div>
 
       </div>
@@ -87,4 +98,4 @@ const AddLocation = () => {
   );
 };
 
-export default AddLocation;
+export default EditLocation;

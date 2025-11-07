@@ -26,8 +26,13 @@ import RolesDashboard from "./components/Masters/roles/rolesdashboard.jsx";
 import AddRole from "./components/Masters/roles/addroles.jsx";
 import LocationsDashboard from "./components/Masters/locations/locationsdashboard.jsx";
 import AddLocation from "./components/Masters/locations/addlocations.jsx";
+import ViewLocation from "./components/Masters/locations/viewlocation.jsx";
+import EditLocation from "./components/Masters/locations/editlocation.jsx";
+
 import ProductsDashboard from "./components/Masters/products/productsdashboard.jsx";
 import AddProduct from "./components/Masters/products/addproducts.jsx";
+import ViewProduct from "./components/Masters/products/ViewProduct.jsx"
+import EditProduct from "./components/Masters/products/EditProduct.jsx";
 
 //User
 import UserDevices from "./components/user/user_devices/user_devices.jsx";
@@ -81,10 +86,15 @@ function AppLayout() {
             <Route path="/masters/roles" element={<RolesDashboard />} />
             <Route path="/masters/roles/add" element={<AddRole />} />
             <Route path="/masters/locations" element={<LocationsDashboard />} />
-            <Route path="/masters/locations/add" element={<AddLocation />} />
-            <Route path="/masters/products" element={<ProductsDashboard />} />
-            <Route path="/masters/products/add" element={<AddProduct />} />
-          
+<Route path="/masters/locations/add" element={<AddLocation />} />
+<Route path="/masters/locations/view/:id" element={<ViewLocation />} />
+<Route path="/masters/locations/edit/:id" element={<EditLocation />} />
+
+             <Route path="/masters/products" element={<ProductsDashboard />} />
+              <Route path="/masters/products/add" element={<AddProduct />} />
+              <Route path="/masters/products/view/:id" element={<ViewProduct />} />
+               <Route path="/masters/products/edit/:id" element={<EditProduct />} />
+
             {/* User Section */}
             <Route path="/user-devices" element={<UserDevices />} />
             <Route path="/inventory-ledger" element={<InventoryLedger />} />

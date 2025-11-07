@@ -1,8 +1,10 @@
+// src/components/Masters/Products/EditProduct.jsx
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "./addproducts.css";
+import "./addproducts.css"; // reuse same CSS as AddProduct
 
-const AddProduct = () => {
+const EditProduct = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -21,14 +23,15 @@ const AddProduct = () => {
     is_active: true
   });
 
+  // Fetch product details by ID and pre-fill form
   useEffect(() => {
-    if (id) {
-      fetch(`http://127.0.0.1:8000/api/v1/catalog/products/${id}/`)
-        .then((res) => res.json())
-        .then((data) => setFormData(data));
-    }
+    fetch(`http://127.0.0.1:8000/api/v1/catalog/products/${id}/`)
+      .then(res => res.json())
+      .then(data => setFormData(data))
+      .catch(err => console.error("Error fetching product:", err));
   }, [id]);
 
+  // Handle form input changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -37,32 +40,30 @@ const AddProduct = () => {
     });
   };
 
+  // Handle form submission for update
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/v1/catalog/products/${id}/`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
 
-    const url = id
-      ? `http://127.0.0.1:8000/api/v1/catalog/products/${id}/`
-      : `http://127.0.0.1:8000/api/v1/catalog/products/`;
-
-    const method = id ? "PUT" : "POST";
-
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData)
-    });
-
-    if (res.ok) {
-      alert(id ? "Product Updated Successfully!" : "Product Added Successfully!");
-      navigate("/masters/products");
-    } else {
-      alert("Failed!");
+      if (res.ok) {
+        alert("Product Updated Successfully!");
+        navigate("/masters/products");
+      } else {
+        alert("Failed to update product!");
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
     }
   };
 
   return (
     <div className="vendors-container">
-      <h1 className="vendors-title">{id ? "Update Product" : "Add Product"}</h1>
+      <h1 className="vendors-title">Update Product</h1>
 
       <form className="vendors-form" onSubmit={handleSubmit}>
 
@@ -97,7 +98,6 @@ const AddProduct = () => {
           </div>
         </div>
 
-
         <div className="form-row">
           <div className="form-group">
             <label>Manufacturer:</label>
@@ -109,7 +109,6 @@ const AddProduct = () => {
             <input type="number" name="mrp" value={formData.mrp} onChange={handleChange} step="0.01"/>
           </div>
         </div>
-
 
         <div className="form-row">
           <div className="form-group">
@@ -123,7 +122,6 @@ const AddProduct = () => {
           </div>
         </div>
 
-
         <div className="form-row">
           <div className="form-group">
             <label>Units Per Pack:</label>
@@ -135,7 +133,6 @@ const AddProduct = () => {
             <input type="number" name="base_unit_step" value={formData.base_unit_step} onChange={handleChange} step="0.001"/>
           </div>
         </div>
-
 
         <div className="form-row">
           <div className="form-group checkbox-group">
@@ -155,14 +152,11 @@ const AddProduct = () => {
           <button type="button" className="cancel-btn" onClick={() => navigate("/masters/products")}>
             Cancel
           </button>
-
-          <button type="submit" className="submit-btn">
-            {id ? "Update" : "Save"}
-          </button>
+          <button type="submit" className="submit-btn">Update</button>
         </div>
       </form>
     </div>
   );
 };
 
-export default AddProduct;
+export default EditProduct;

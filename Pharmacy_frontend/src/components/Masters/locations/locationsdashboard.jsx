@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./locationsdashboard.css";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+
 
 
 const LocationsDashboard = () => {
@@ -8,10 +10,21 @@ const LocationsDashboard = () => {
   const navigate = useNavigate();
 
   const fetchLocations = async () => {
-    const res = await fetch("http://127.0.0.1:8000/api/locations/");
+    const res = await fetch("http://127.0.0.1:8000/api/v1/locations/locations/");
     const data = await res.json();
-    setLocations(data);
+    setLocations(data.results);   // <-- IMPORTANT
   };
+
+  const handleDelete = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this location?")) return;
+
+  await fetch(`http://127.0.0.1:8000/api/v1/locations/locations/${id}/`, {
+    method: "DELETE",
+  });
+
+  fetchLocations();
+};
+
 
   useEffect(() => {
     fetchLocations();
@@ -42,6 +55,7 @@ const LocationsDashboard = () => {
               <th>Address</th>
               <th>GSTIN</th>
               <th>Active</th>
+               <th>Actions</th>   {/* NEW COLUMN */}
             </tr>
           </thead>
 
@@ -55,6 +69,24 @@ const LocationsDashboard = () => {
                 <td>{l.address}</td>
                 <td>{l.gstin}</td>
                 <td>{l.is_active ? "Yes" : "No"}</td>
+
+                   <td className="action-icons">
+          <Eye
+            size={18}
+            className="view-icon"
+            onClick={() => navigate(`/masters/locations/view/${l.id}`)}
+          />
+          <Pencil
+            size={18}
+            className="edit-icon"
+            onClick={() => navigate(`/masters/locations/edit/${l.id}`)}
+          />
+          <Trash2
+            size={18}
+            className="delete-icon"
+            onClick={() => handleDelete(l.id)}
+          />
+        </td>
               </tr>
             ))}
 

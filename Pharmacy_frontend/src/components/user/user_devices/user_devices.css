@@ -1,10 +1,10 @@
 .user-devices-container {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 2rem auto;
   padding: 1.5rem;
-  background: #ffffff;
+  background: #fff;
   border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -14,6 +14,7 @@
   color: #333;
 }
 
+/* === Form: identical layout/feel to inventory-ledger-form === */
 .user-devices-form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -21,7 +22,6 @@
   margin-bottom: 1.5rem;
   align-items: start;
 }
-
 
 .user-devices-form input,
 .user-devices-form textarea,
@@ -31,8 +31,9 @@
 }
 
 .user-devices-form input[type="text"],
-.user-devices-form input[type="email"],
+.user-devices-form input[type="number"],
 .user-devices-form input[type="datetime-local"],
+.user-devices-form input[type="email"],
 .user-devices-form textarea {
   padding: 0.6rem;
   border: 1px solid #ccc;
@@ -48,16 +49,17 @@
   outline: none;
 }
 
-.user-devices-form .checkbox {
+/* Checkbox styled inline like a control */
+.user-devices-form .checkbox-inline {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-/* make the Add/Update button span full width and appear below all inputs */
+/* Button on a new full-width line (same as inventory) */
 .user-devices-form button {
-  grid-column: 1 / -1;        /* full width of the form */
-  justify-self: start;       /* center horizontally */
+  grid-column: 1 / -1;
+  justify-self: start;
   background-color: #059669;
   color: white;
   padding: 0.45rem 1rem;
@@ -68,41 +70,39 @@
   font-weight: 500;
   transition: background-color 0.2s;
 }
-.user-devices-form button:hover {
-  background-color: #10b981e6;
+.user-devices-form button:hover { background-color: #10b981e6; }
+
+/* Section title */
+.user-devices-list-title {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  color: #444;
+  border-bottom: 2px solid #10b981e6;
+  padding-bottom: 0.4rem;
 }
 
-
-/* Table Styles */
+/* === Table: identical look to inventory table === */
 .user-devices-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
   font-size: 0.95rem;
 }
-
 .user-devices-table th,
 .user-devices-table td {
   border: 1px solid #ddd;
   padding: 0.75rem;
   text-align: left;
 }
-
 .user-devices-table th {
   background-color: #10b981e6;
   color: white;
   font-weight: 600;
 }
+.user-devices-table tr:nth-child(even) { background-color: #f9f9f9; }
+.user-devices-table tr:hover { background-color: #f1f1f1; }
 
-.user-devices-table tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.user-devices-table tr:hover {
-  background-color: #f1f1f1;
-}
-
-/* Buttons inside table */
+/* Action buttons */
 .edit-btn,
 .delete-btn {
   padding: 0.4rem 0.8rem;
@@ -114,30 +114,7 @@
   font-weight: 500;
   transition: background-color 0.2s;
 }
-
-.edit-btn {
-  background-color: #ffc107;
-  color: #000;
-}
-
-.edit-btn:hover {
-  background-color: #e0a800;
-}
-
-.delete-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: #b02a37;
-}
-
-/* Title */
-.user-devices-list-title {
-  margin-top: 2rem;
-  font-size: 1.2rem;
-  color: #444;
-  border-bottom: 2px solid #10b981e6;
-  padding-bottom: 0.4rem;
-}
+.edit-btn { background-color: #ffc107; color: #000; }
+.edit-btn:hover { background-color: #e0a800; }
+.delete-btn { background-color: #dc3545; color: white; }
+.delete-btn:hover { background-color: #b02a37; }

@@ -122,75 +122,73 @@ const UserDevices = () => {
     <div className="user-devices-container">
       <h2>User Devices</h2>
 
-<form className="user-devices-form" onSubmit={handleSubmit}>
-  <div className="form-grid">
-    <input
-      type="text"
-      name="user_id"
-      placeholder="User ID"
-      value={formData.user_id}
-      onChange={handleChange}
-      required
-    />
-    <input
-      type="text"
-      name="device_id"
-      placeholder="Device ID"
-      value={formData.device_id}
-      onChange={handleChange}
-      required
-    />
-    <input
-      type="text"
-      name="user_agent"
-      placeholder="User Agent"
-      value={formData.user_agent}
-      onChange={handleChange}
-    />
-    <input
-      type="text"
-      name="ip_address"
-      placeholder="IP Address"
-      value={formData.ip_address}
-      onChange={handleChange}
-    />
+      {/* ⬇️ Form layout/styles now mirror Inventory Ledger exactly */}
+      <form className="user-devices-form" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          name="user_id"
+          placeholder="User ID"
+          value={formData.user_id}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="device_id"
+          placeholder="Device ID"
+          value={formData.device_id}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="user_agent"
+          placeholder="User Agent"
+          value={formData.user_agent}
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="ip_address"
+          placeholder="IP Address"
+          value={formData.ip_address}
+          onChange={handleChange}
+        />
 
-    <label>
-      Issued At
-      <input
-        type="datetime-local"
-        name="issued_at"
-        value={formData.issued_at}
-        onChange={handleChange}
-      />
-    </label>
-    <label>
-      Last Seen At
-      <input
-        type="datetime-local"
-        name="last_seen_at"
-        value={formData.last_seen_at}
-        onChange={handleChange}
-      />
-    </label>
-  </div>
+        <label>
+          Issued At
+          <input
+            type="datetime-local"
+            name="issued_at"
+            value={formData.issued_at}
+            onChange={handleChange}
+          />
+        </label>
+        <label>
+          Last Seen At
+          <input
+            type="datetime-local"
+            name="last_seen_at"
+            value={formData.last_seen_at}
+            onChange={handleChange}
+          />
+        </label>
 
-  {/* ✅ Active Checkbox - now just above the button */}
-  <div className="form-footer">
-    <label className="checkbox">
-      <input
-        type="checkbox"
-        name="is_active"
-        checked={formData.is_active}
-        onChange={handleChange}
-      />
-      Active
-    </label>
+        {/* Active checkbox styled as a form control, just above the button */}
+        <label className="checkbox-inline">
+          <input
+            type="checkbox"
+            name="is_active"
+            checked={formData.is_active}
+            onChange={handleChange}
+          />
+          Active
+        </label>
 
-    <button type="submit">{editingId ? "Update Device" : "Add Device"}</button>
-  </div>
-</form>
-
+        <button type="submit">
+          {editingId ? "Update Device" : "Add Device"}
+        </button>
+      </form>
 
       <h3 className="user-devices-list-title">
         {loading ? "Loading Devices..." : "Device List"}

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./productsdashboard.css";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+
 
 const ProductsDashboard = () => {
   const [products, setProducts] = useState([]);
@@ -8,9 +10,9 @@ const ProductsDashboard = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/products/");
+      const res = await fetch("http://127.0.0.1:8000/api/v1/catalog/products/");
       const data = await res.json();
-      setProducts(data);
+      setProducts(data.results);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
@@ -22,7 +24,7 @@ const ProductsDashboard = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
-      await fetch(`http://127.0.0.1:8000/api/products/${id}/`, {
+      await fetch(`http://127.0.0.1:8000/api/v1/catalog/products/${id}/`, {
         method: "DELETE",
       });
       fetchProducts();
@@ -88,15 +90,13 @@ const ProductsDashboard = () => {
                 <td>₹ {product.mrp}</td>
                 <td>{product.is_active ? "Active" : "Inactive"}</td>
 
-                <td>
-                  <button className="edit-btn" onClick={() => navigate(`/masters/products/edit/${product.id}`)}>
-                    Edit
-                  </button>
+                <td className="actions-icons">
+  <Eye className="action-icon view" onClick={() => navigate(`/masters/products/view/${product.id}`)} />
+  <Pencil className="action-icon edit" onClick={() => navigate(`/masters/products/edit/${product.id}`)} />
+  <Trash2 className="action-icon delete" onClick={() => handleDelete(product.id)} />
+</td>
 
-                  <button className="delete-btn" onClick={() => handleDelete(product.id)}>
-                    Delete
-                  </button>
-                </td>
+
               </tr>
             ))}
 

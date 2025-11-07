@@ -207,3 +207,12 @@
 .add-btn:hover {
   background: #0d9488;
 }
+
+.action-icons svg {
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.view-icon:hover { color: blue; }
+.edit-icon:hover { color: green; }
+.delete-icon:hover { color: red; }

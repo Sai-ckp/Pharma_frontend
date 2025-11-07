@@ -7,6 +7,11 @@ import {
   ChevronDown,
   ChevronRight,
   Smartphone,
+  Boxes,
+  ShieldAlert,
+  FileSignature,
+  RefreshCcw,
+  Receipt,
   Box,
   Pill,
   Layers,
@@ -25,12 +30,12 @@ import {
   MapPin,
   ShoppingCart,
   FlaskRound,
- 
 } from "lucide-react";
 import "./Sidebar.css";
 
 const Sidebar = () => {
   const [isMastersOpen, setIsMastersOpen] = useState(false);
+  const [isUsersOpen, setIsUsersOpen] = useState(false);
 
   const masterItems = [
     { path: "/masters/vendors", label: "Vendors", icon: <Store size={18} /> },
@@ -40,21 +45,20 @@ const Sidebar = () => {
     { path: "/masters/products", label: "Products", icon: <FlaskRound size={18} /> },
     { path: "/users", label: "Users", icon: <UserCog size={18} /> },
   ];
-  const userItems = [
-    { path: "/user-devices", label: "UserDevices", icon: <Smartphone size={18} /> },
-    { path: "/inventory-ledger", label: "InventoryLedger", icon: <Package size={18} /> },
-    { path: "/transfer-vouchers", label: "TransferVouchers", icon: <Package size={18} /> },
-    { path: "/breach-logs", label: "BreachLogs", icon: <Package size={18} /> },
-    { path: "/audit-logs", label: "AuditLogs", icon: <Package size={18} /> }, // ⬅️ NEW
-    { path: "/recall-events", label: "RecallEvents", icon: <Package size={18} /> }, // ⬅️ NEW
-    { path: "/purchase-lines", label: "PurchaseLines", icon: <Package size={18} /> }, // ⬅️ new
-    { path: "/sales-invoices", label: "SalesInvoices", icon: <Package size={18} /> },
 
+  const userItems = [
+    { path: "/user-devices", label: "User Devices", icon: <Smartphone size={18} /> },           // Device management
+    { path: "/inventory-ledger", label: "Inventory Ledger", icon: <Boxes size={18} /> },        // Inventory tracking
+    { path: "/transfer-vouchers", label: "Transfer Vouchers", icon: <ArrowLeftRight size={18} /> }, // Transfer documents
+    { path: "/breach-logs", label: "Breach Logs", icon: <ShieldAlert size={18} /> },            // Security-related logs
+    { path: "/audit-logs", label: "Audit Logs", icon: <FileSignature size={18} /> },            // Audit trail / compliance
+    { path: "/recall-events", label: "Recall Events", icon: <RefreshCcw size={18} /> },         // Recall / return events
+    { path: "/purchase-lines", label: "Purchase Lines", icon: <ShoppingCart size={18} /> },     // Purchase-related
+    { path: "/sales-invoices", label: "Sales Invoices", icon: <Receipt size={18} /> },          // Billing / sales invoices
   ];
   const otherMenuItems = [
-
-    { path: "/settings", label: "settings", icon: <ShoppingCart size={18} /> },
-    { path: "/retention-policies", label: "retention-policies", icon: <ShoppingCart size={18} /> },
+    { path: "/settings", label: "Settings", icon: <ShoppingCart size={18} /> },
+    { path: "/retention-policies", label: "Retention Policies", icon: <ShoppingCart size={18} /> },
     { path: "/pharmacy", label: "Pharmacy", icon: <Pill size={18} /> },
     { path: "/rackrules", label: "Rack Rules", icon: <Layers size={18} /> },
     { path: "/batchlots", label: "Batch Lots", icon: <Box size={18} /> },
@@ -70,8 +74,7 @@ const Sidebar = () => {
 
   return (
     <div className="sidebar-container">
-      
-      {/* ✅ Header */}
+      {/* Header */}
       <div className="sidebar-header">
         <div className="sidebar-logo-wrap">
           <img
@@ -86,55 +89,32 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* ✅ Menu */}
       <nav className="sidebar-menu">
-
-        {/* ✅ Dashboard */}
-        <NavLink
-          to="/"
-          className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}
-        >
+        {/* Dashboard */}
+        <NavLink to="/" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}>
           <span className="sidebar-icon"><LayoutDashboard size={18} /></span>
           <span className="sidebar-label">Dashboard</span>
         </NavLink>
 
-        {/* ✅ Masters Dropdown */}
-        <div
-          className="sidebar-link sidebar-dropdown"
-          onClick={() => setIsMastersOpen(!isMastersOpen)}
-        >
+        {/* Masters */}
+        <div className="sidebar-link sidebar-dropdown" onClick={() => setIsMastersOpen(!isMastersOpen)}>
           <div className="sidebar-dropdown-left">
-            
-            {/* ✅ ICON */}
-            <span className="sidebar-icon">
-              <Settings size={18} />
-            </span>
-
-            {/* ✅ Title + Subtext */}
+            <span className="sidebar-icon"><Settings size={18} /></span>
             <div className="masters-title">
               <span className="sidebar-label">Masters</span>
               <span className="masters-small-font">Master Panel</span>
             </div>
-
           </div>
-
-          {/* ✅ Chevron */}
           <span className="sidebar-chevron">
             {isMastersOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </span>
         </div>
 
-        {/* ✅ Masters Items */}
         {isMastersOpen && (
           <div className="sidebar-submenu">
             {masterItems.map((item, idx) => (
-              <NavLink
-                key={idx}
-                to={item.path}
-                className={({ isActive }) =>
-                  `sidebar-link sidebar-sublink ${isActive ? "active" : ""}`
-                }
-              >
+              <NavLink key={idx} to={item.path}
+                className={({ isActive }) => `sidebar-link sidebar-sublink ${isActive ? "active" : ""}`}>
                 <span className="sidebar-icon">{item.icon}</span>
                 <span className="sidebar-label">{item.label}</span>
               </NavLink>
@@ -142,20 +122,40 @@ const Sidebar = () => {
           </div>
         )}
 
-        {/* ✅ Other Menu Items */}
+        {/* User (NEW) */}
+        <div className="sidebar-link sidebar-dropdown" onClick={() => setIsUsersOpen(!isUsersOpen)}>
+          <div className="sidebar-dropdown-left">
+            <span className="sidebar-icon"><UserCog size={18} /></span>
+            <div className="masters-title">
+              <span className="sidebar-label">User</span>
+              <span className="masters-small-font">User Panel</span>
+            </div>
+          </div>
+          <span className="sidebar-chevron">
+            {isUsersOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </span>
+        </div>
+
+        {isUsersOpen && (
+          <div className="sidebar-submenu">
+            {userItems.map((item, idx) => (
+              <NavLink key={idx} to={item.path}
+                className={({ isActive }) => `sidebar-link sidebar-sublink ${isActive ? "active" : ""}`}>
+                <span className="sidebar-icon">{item.icon}</span>
+                <span className="sidebar-label">{item.label}</span>
+              </NavLink>
+            ))}
+          </div>
+        )}
+
+        {/* Other */}
         {otherMenuItems.map((item, idx) => (
-          <NavLink
-            key={idx}
-            to={item.path}
-            className={({ isActive }) =>
-              `sidebar-link ${isActive ? "active" : ""}`
-            }
-          >
+          <NavLink key={idx} to={item.path}
+            className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}>
             <span className="sidebar-icon">{item.icon}</span>
             <span className="sidebar-label">{item.label}</span>
           </NavLink>
         ))}
-
       </nav>
     </div>
   );
