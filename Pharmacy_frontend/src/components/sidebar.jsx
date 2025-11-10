@@ -38,7 +38,7 @@ const Sidebar = () => {
   const [isUsersOpen, setIsUsersOpen] = useState(false);
 
   const masterItems = [
-    { path: "/masters/vendors", label: "Vendors", icon: <Store size={18} /> },
+   
     { path: "/masters/customers", label: "Customers", icon: <UserCircle size={18} /> },
     { path: "/masters/roles", label: "Roles", icon: <ShieldCheck size={18} /> },
     { path: "/masters/locations", label: "Locations", icon: <MapPin size={18} /> },
@@ -47,8 +47,10 @@ const Sidebar = () => {
   ];
 
   const userItems = [
+
+    
     { path: "/user-devices", label: "User Devices", icon: <Smartphone size={18} /> },           // Device management
-    { path: "/inventory-ledger", label: "Inventory Ledger", icon: <Boxes size={18} /> },        // Inventory tracking
+   
     { path: "/transfer-vouchers", label: "Transfer Vouchers", icon: <ArrowLeftRight size={18} /> }, // Transfer documents
     { path: "/breach-logs", label: "Breach Logs", icon: <ShieldAlert size={18} /> },            // Security-related logs
     { path: "/audit-logs", label: "Audit Logs", icon: <FileSignature size={18} /> },            // Audit trail / compliance
@@ -57,6 +59,9 @@ const Sidebar = () => {
     { path: "/sales-invoices", label: "Sales Invoices", icon: <Receipt size={18} /> },          // Billing / sales invoices
   ];
   const otherMenuItems = [
+     { path: "/inventory-ledger", label: "Inventory", icon: <Boxes size={18} /> },        // Inventory tracking
+     { path: "/masters/vendors", label: "Suppliers", icon: <Store size={18} /> },
+      { path: "/masters/customers", label: "Customers", icon: <UserCircle size={18} /> },
     { path: "/settings", label: "Settings", icon: <ShoppingCart size={18} /> },
     { path: "/retention-policies", label: "Retention Policies", icon: <ShoppingCart size={18} /> },
     { path: "/pharmacy", label: "Pharmacy", icon: <Pill size={18} /> },

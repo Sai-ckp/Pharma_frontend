@@ -1,20 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./vendorsdashboard.css";
-import { Eye, Pencil, Trash2 } from "lucide-react";
-
+import { Store, PhoneCall, Mail, Eye, Pencil, Trash2, Plus } from "lucide-react";
 
 const VendorsDashboard = () => {
   const [vendors, setVendors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
+  const VENDORS_API = "http://127.0.0.1:8000/api/v1/procurement/vendors/";
+
   const fetchVendors = async () => {
+    setLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/v1/procurement/vendors/");
+      const res = await fetch(VENDORS_API);
       const data = await res.json();
-      setVendors(data.results);
-    } catch (error) {
-      console.error("Error fetching vendors:", error);
+      if (Array.isArray(data)) setVendors(data);
+      else if (data?.results) setVendors(data.results);
+      else if (data?.data) setVendors(data.data);
+      else setVendors([]);
+    } catch (err) {
+      console.error("Error fetching vendors:", err);
+      setVendors([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -22,89 +32,131 @@ const VendorsDashboard = () => {
     fetchVendors();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this vendor?")) {
-      await fetch(`http://127.0.0.1:8000/api/v1/procurement/vendors/${id}/`, {
-        method: "DELETE",
-      });
-      fetchVendors();
+  const filtered = vendors.filter((v) => {
+    const name = v.vendor_name ?? v.name ?? v.company_name ?? "";
+    const contactPerson = v.vendor_contact_person ?? v.contact_person ?? v.person_name ?? "";
+    const phone = v.vendor_contact ?? v.contact_phone ?? v.phone ?? "";
+    return (
+      name.toLowerCase().includes(search.toLowerCase()) ||
+      contactPerson.toLowerCase().includes(search.toLowerCase()) ||
+      phone.toLowerCase().includes(search.toLowerCase())
+    );
+  });
+
+  const openVendor = (vendor) => {
+    navigate(`/masters/vendors/viewdetails/${vendor.id}`);
+  };
+
+  const goEdit = (e, id) => {
+    e.stopPropagation();
+    navigate(`/masters/vendors/edit/${id}`);
+  };
+
+  const handleDelete = async (e, id) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this vendor?")) return;
+    try {
+      const res = await fetch(`${VENDORS_API}${id}/`, { method: "DELETE" });
+      if (res.ok) fetchVendors();
+      else alert("Failed to delete vendor");
+    } catch {
+      alert("Delete failed");
     }
   };
 
-  return (
-    <div className="customers-container">
-      <div className="flex justify-between items-center">
-        <h1 className="customers-title">Vendor Management</h1>
+  const handleAddSupplier = () => {
+    navigate("/masters/vendors/add"); // Navigate to your add vendor page
+  };
 
-        <button className="add-btn" onClick={() => navigate("/masters/vendors/add")}>
-          + Add Vendor
+  return (
+    <div className="customers-container vendors-page">
+      <div className="header-row">
+        <h1 className="customers-title">Supplier Management</h1>
+        <button className="add-supplier-btn" onClick={handleAddSupplier}>
+          <Plus size={16} /> Add Supplier
         </button>
       </div>
 
-      <h2 className="customer-heading">Manage vendor details and supply records</h2>
+      <p className="customers-heading">Manage Suppliers and purchase orders</p>
 
-      {/* KPI CARDS */}
-      <div className="grid grid-cols-3 gap-4 my-6">
-        <div className="bg-white shadow rounded-xl p-5 text-center">
-          <h3 className="text-lg font-semibold">Total Vendors</h3>
-          <p className="text-3xl font-bold mt-2">{vendors.length}</p>
-        </div>
-
-        <div className="bg-white shadow rounded-xl p-5 text-center">
-          <h3 className="text-lg font-semibold">Avg Purchase Value</h3>
-          <p className="text-3xl font-bold mt-2">₹ 32000</p>
-        </div>
-
-        <div className="bg-white shadow rounded-xl p-5 text-center">
-          <h3 className="text-lg font-semibold">Active Suppliers</h3>
-          <p className="text-3xl font-bold mt-2">5</p>
-        </div>
+      <div className="search-row">
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Search vendor name / contact person / phone..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
-      {/* VENDORS LIST */}
-      <div className="customers-list">
-        <h3>Vendor List</h3>
+      {loading ? (
+        <p className="loading-text">Loading vendors...</p>
+      ) : filtered.length === 0 ? (
+        <div className="no-vendors-box"><p>No vendors found.</p></div>
+      ) : (
+        <div className="cards-grid">
+          {filtered.map((vendor, idx) => {
+            const id = vendor.id ?? idx;
+            const name = vendor.vendor_name ?? vendor.name ?? vendor.company_name ?? "Untitled Vendor";
+            const phone = vendor.vendor_contact ?? vendor.contact_phone ?? vendor.phone ?? "-";
+            const contactPerson = vendor.vendor_contact_person ?? vendor.contact_person ?? vendor.person_name ?? "-";
+            const email = vendor.vendor_email ?? vendor.email ?? "-";
+            const productsCount = vendor.products_count ?? vendor.product_count ?? 0;
+            const ordersCount = vendor.orders_count ?? vendor.order_count ?? 0;
+            const totalAmount = vendor.total_amount ?? vendor.total_sales ?? 0;
 
-        <table className="customers-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>GSTIN</th>
-              <th>Phone</th>
-              <th>Address</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+            return (
+              <div key={id} className="vendor-card clickable-card">
+                {/* Card Top */}
+                <div className="card-top" onClick={() => openVendor(vendor)}>
+                  <div>
+                    <div className="card-title">{name}</div>
+                    <div className="contact-person-text">Contact: {contactPerson}</div>
+                  </div>
+                  <div className="card-icon"><Store size={20} /></div>
+                </div>
 
-          <tbody>
-            {vendors.map((vendor, index) => (
-              <tr key={vendor.id}>
-                <td>{index + 1}</td>
-                <td>{vendor.name}</td>
-                <td>{vendor.gstin}</td>
-                <td>{vendor.contact_phone}</td>
-                <td>{vendor.address}</td>
-                <td>{vendor.is_active ? "Active" : "Inactive"}</td>
+                {/* Card Body */}
+                <div className="card-body" onClick={() => openVendor(vendor)}>
+                  <div className="contact-row">
+                    <PhoneCall size={14} /><span>{phone}</span>
+                  </div>
+                  <div className="contact-row">
+                    <Mail size={14} /><span>{email}</span>
+                  </div>
 
-                <td>
-                 <Eye onClick={() => navigate(`/masters/vendors/view/${vendor.id}`)} className="icon-btn" />
-                 <Pencil onClick={() => navigate(`/masters/vendors/edit/${vendor.id}`)} className="icon-btn" />
-                 <Trash2 onClick={() => handleDelete(vendor.id)} className="icon-btn delete" />
+                  <div className="metrics-row">
+                    <div className="metric clickable" onClick={() => openVendor(vendor)}>
+                      <div className="metric-value">{productsCount}</div>
+                      <div className="metric-label">Products</div>
+                    </div>
+                    <div className="metric divider clickable" onClick={() => openVendor(vendor)}>
+                      <div className="metric-value">{ordersCount}</div>
+                      <div className="metric-label">Orders</div>
+                    </div>
+                    <div className="metric clickable" onClick={() => openVendor(vendor)}>
+                      <div className="metric-value">₹ {totalAmount}</div>
+                      <div className="metric-label">Amount</div>
+                    </div>
+                  </div>
+                </div>
 
-                </td>
-              </tr>
-            ))}
+                {/* Footer */}
+                <div className="card-footer">
+                  <div className={`status-badge ${vendor.is_active ? "active" : "inactive"}`}>
+                    {vendor.is_active ? "Active" : "Inactive"}
+                  </div>
 
-            {vendors.length === 0 && (
-              <tr>
-                <td colSpan="7" className="no-data">No vendors found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                  <div className="action-icons">
+                    <Eye className="icon" size={16} onClick={(e) => goEdit(e, id)} />
+                    <Trash2 className="icon delete" size={16} onClick={(e) => handleDelete(e, id)} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

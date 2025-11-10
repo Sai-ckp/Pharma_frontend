@@ -19,6 +19,7 @@ import Billing from "./components/billing/billing.jsx";
 
 // Masters
 import Vendorsdashboard from "./components/Masters/Vendors/vendorsdashboard.jsx";
+import VendorDetails from "./components/Masters/Vendors/VendorDetails.jsx";
 import AddVendors from "./components/Masters/Vendors/addvendors.jsx";
 import ViewVendor from "./components/Masters/Vendors/viewvendor.jsx";
 import EditVendor from "./components/Masters/Vendors/editvendor.jsx";
@@ -31,10 +32,14 @@ import AddLocation from "./components/Masters/locations/addlocations.jsx";
 import ViewLocation from "./components/Masters/locations/viewlocation.jsx";
 import EditLocation from "./components/Masters/locations/editlocation.jsx";
 
-import ProductsDashboard from "./components/Masters/products/productsdashboard.jsx";
+import ProductsDashboard from "./components/Masters/products/createorder.jsx";
+import PurchaseOrders from "./components/Masters/products/PurchaseOrders.jsx";
+import ReceiveItems from "./components/Masters/products/ReceiveItems.jsx";
 import AddProduct from "./components/Masters/products/addproducts.jsx";
 import ViewProduct from "./components/Masters/products/ViewProduct.jsx"
 import EditProduct from "./components/Masters/products/EditProduct.jsx";
+
+
 
 //User
 import UserDevices from "./components/user/user_devices/user_devices.jsx";
@@ -89,6 +94,7 @@ function AppLayout() {
             <Route path="/masters/vendors/add" element={<AddVendors />} />
             <Route path="/masters/vendors/view/:id" element={<ViewVendor />} />
             <Route path="/masters/vendors/edit/:id" element={<EditVendor />} />
+             <Route path="/masters/vendors/viewdetails/:id" element={<VendorDetails />} />
 
 
             <Route path="/masters/customers" element={<CustomersDashboard />} />
@@ -104,7 +110,9 @@ function AppLayout() {
               <Route path="/masters/products/add" element={<AddProduct />} />
               <Route path="/masters/products/view/:id" element={<ViewProduct />} />
                <Route path="/masters/products/edit/:id" element={<EditProduct />} />
-
+               <Route path="/masters/products/purchase-orders" element={<PurchaseOrders />} />
+               <Route path="/masters/products/receive-items/" element={<ReceiveItems />} />
+               
             {/* User Section */}
             <Route path="/user-devices" element={<UserDevices />} />
             <Route path="/inventory-ledger" element={<InventoryLedger />} />

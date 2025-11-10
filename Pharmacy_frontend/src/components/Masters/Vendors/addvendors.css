@@ -86,3 +86,17 @@
 .cancel-btn:hover {
   background: #0d9488;
 }
+
+.section {
+  border: 1px solid #e6e6e6;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 20px;
+  background: #fafafa;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}

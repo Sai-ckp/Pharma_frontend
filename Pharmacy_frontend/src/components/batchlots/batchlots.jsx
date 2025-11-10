@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./batchlots.css";
 
 const Batchlots = () => {
@@ -14,12 +14,23 @@ const Batchlots = () => {
     createdAt: new Date().toLocaleString(),
   });
 
-  // Auto-generate ID
-  const generateId = () => {
-    const next = batchlots.length + 1;
-    return `BL${next.toString().padStart(3, "0")}`;
+  // FETCH ALL BATCHES FROM API
+  const fetchBatches = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/v1/catalog/batches/");
+      const data = await res.json();
+
+      setBatchlots(data.results); // if paginated
+    } catch (err) {
+      console.error("Error fetching:", err);
+    }
   };
 
+  useEffect(() => {
+    fetchBatches();
+  }, []);
+
+  // FORM CHANGE HANDLER
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -28,37 +39,50 @@ const Batchlots = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  // SUBMIT BATCH TO BACKEND
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newBatch = {
-      id: generateId(),
-      ...formData,
-      createdAt: new Date().toLocaleString(),
-    };
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/v1/catalog/batches/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    setBatchlots([...batchlots, newBatch]);
+      if (!res.ok) {
+        alert("Error creating batch!");
+        return;
+      }
 
-    alert("✅ Batch Lot Created Successfully!");
-    console.log("New Batch Lot:", newBatch);
+      alert("✅ Batch Lot Created Successfully!");
 
-    // Reset form
-    setFormData({
-      productId: "",
-      batchNo: "",
-      expiryDate: "",
-      status: "ACTIVE",
-      recallReason: "",
-      rackNo: "",
-      createdAt: new Date().toLocaleString(),
-    });
+      // Refresh list
+      fetchBatches();
+
+      // Reset form
+      setFormData({
+        productId: "",
+        batchNo: "",
+        expiryDate: "",
+        status: "ACTIVE",
+        recallReason: "",
+        rackNo: "",
+        createdAt: new Date().toLocaleString(),
+      });
+    } catch (error) {
+      console.log(error);
+      alert("Something went wrong!");
+    }
   };
 
   return (
     <div className="batchlots">
       <h2>Create Batch Lot</h2>
 
-      {/* ===== FORM SECTION ===== */}
+      {/* FORM */}
       <form onSubmit={handleSubmit} className="batchForm">
         <div className="formGroup">
           <label>Product ID:</label>
@@ -137,16 +161,16 @@ const Batchlots = () => {
         </button>
       </form>
 
-      {/* ===== LIST SECTION ===== */}
+      {/* LIST */}
       <div className="batchList">
         <h3>📋 Batch Lot Records</h3>
+
         {batchlots.length === 0 ? (
           <p className="noRecords">No batch lots found.</p>
         ) : (
           <table>
             <thead>
               <tr>
-                <th>ID</th>
                 <th>Product ID</th>
                 <th>Batch No</th>
                 <th>Expiry Date</th>
@@ -156,10 +180,10 @@ const Batchlots = () => {
                 <th>Created At</th>
               </tr>
             </thead>
+
             <tbody>
               {batchlots.map((batch, index) => (
                 <tr key={index}>
-                  <td>{batch.id}</td>
                   <td>{batch.productId}</td>
                   <td>{batch.batchNo}</td>
                   <td>{batch.expiryDate}</td>
