@@ -4,15 +4,20 @@ import "./customersdashboard.css";
 
 const CustomersDashboard = () => {
   const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const fetchCustomers = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/customers/");
+      setLoading(true);
+      const res = await fetch("http://127.0.0.1:8000/api/v1/customers/");
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setCustomers(data);
     } catch (error) {
       console.error("Error fetching customers:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -22,92 +27,113 @@ const CustomersDashboard = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this customer?")) {
-      await fetch(`http://127.0.0.1:8000/api/customers/${id}/`, {
-        method: "DELETE",
-      });
-      fetchCustomers();
+      try {
+        const res = await fetch(`http://127.0.0.1:8000/api/v1/customers/${id}/`, {
+          method: "DELETE",
+        });
+        if (res.ok) fetchCustomers();
+        else alert("Failed to delete customer!");
+      } catch (error) {
+        console.error("Error deleting customer:", error);
+      }
     }
   };
 
   return (
     <div className="customers-container">
-      <div className="flex justify-between items-center">
-        <h1 className="customers-title">Customer Management</h1>
-        <h2 className="customer-heading">Manage customer information and purchase history</h2>
-
-        <button className="add-btn" onClick={() => navigate("/masters/customers/add")}>
-          + Add Customer
-        </button>
+      {/* Dashboard Header */}
+      <div className="dashboard-header flex justify-between items-center mb-4">
+        <div>
+          <h1 className="customers-title">Customer Management</h1>
+          <h2 className="customer-heading">Manage customer information and purchase history</h2>
+        </div>
+         <button className="add-btn" onClick={() => navigate("/masters/customers/add")}>
+            send message
+          </button>
       </div>
 
-      {/* KPI CARDS */}
-      <div className="grid grid-cols-3 gap-4 my-6">
-        <div className="bg-white shadow rounded-xl p-5 text-center">
-          <h3 className="text-lg font-semibold">Total Customers</h3>
-          <p className="text-3xl font-bold mt-2">{customers.length}</p>
+      {/* KPI Cards + Customer Directory header inside same container */}
+      <div className="kpi-directory-container bg-white shadow rounded-xl p-5 mb-6">
+        {/* KPI CARDS */}
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="kpi-card">
+            <h3>Total Customers</h3>
+            <p>{customers.length}</p>
+          </div>
+          <div className="kpi-card">
+            <h3>Avg Purchase Value</h3>
+            <p>₹ 1500</p>
+          </div>
+          <div className="kpi-card">
+            <h3>Active This Month</h3>
+            <p>{customers.filter(c => c.is_active).length}</p>
+          </div>
         </div>
 
-        <div className="bg-white shadow rounded-xl p-5 text-center">
-          <h3 className="text-lg font-semibold">Avg Purchase Value</h3>
-          <p className="text-3xl font-bold mt-2">₹ 1500</p>
+        {/* Customer Directory Header with Add Button inside the same card container */}
+       
+
+        {/* CUSTOMERS TABLE */}
+        <div className="customers-list">
+           <div className="customer-directory-header flex justify-between items-center mb-4">
+          <h3>Customer Directory</h3>
+          <button className="add-btn" onClick={() => navigate("/masters/customers/add")}>
+            + Add Customer
+          </button>
         </div>
+          {loading ? (
+            <p>Loading customers...</p>
+          ) : (
+            <table className="customers-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Purchase Date</th>
+                
+                  <th>Total Purchases</th>
+                  <th>Total Amount</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {customers.length > 0 ? (
+                  customers.map((customer, index) => (
+                    <tr key={customer.id}>
+                      <td>{index + 1}</td>
+                      <td>{customer.name}</td>
+                      <td>{customer.last_purchase_date || "-"}</td>
+                      
+                      <td>{customer.total_purchases || 0}</td>
+                      <td>₹ {customer.total_amount || 0}</td>
+                      <td>
+                       <button
+  className="edit-btn"
+  onClick={() => navigate(`http://127.0.0.1:8000/api/v1/customers/${id}/`)}
+>
+  View
+</button>
 
-        <div className="bg-white shadow rounded-xl p-5 text-center">
-          <h3 className="text-lg font-semibold">Active This Month</h3>
-          <p className="text-3xl font-bold mt-2">8</p>
+                        <button
+                          className="delete-btn"
+                          onClick={() => handleDelete(customer.id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="no-data">
+                      No customers found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
-      </div>
-
-      {/* CUSTOMERS LIST */}
-      <div className="customers-list">
-        <h3>Customer List</h3>
-
-        <table className="customers-table">
-          <thead>
-            <tr>
-              <th>id</th>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Address</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {customers.map((customer, index) => (
-              <tr key={customer.id}>
-                <td>{index + 1}</td>
-                <td>{customer.name}</td>
-                <td>{customer.phone}</td>
-                <td>{customer.email}</td>
-                <td>{customer.address}</td>
-                <td>{customer.is_active ? "Active" : "Inactive"}</td>
-
-                <td>
-                  <button className="edit-btn" onClick={() => alert("View Screen Coming!")}>
-                    View
-                  </button>
-
-                  <button className="edit-btn" onClick={() => navigate(`/masters/customers/edit/${customer.id}`)}>
-                    Edit
-                  </button>
-
-                  <button className="delete-btn" onClick={() => handleDelete(customer.id)}>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {customers.length === 0 && (
-              <tr>
-                <td colSpan="7" className="no-data">No customers found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
       </div>
     </div>
   );

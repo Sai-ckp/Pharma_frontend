@@ -1,0 +1,106 @@
+.customer-details-container {
+  padding: 24px;
+  font-family: "Inter", sans-serif;
+}
+
+.customer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back-btn {
+  background: #10b981;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.back-btn:hover {
+  background: #0d9488;
+}
+
+.customer-name {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+}
+
+/* KPI Cards Container */
+.customer-kpi-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+/* KPI CARD BASE */
+.kpi-card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: rgba(0,0,0,0.06) 0px 2px 8px;
+}
+
+.kpi-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* Contact Info Card */
+.contact-info .contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* Additional Info Card */
+.additional-info .additional-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.info-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.info-btn:hover {
+  background: #2563eb;
+}
+
+/* Small Card - Customer Status */
+.customer-status.small-card {
+  text-align: center;
+}
+
+.customer-status .status-icon {
+  margin: 8px 0;
+  color: #10b981;
+}
+
+/* Purchase Stats */
+.purchase-stats p,
+.this-month p {
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+/* This Month */
+.this-month {
+  text-align: center;
+}
