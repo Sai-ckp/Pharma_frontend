@@ -32,11 +32,11 @@ import {
   FlaskRound,
 } from "lucide-react";
 import "./Sidebar.css";
-
+ 
 const Sidebar = () => {
   const [isMastersOpen, setIsMastersOpen] = useState(false);
   const [isUsersOpen, setIsUsersOpen] = useState(false);
-
+ 
   const masterItems = [
    
     { path: "/masters/customers", label: "Customers", icon: <UserCircle size={18} /> },
@@ -45,10 +45,10 @@ const Sidebar = () => {
     { path: "/masters/products", label: "Products", icon: <FlaskRound size={18} /> },
     { path: "/users", label: "Users", icon: <UserCog size={18} /> },
   ];
-
+ 
   const userItems = [
-
-    
+ 
+   
     { path: "/user-devices", label: "User Devices", icon: <Smartphone size={18} /> },           // Device management
    
     { path: "/transfer-vouchers", label: "Transfer Vouchers", icon: <ArrowLeftRight size={18} /> }, // Transfer documents
@@ -76,7 +76,7 @@ const Sidebar = () => {
     { path: "/h1registerentries", label: "Register Entries", icon: <ClipboardCheck size={18} /> },
     { path: "/ndpsdailyentries", label: "NDPS Daily Entries", icon: <ClipboardList size={18} /> },
   ];
-
+ 
   return (
     <div className="sidebar-container">
       {/* Header */}
@@ -93,14 +93,14 @@ const Sidebar = () => {
           </div>
         </div>
       </div>
-
+ 
       <nav className="sidebar-menu">
         {/* Dashboard */}
         <NavLink to="/" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}>
           <span className="sidebar-icon"><LayoutDashboard size={18} /></span>
           <span className="sidebar-label">Dashboard</span>
         </NavLink>
-
+ 
         {/* Masters */}
         <div className="sidebar-link sidebar-dropdown" onClick={() => setIsMastersOpen(!isMastersOpen)}>
           <div className="sidebar-dropdown-left">
@@ -114,7 +114,7 @@ const Sidebar = () => {
             {isMastersOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </span>
         </div>
-
+ 
         {isMastersOpen && (
           <div className="sidebar-submenu">
             {masterItems.map((item, idx) => (
@@ -126,7 +126,7 @@ const Sidebar = () => {
             ))}
           </div>
         )}
-
+ 
         {/* User (NEW) */}
         <div className="sidebar-link sidebar-dropdown" onClick={() => setIsUsersOpen(!isUsersOpen)}>
           <div className="sidebar-dropdown-left">
@@ -140,7 +140,7 @@ const Sidebar = () => {
             {isUsersOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </span>
         </div>
-
+ 
         {isUsersOpen && (
           <div className="sidebar-submenu">
             {userItems.map((item, idx) => (
@@ -152,7 +152,7 @@ const Sidebar = () => {
             ))}
           </div>
         )}
-
+ 
         {/* Other */}
         {otherMenuItems.map((item, idx) => (
           <NavLink key={idx} to={item.path}
@@ -165,5 +165,6 @@ const Sidebar = () => {
     </div>
   );
 };
-
+ 
 export default Sidebar;
+ 
