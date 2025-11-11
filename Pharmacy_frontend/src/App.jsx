@@ -25,7 +25,7 @@ import ViewVendor from "./components/Masters/Vendors/viewvendor.jsx";
 import EditVendor from "./components/Masters/Vendors/editvendor.jsx";
 import AddCustomers from "./components/Masters/Customers/addcustomers.jsx";
 import CustomersDashboard from "./components/Masters/Customers/customersdashboard.jsx";
-import CustomerDetails from "./components/Masters/Customers/CustomerDetails.jsx";
+// import CustomerDetails from "./components/Masters/Customers/CustomerDetails.jsx";
  
 import RolesDashboard from "./components/Masters/roles/rolesdashboard.jsx";
 import AddRole from "./components/Masters/roles/addroles.jsx";
@@ -101,7 +101,7 @@ function AppLayout() {
  
             <Route path="/masters/customers" element={<CustomersDashboard />} />
             <Route path="/masters/customers/add" element={<AddCustomers />} />
-             <Route path="/masters/customers/customerdetails" element={<CustomerDetails />} />
+             {/* <Route path="/masters/customers/customerdetails" element={<CustomerDetails />} /> */}
        
             <Route path="/masters/roles" element={<RolesDashboard />} />
             <Route path="/masters/roles/add" element={<AddRole />} />
