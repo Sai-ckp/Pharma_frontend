@@ -1,0 +1,59 @@
+.mc-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 1000px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+/* sizing helpers */
+.mc-big { width: 100%; height: 100%; }
+.mc-medium { width: 100%; height: 100%; max-width: 320px; max-height: 240px; }
+
+.mc-slide {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 84%;
+  height: 84%;
+  border-radius: 12px;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  transform: translateZ(-120px) scale(.86);
+  opacity: 0;
+  transition: transform 700ms cubic-bezier(.2,.85,.3,1), opacity 520ms ease, filter 700ms ease;
+  box-shadow: 0 14px 40px rgba(2,6,23,0.12);
+  border: 6px solid rgba(255,255,255,0.9);
+  filter: saturate(0.94) contrast(.98) blur(.2px);
+}
+
+/* active slide pop */
+.mc-active {
+  transform: translateZ(0) scale(1);
+  opacity: 1;
+  z-index: 30;
+  filter: none;
+}
+
+/* dots */
+.mc-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display:flex;
+  gap:10px;
+}
+.mc-dot {
+  width:8px; height:8px; border-radius:999px; background: rgba(255,255,255,0.6);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  transition: transform 200ms ease, background 200ms ease;
+}
+.mc-dot-on {
+  background: white;
+  transform: scale(1.25);
+}

@@ -48,17 +48,22 @@ const Sidebar = () => {
 
   const userItems = [
     { path: "/user-devices", label: "User Devices", icon: <Smartphone size={18} /> },           // Device management
+    // inventory ledger kept Boxes but you can swap to Package/Database if you want
     { path: "/inventory-ledger", label: "Inventory Ledger", icon: <Boxes size={18} /> },        // Inventory tracking
     { path: "/transfer-vouchers", label: "Transfer Vouchers", icon: <ArrowLeftRight size={18} /> }, // Transfer documents
     { path: "/breach-logs", label: "Breach Logs", icon: <ShieldAlert size={18} /> },            // Security-related logs
     { path: "/audit-logs", label: "Audit Logs", icon: <FileSignature size={18} /> },            // Audit trail / compliance
     { path: "/recall-events", label: "Recall Events", icon: <RefreshCcw size={18} /> },         // Recall / return events
-    { path: "/purchase-lines", label: "Purchase Lines", icon: <ShoppingCart size={18} /> },     // Purchase-related
+    // PURCHASE LINES: cart + tiny animated pill badge (pharmacy)
+    { path: "/purchase-lines", label: "Purchase Lines", icon: <ShoppingCart size={18} />, purchase: true },     // Purchase-related
     { path: "/sales-invoices", label: "Sales Invoices", icon: <Receipt size={18} /> },          // Billing / sales invoices
   ];
+
   const otherMenuItems = [
-    { path: "/settings", label: "Settings", icon: <ShoppingCart size={18} /> },
-    { path: "/retention-policies", label: "Retention Policies", icon: <ShoppingCart size={18} /> },
+    // SETTINGS: gear with gentle rotate-on-hover
+    { path: "/settings", label: "Settings", icon: <Settings size={18} />, anim: "settings" },
+    // RETENTION POLICIES: package icon with soft pulse
+    { path: "/retention-policies", label: "Retention Policies", icon: <Package size={18} />, anim: "pulse" },
     { path: "/pharmacy", label: "Pharmacy", icon: <Pill size={18} /> },
     { path: "/rackrules", label: "Rack Rules", icon: <Layers size={18} /> },
     { path: "/batchlots", label: "Batch Lots", icon: <Box size={18} /> },
@@ -140,8 +145,20 @@ const Sidebar = () => {
           <div className="sidebar-submenu">
             {userItems.map((item, idx) => (
               <NavLink key={idx} to={item.path}
-                className={({ isActive }) => `sidebar-link sidebar-sublink ${isActive ? "active" : ""}`}>
-                <span className="sidebar-icon">{item.icon}</span>
+                className={({ isActive }) => `sidebar-link sidebar-sublink ${isActive ? "active" : ""} ${item.purchase ? "group" : ""}`}>
+                <span className="sidebar-icon">
+                  {/* if purchase line, add small pill badge */}
+                  {item.icon}
+                  {item.purchase && (
+                    <span className="purchase-pill" aria-hidden="true" title="pharma">
+                      {/* tiny pill SVG */}
+                      <svg width="12" height="8" viewBox="0 0 24 14" className="pill-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0.5" y="0.5" width="11" height="13" rx="6.5" fill="#fff" stroke="#e2e8f0"/>
+                        <rect x="11.5" y="0.5" width="11" height="13" rx="6.5" fill="#34d399" />
+                      </svg>
+                    </span>
+                  )}
+                </span>
                 <span className="sidebar-label">{item.label}</span>
               </NavLink>
             ))}
@@ -151,8 +168,12 @@ const Sidebar = () => {
         {/* Other */}
         {otherMenuItems.map((item, idx) => (
           <NavLink key={idx} to={item.path}
-            className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}>
-            <span className="sidebar-icon">{item.icon}</span>
+            className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""} ${item.anim ? "group" : ""}`}>
+            <span
+              className={`sidebar-icon ${item.anim === "settings" ? "hover-rotate" : ""} ${item.anim === "pulse" ? "pulse-icon" : ""}`}
+            >
+              {item.icon}
+            </span>
             <span className="sidebar-label">{item.label}</span>
           </NavLink>
         ))}
