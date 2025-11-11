@@ -38,7 +38,7 @@ const Sidebar = () => {
   const [isUsersOpen, setIsUsersOpen] = useState(false);
 
   const masterItems = [
-    { path: "/masters/vendors", label: "Vendors", icon: <Store size={18} /> },
+   
     { path: "/masters/customers", label: "Customers", icon: <UserCircle size={18} /> },
     { path: "/masters/roles", label: "Roles", icon: <ShieldCheck size={18} /> },
     { path: "/masters/locations", label: "Locations", icon: <MapPin size={18} /> },
@@ -47,8 +47,9 @@ const Sidebar = () => {
   ];
 
   const userItems = [
+
+    
     { path: "/user-devices", label: "User Devices", icon: <Smartphone size={18} /> },           // Device management
-    // inventory ledger kept Boxes but you can swap to Package/Database if you want
     { path: "/inventory-ledger", label: "Inventory Ledger", icon: <Boxes size={18} /> },        // Inventory tracking
     { path: "/transfer-vouchers", label: "Transfer Vouchers", icon: <ArrowLeftRight size={18} /> }, // Transfer documents
     { path: "/breach-logs", label: "Breach Logs", icon: <ShieldAlert size={18} /> },            // Security-related logs
@@ -60,10 +61,8 @@ const Sidebar = () => {
   ];
 
   const otherMenuItems = [
-    // SETTINGS: gear with gentle rotate-on-hover
-    { path: "/settings", label: "Settings", icon: <Settings size={18} />, anim: "settings" },
-    // RETENTION POLICIES: package icon with soft pulse
-    { path: "/retention-policies", label: "Retention Policies", icon: <Package size={18} />, anim: "pulse" },
+    { path: "/settings", label: "Settings", icon: <ShoppingCart size={18} /> },
+    { path: "/retention-policies", label: "Retention Policies", icon: <ShoppingCart size={18} /> },
     { path: "/pharmacy", label: "Pharmacy", icon: <Pill size={18} /> },
     { path: "/rackrules", label: "Rack Rules", icon: <Layers size={18} /> },
     { path: "/batchlots", label: "Batch Lots", icon: <Box size={18} /> },

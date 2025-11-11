@@ -1,209 +1,261 @@
-/* MAIN CONTAINER */
+/* wrapper (keeps your original naming) */
 .customers-container {
   padding: 24px;
   font-family: "Inter", sans-serif;
+  background: #f7fafc;
+  min-height: 100vh;
 }
 
-/* TITLE */
+/* header */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
 .customers-title {
   font-size: 26px;
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: 12px;
+  margin: 0;
 }
 
 .customers-heading {
-  font-size: 12px;
-  font-weight: 300;
-  color: #0f172a;
-  margin-bottom: 12px;
-}
-
-.customers-description {
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 400;
   color: #475569;
-  margin-bottom: 22px;
-}
-
-/* KPI CARDS */
-.grid {
-  display: grid;
-}
-
-.bg-white {
-  background: #fff;
-}
-
-.shadow {
-  box-shadow: rgba(0,0,0,0.06) 0px 2px 8px;
-}
-
-.rounded-xl {
-  border-radius: 16px;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-lg {
-  font-size: 17px;
-  font-weight: 600;
-  color: #334155;
-}
-
-.text-3xl {
-  font-size: 32px;
-  font-weight: 700;
-  color: #0d9488;
-}
-
-/* FORM CARD */
-.customers-card {
-  background: #fff;
-  border-radius: 14px;
-  margin-top: 18px;
-  padding: 20px;
-  box-shadow: rgba(0,0,0,0.05) 0px 2px 8px;
-}
-
-.customers-card h3 {
-  font-size: 16px;
-  font-weight: 600;
+  margin-top: 8px;
   margin-bottom: 18px;
 }
 
-.customers-form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.form-row {
-  display: flex;
-  gap: 18px;
-}
-
-.form-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-group label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1e293b;
-}
-
-.form-group input,
-.form-group textarea {
-  border: 1px solid #10b981e6;
-  border-radius: 10px;
-  padding: 9px 12px;
-  font-size: 14px;
-  outline: none;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  border-color: #0d9488;
-}
-
-/* BUTTON SUBMIT */
-.submit-btn {
-  background: #0d9488;
+/* Add button */
+.add-btn {
+  background: #10b981;
   color: white;
-  border: none;
-  padding: 12px 18px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-  width: 180px;
-  transition: 0.2s;
-}
-
-.submit-btn:hover {
-  background: #0f766e;
-}
-
-/* TABLE */
-.customers-list {
-  background: #fff;
-  border-radius: 14px;
-  padding: 20px;
-  margin-top: 30px;
-  box-shadow: rgba(0,0,0,0.05) 0px 2px 8px;
-}
-
-.customers-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
-}
-
-.customers-table th,
-.customers-table td {
-  border-bottom: 1px solid #e2e8f0;
-  padding: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
   font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+.add-btn:hover { background: #0d9488; }
+
+/* loading / empty */
+.loading-text,
+.no-vendors-box {
+  padding: 28px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: rgba(0,0,0,0.04) 0px 2px 8px;
+  text-align: center;
   color: #334155;
+}
+
+/* Grid of cards */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .cards-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .cards-grid { grid-template-columns: 1fr; }
+}
+
+/* card */
+.vendor-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: rgba(2,6,23,0.06) 0px 6px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 170px;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  border: 1px solid rgba(15, 23, 42, 0.03);
+}
+.vendor-card:hover {
+  transform: translateY(-6px);
+  box-shadow: rgba(2,6,23,0.10) 0px 10px 30px;
+}
+
+/* top row */
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  max-width: 75%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-icon { color: #0d9488; }
+
+/* body contact rows */
+.card-body { margin-top: 10px; }
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #334155;
+  margin-top: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.contact-text {
+  display: inline-block;
+  max-width: calc(100% - 26px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* metrics row inside card */
+.metrics-row {
+  display: flex;
+  margin-top: 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #eef2f7;
+  background: #fbfdff;
+}
+
+.metric {
+  flex: 1;
+  padding: 10px 8px;
   text-align: center;
 }
 
-.customers-table th {
-  background: #f8fafc;
-  font-weight: 600;
+.metric.divider {
+  border-left: 1px solid #eef2f7;
+  border-right: 1px solid #eef2f7;
 }
 
-.no-data {
-  padding: 18px;
-  font-size: 14px;
+.metric-value {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 15px;
 }
 
-/* ACTION BUTTONS */
-.edit-btn, .delete-btn {
+.metric-label {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+/* footer (status + action icons) */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.status-badge {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.status-badge.active {
+  background: #ecfdf5;
+  color: #027a48;
+}
+
+.status-badge.inactive {
+  background: #fff1f2;
+  color: #b91c1c;
+}
+
+/* action icons */
+.action-icons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.action-icons .icon {
+  background: transparent;
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  color: #334155;
+  transition: background 120ms ease, color 120ms ease;
+}
+.action-icons .icon:hover {
+  background: rgba(15,23,42,0.04);
+  color: #0d9488;
+}
+.action-icons .icon.delete:hover {
+  background: rgba(239,68,68,0.08);
+  color: #dc2626;
+}
+
+/* small tweaks */
+.customers-title + .customers-heading { margin-bottom: 18px; }
+
+
+.clickable-card {
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.clickable-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.clickable {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.clickable:hover {
+  background-color: #f5f5f5;
+  border-radius: 6px;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.add-supplier-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #0d9488;
+  color: #fff;
   border: none;
   padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: 6px;
+  font-size: 14px;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  margin-right: 6px;
+  transition: background 0.2s;
 }
 
-.edit-btn {
-  background: #facc15;
-  color: #1e293b;
-}
-
-.edit-btn:hover {
-  background: #eab308;
-}
-
-.delete-btn {
-  background: #ef4444;
-  color: #fff;
-}
-
-.delete-btn:hover {
-  background: #dc2626;
-}
-
-.add-btn {
-  background: #10b981;
-    color: white;
-    padding: 7px 8px;
-    border-radius: -13px;
-    font-size: 14px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.add-btn:hover {
-  background: #0d9488;
+.add-supplier-btn:hover {
+  background-color: #0d9488;
 }
