@@ -39,7 +39,7 @@ const Sidebar = () => {
  
   const masterItems = [
    
-    { path: "/masters/customers", label: "Customers", icon: <UserCircle size={18} /> },
+    
     { path: "/masters/roles", label: "Roles", icon: <ShieldCheck size={18} /> },
     { path: "/masters/locations", label: "Locations", icon: <MapPin size={18} /> },
     { path: "/masters/products", label: "Products", icon: <FlaskRound size={18} /> },

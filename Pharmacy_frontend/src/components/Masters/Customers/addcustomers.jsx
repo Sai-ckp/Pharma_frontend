@@ -4,7 +4,7 @@ import "../customers/addcustomers.css";
 
 const AddCustomer = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // check edit mode
+  const { id } = useParams();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -12,6 +12,9 @@ const AddCustomer = () => {
     email: "",
     gstin: "",
     type: "RETAIL",
+    credit_limit: "0",
+    outstanding_balance: "0",
+    customer_category: "",
     price_tier: "",
     billing_address: "",
     shipping_address: "",
@@ -22,18 +25,21 @@ const AddCustomer = () => {
     is_active: true,
   });
 
-  // Load data if edit mode
+  // ✅ Load data if edit mode
   useEffect(() => {
     if (id) {
       fetch(`http://127.0.0.1:8000/api/v1/customers/${id}/`)
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           setFormData({
             name: data.name || "",
             phone: data.phone || "",
             email: data.email || "",
             gstin: data.gstin || "",
             type: data.type || "RETAIL",
+            credit_limit: data.credit_limit?.toString() || "0",
+            outstanding_balance: data.outstanding_balance?.toString() || "0",
+            customer_category: data.customer_category || "",
             price_tier: data.price_tier || "",
             billing_address: data.billing_address || "",
             shipping_address: data.shipping_address || "",
@@ -43,10 +49,12 @@ const AddCustomer = () => {
             consent_required: data.consent_required || false,
             is_active: data.is_active ?? true,
           });
-        });
+        })
+        .catch((err) => console.error("Error loading customer:", err));
     }
   }, [id]);
 
+  // ✅ Handle input change
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -55,6 +63,7 @@ const AddCustomer = () => {
     });
   };
 
+  // ✅ Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -63,11 +72,20 @@ const AddCustomer = () => {
         ? `http://127.0.0.1:8000/api/v1/customers/${id}/`
         : "http://127.0.0.1:8000/api/v1/customers/";
 
-      await fetch(url, {
+      console.log("Submitting payload:", formData);
+
+      const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        console.error("Backend error:", errData);
+        alert("Error saving customer: " + JSON.stringify(errData));
+        return;
+      }
 
       alert(id ? "Customer Updated Successfully!" : "Customer Added Successfully!");
       navigate("/masters/customers");
@@ -90,7 +108,7 @@ const AddCustomer = () => {
 
           <div className="form-group">
             <label>Phone:</label>
-            <input type="text" name="phone" value={formData.phone} onChange={handleChange} placeholder="Enter phone" required />
+            <input type="text" name="phone" value={formData.phone} onChange={handleChange} placeholder="Enter phone" />
           </div>
 
           <div className="form-group">
@@ -99,7 +117,7 @@ const AddCustomer = () => {
           </div>
         </div>
 
-        {/* Row 2: GSTIN, Type, Price Tier */}
+        {/* Row 2: GSTIN, Type, Category */}
         <div className="form-row">
           <div className="form-group">
             <label>GSTIN:</label>
@@ -116,12 +134,54 @@ const AddCustomer = () => {
           </div>
 
           <div className="form-group">
-            <label>Price Tier:</label>
-            <input type="text" name="price_tier" value={formData.price_tier} onChange={handleChange} placeholder="Enter price tier" />
+            <label>Customer Category:</label>
+            <input
+              type="text"
+              name="customer_category"
+              value={formData.customer_category}
+              onChange={handleChange}
+              placeholder="Enter customer category"
+            />
           </div>
         </div>
 
-        {/* Row 3: Billing & Shipping Address */}
+        {/* Row 3: Credit Limit, Outstanding Balance, Price Tier */}
+        <div className="form-row">
+          <div className="form-group">
+            <label>Credit Limit:</label>
+            <input
+              type="number"
+              name="credit_limit"
+              value={formData.credit_limit}
+              onChange={handleChange}
+              placeholder="Enter credit limit"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Outstanding Balance:</label>
+            <input
+              type="number"
+              name="outstanding_balance"
+              value={formData.outstanding_balance}
+              onChange={handleChange}
+              placeholder="Enter outstanding balance"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Price Tier:</label>
+            <input
+              type="text"
+              name="price_tier"
+              value={formData.price_tier}
+              onChange={handleChange}
+              placeholder="Enter price tier"
+            />
+          </div>
+        </div>
+
+        {/* Row 4: Billing & Shipping Address */}
         <div className="form-row">
           <div className="form-group">
             <label>Billing Address:</label>
@@ -134,7 +194,7 @@ const AddCustomer = () => {
           </div>
         </div>
 
-        {/* Row 4: City, State, Pincode */}
+        {/* Row 5: City, State, Pincode */}
         <div className="form-row">
           <div className="form-group">
             <label>City:</label>
@@ -152,7 +212,7 @@ const AddCustomer = () => {
           </div>
         </div>
 
-        {/* Row 5: Checkboxes */}
+        {/* Row 6: Checkboxes */}
         <div className="form-row">
           <div className="form-group checkbox-group">
             <label>
@@ -169,12 +229,11 @@ const AddCustomer = () => {
           </div>
         </div>
 
-        {/* Form Actions */}
+        {/* Actions */}
         <div className="form-actions">
           <button type="button" className="cancel-btn" onClick={() => navigate("/masters/customers")}>
             Cancel
           </button>
-
           <button type="submit" className="submit-btn">
             {id ? "Update" : "Save"}
           </button>

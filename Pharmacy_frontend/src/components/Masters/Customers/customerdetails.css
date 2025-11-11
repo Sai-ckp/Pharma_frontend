@@ -1,12 +1,16 @@
+/* Container */
 .customer-details-container {
   padding: 24px;
   font-family: "Inter", sans-serif;
+  background: #f9fafb;
 }
 
+/* Header */
 .customer-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px; /* space between back button and name */
+  margin-bottom: 20px;
 }
 
 .back-btn {
@@ -21,14 +25,13 @@
 }
 
 .back-btn:hover {
-  background: #0d9488;
+  background: #059669;
 }
 
 .customer-name {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 700; /* Only customer name bold */
   color: #0f172a;
-  text-align: center;
 }
 
 /* KPI Cards Container */
@@ -39,18 +42,31 @@
   margin-top: 20px;
 }
 
-/* KPI CARD BASE */
+/* KPI Card Base */
 .kpi-card {
   background: #fff;
   padding: 16px;
   border-radius: 14px;
-  box-shadow: rgba(0,0,0,0.06) 0px 2px 8px;
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  text-align: left;
 }
 
+/* Only h3 headings are bold */
 .kpi-card h3 {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 12px;
+}
+
+/* Normal text inside cards */
+.kpi-card p,
+.kpi-card span {
+  font-weight: 400; /* Normal weight */
+  font-size: 14px;
+  margin-bottom: 6px;
 }
 
 /* Contact Info Card */
@@ -66,10 +82,11 @@
 .additional-info .additional-btns {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .info-btn {
-  background: #3b82f6;
+  background: #10b981;
   color: white;
   border: none;
   padding: 6px 10px;
@@ -80,27 +97,31 @@
 }
 
 .info-btn:hover {
-  background: #2563eb;
+  background: #059669;
 }
 
 /* Small Card - Customer Status */
 .customer-status.small-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; /* center content horizontally */
   text-align: center;
+  gap: 8px;
 }
 
 .customer-status .status-icon {
-  margin: 8px 0;
   color: #10b981;
 }
 
-/* Purchase Stats */
+/* Purchase Stats & This Month Cards */
 .purchase-stats p,
 .this-month p {
   font-size: 14px;
   margin-bottom: 6px;
 }
 
-/* This Month */
+/* This Month Card */
 .this-month {
   text-align: center;
 }
