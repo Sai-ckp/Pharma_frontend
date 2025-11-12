@@ -30,41 +30,29 @@ import {
   MapPin,
   ShoppingCart,
   FlaskRound,
+  CreditCard,
 } from "lucide-react";
 import "./Sidebar.css";
- 
+
 const Sidebar = () => {
   const [isMastersOpen, setIsMastersOpen] = useState(false);
-  const [isUsersOpen, setIsUsersOpen] = useState(false);
- 
+
   const masterItems = [
-   
-    
-    { path: "/masters/roles", label: "Roles", icon: <ShieldCheck size={18} /> },
-    { path: "/masters/locations", label: "Locations", icon: <MapPin size={18} /> },
-    { path: "/masters/products", label: "Products", icon: <FlaskRound size={18} /> },
-    { path: "/users", label: "Users", icon: <UserCog size={18} /> },
+    // { path: "/masters/roles", label: "Roles", icon: <ShieldCheck size={18} /> },
+    // { path: "/masters/locations", label: "Locations", icon: <MapPin size={18} /> },
+    // { path: "/masters/products", label: "Products", icon: <FlaskRound size={18} /> },
+    // { path: "/users", label: "Users", icon: <UserCog size={18} /> },
+    { path: "/masters/payment-methods", label: "Payment Methods", icon: <CreditCard size={18} /> },
+    { path: "/masters/payment-terms", label: "Payment Terms", icon: <Store size={18} /> },
+    { path: "/masters/rack-locations", label: "Rack Locations", icon: <Store size={18} /> },
   ];
- 
-  const userItems = [
- 
-   
-    { path: "/user-devices", label: "User Devices", icon: <Smartphone size={18} /> },           // Device management
-   
-    { path: "/transfer-vouchers", label: "Transfer Vouchers", icon: <ArrowLeftRight size={18} /> }, // Transfer documents
-    { path: "/breach-logs", label: "Breach Logs", icon: <ShieldAlert size={18} /> },            // Security-related logs
-    { path: "/audit-logs", label: "Audit Logs", icon: <FileSignature size={18} /> },            // Audit trail / compliance
-    { path: "/recall-events", label: "Recall Events", icon: <RefreshCcw size={18} /> },         // Recall / return events
-    { path: "/purchase-lines", label: "Purchase Lines", icon: <ShoppingCart size={18} /> },     // Purchase-related
-    { path: "/sales-invoices", label: "Sales Invoices", icon: <Receipt size={18} /> },          // Billing / sales invoices
-  ];
+
   const otherMenuItems = [
-     { path: "/inventory-ledger", label: "Inventory", icon: <Boxes size={18} /> },        // Inventory tracking
-     { path: "/masters/vendors", label: "Suppliers", icon: <Store size={18} /> },
-      { path: "/masters/customers", label: "Customers", icon: <UserCircle size={18} /> },
+    { path: "/masters/vendors", label: "Suppliers", icon: <Store size={18} /> },
+    { path: "/masters/customers", label: "Customers", icon: <UserCircle size={18} /> },
     { path: "/settings", label: "Settings", icon: <ShoppingCart size={18} /> },
     { path: "/retention-policies", label: "Retention Policies", icon: <ShoppingCart size={18} /> },
-    { path: "/pharmacy", label: "Pharmacy", icon: <Pill size={18} /> },
+    { path: "/inventory/medicines/", label: "Inventory Management", icon: <Boxes size={18} /> },
     { path: "/rackrules", label: "Rack Rules", icon: <Layers size={18} /> },
     { path: "/batchlots", label: "Batch Lots", icon: <Box size={18} /> },
     { path: "/purchases", label: "Purchases", icon: <ShoppingBag size={18} /> },
@@ -75,8 +63,15 @@ const Sidebar = () => {
     { path: "/saleslines", label: "Sales Lines", icon: <ReceiptText size={18} /> },
     { path: "/h1registerentries", label: "Register Entries", icon: <ClipboardCheck size={18} /> },
     { path: "/ndpsdailyentries", label: "NDPS Daily Entries", icon: <ClipboardList size={18} /> },
+    { path: "/user-devices", label: "User Devices", icon: <Smartphone size={18} /> },
+    { path: "/transfer-vouchers", label: "Transfer Vouchers", icon: <ArrowLeftRight size={18} /> },
+    { path: "/breach-logs", label: "Breach Logs", icon: <ShieldAlert size={18} /> },
+    { path: "/audit-logs", label: "Audit Logs", icon: <FileSignature size={18} /> },
+    { path: "/recall-events", label: "Recall Events", icon: <RefreshCcw size={18} /> },
+    { path: "/purchase-lines", label: "Purchase Lines", icon: <ShoppingCart size={18} /> },
+    { path: "/sales-invoices", label: "Sales Invoices", icon: <Receipt size={18} /> },
   ];
- 
+
   return (
     <div className="sidebar-container">
       {/* Header */}
@@ -93,14 +88,14 @@ const Sidebar = () => {
           </div>
         </div>
       </div>
- 
+
       <nav className="sidebar-menu">
         {/* Dashboard */}
         <NavLink to="/" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}>
           <span className="sidebar-icon"><LayoutDashboard size={18} /></span>
           <span className="sidebar-label">Dashboard</span>
         </NavLink>
- 
+
         {/* Masters */}
         <div className="sidebar-link sidebar-dropdown" onClick={() => setIsMastersOpen(!isMastersOpen)}>
           <div className="sidebar-dropdown-left">
@@ -114,7 +109,7 @@ const Sidebar = () => {
             {isMastersOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </span>
         </div>
- 
+
         {isMastersOpen && (
           <div className="sidebar-submenu">
             {masterItems.map((item, idx) => (
@@ -126,34 +121,8 @@ const Sidebar = () => {
             ))}
           </div>
         )}
- 
-        {/* User (NEW) */}
-        <div className="sidebar-link sidebar-dropdown" onClick={() => setIsUsersOpen(!isUsersOpen)}>
-          <div className="sidebar-dropdown-left">
-            <span className="sidebar-icon"><UserCog size={18} /></span>
-            <div className="masters-title">
-              <span className="sidebar-label">User</span>
-              <span className="masters-small-font">User Panel</span>
-            </div>
-          </div>
-          <span className="sidebar-chevron">
-            {isUsersOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-          </span>
-        </div>
- 
-        {isUsersOpen && (
-          <div className="sidebar-submenu">
-            {userItems.map((item, idx) => (
-              <NavLink key={idx} to={item.path}
-                className={({ isActive }) => `sidebar-link sidebar-sublink ${isActive ? "active" : ""}`}>
-                <span className="sidebar-icon">{item.icon}</span>
-                <span className="sidebar-label">{item.label}</span>
-              </NavLink>
-            ))}
-          </div>
-        )}
- 
-        {/* Other */}
+
+        {/* Other Menu Items */}
         {otherMenuItems.map((item, idx) => (
           <NavLink key={idx} to={item.path}
             className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}>
@@ -165,6 +134,5 @@ const Sidebar = () => {
     </div>
   );
 };
- 
+
 export default Sidebar;
- 

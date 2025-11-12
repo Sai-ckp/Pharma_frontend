@@ -12,11 +12,11 @@ import PrivateRoute from "./components/user/privateroute";
  
 // Pages
 import Home from "./pages/Home";
-import Pharmacy from "./pages/Pharmacy";
 import Dashboard from "./components/dashboard/dashboard.jsx";
-import Inventory from "./components/inventory/inventory.jsx";
 import Billing from "./components/billing/billing.jsx";
- 
+// pages
+import MedicineInventory from "./components/inventory/MedicineInventory.jsx";
+import AddMedicine from "./components/inventory/AddMedicine.jsx"; 
 // Masters
 import Vendorsdashboard from "./components/Masters/Vendors/vendorsdashboard.jsx";
 import VendorDetails from "./components/Masters/Vendors/VendorDetails.jsx";
@@ -41,11 +41,13 @@ import AddProduct from "./components/Masters/products/addproducts.jsx";
 import ViewProduct from "./components/Masters/products/ViewProduct.jsx"
 import EditProduct from "./components/Masters/products/EditProduct.jsx";
  
+import PaymentMethods from "./components/Masters/Payment_Methods/Payment_Methods.jsx"; // <- your page
+import PaymentTerms from "./components/Masters/payment_terms/payment_terms.jsx"; // <- your page
+import RackLocations from "./components/Masters/rack_locations/rack_locations.jsx"; // <- your page
  
  
 //User
 import UserDevices from "./components/user/user_devices/user_devices.jsx";
-import InventoryLedger from "./components/user/inventory_ledger/inventory_ledger.jsx";
 import TransferVouchers from "./components/user/transfer_vouchers/transfer_vouchers.jsx"; // ⬅️ NEW
 import BreachLogs from "./components/user/breach_logs/breach_logs.jsx";
 import AuditLogs from "./components/user/audit_logs/audit_logs.jsx"; // ⬅️ NEW
@@ -88,7 +90,9 @@ function AppLayout() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
  
             <Route path="/home" element={<Home />} />
-            <Route path="/pharmacy" element={<Pharmacy />} />
+            <Route path="/inventory/medicines" element={<MedicineInventory />} />
+            <Route path="/inventory/medicines/add" element={<AddMedicine />} />
+
             <Route path="/user-devices" element={<UserDevices />} />
  
             {/* Masters */}
@@ -116,10 +120,13 @@ function AppLayout() {
                <Route path="/masters/products/edit/:id" element={<EditProduct />} />
                <Route path="/masters/products/purchase-orders" element={<PurchaseOrders />} />
                <Route path="/masters/products/receive-items/" element={<ReceiveItems />} />
-               
+            
+            <Route path="/masters/payment-methods" element={<PaymentMethods />} /> {/* 👈 NEW */}
+            <Route path="/masters/payment-terms" element={<PaymentTerms />} /> {/* 👈 NEW */}
+            <Route path="/masters/rack-locations" element={<RackLocations />} /> {/* 👈 NEW */}
+  
             {/* User Section */}
             <Route path="/user-devices" element={<UserDevices />} />
-            <Route path="/inventory-ledger" element={<InventoryLedger />} />
             <Route path="/transfer-vouchers" element={<TransferVouchers />} />
             <Route path="/breach-logs" element={<BreachLogs />} />
             <Route path="/audit-logs" element={<AuditLogs />} />
@@ -129,7 +136,7 @@ function AppLayout() {
  
             {/* Core */}
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/inventory" element={<Pharmacy />} />
+            
             <Route path="/reports" element={<Home />} />
             <Route path="/billing" element={<Billing />} />
             <Route path="/settings" element={<SettingsDashboard />} />
