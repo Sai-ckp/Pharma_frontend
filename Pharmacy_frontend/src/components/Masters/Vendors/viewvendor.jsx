@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./addvendors.css";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const ViewVendor = () => {
   const { id } = useParams();
@@ -8,7 +9,7 @@ const ViewVendor = () => {
   const [vendor, setVendor] = useState(null);
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/v1/procurement/vendors/${id}/`)
+    fetch(`${API_BASE_URL}/procurement/vendors/${id}/`)
       .then((res) => res.json())
       .then((data) => setVendor(data));
   }, [id]);

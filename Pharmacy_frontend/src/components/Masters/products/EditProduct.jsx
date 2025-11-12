@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./addproducts.css"; // reuse same CSS as AddProduct
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const EditProduct = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const EditProduct = () => {
 
   // Fetch product details by ID and pre-fill form
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/v1/catalog/products/${id}/`)
+    fetch(`${API_BASE_URL}/catalog/products/${id}/`)
       .then(res => res.json())
       .then(data => setFormData(data))
       .catch(err => console.error("Error fetching product:", err));
@@ -44,7 +45,7 @@ const EditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/catalog/products/${id}/`, {
+      const res = await fetch(`${API_BASE_URL}/catalog/products/${id}/`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)

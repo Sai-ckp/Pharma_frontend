@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./vendorDetails.css";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const VendorDetails = () => {
   const { id } = useParams();
@@ -11,7 +12,7 @@ const VendorDetails = () => {
   useEffect(() => {
     const fetchVendor = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/v1/procurement/vendors/${id}/`);
+        const res = await fetch(`${API_BASE_URL}/procurement/vendors/${id}/`);
         if (!res.ok) throw new Error("Vendor not found");
         const data = await res.json();
         setVendor(data);

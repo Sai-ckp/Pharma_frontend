@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./addvendors.css";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const AddVendor = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const AddVendor = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(`http://127.0.0.1:8000/api/v1/procurement/vendors/`, {
+    const res = await fetch(`${API_BASE_URL}/procurement/vendors/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),

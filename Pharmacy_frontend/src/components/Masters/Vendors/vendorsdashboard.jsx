@@ -8,8 +8,9 @@ const VendorsDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-  const VENDORS_API = "http://127.0.0.1:8000/api/v1/procurement/vendors/";
+  const VENDORS_API = `${API_BASE_URL}/procurement/vendors/`;
 
   // Fetch vendors once
   useEffect(() => {

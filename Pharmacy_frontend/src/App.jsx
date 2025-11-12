@@ -69,6 +69,9 @@ import ExpiryAlerts from "./components/expiryalerts/expiryalerts.jsx";
 
 // Settings / retention
 import SettingsDashboard from "./components/settings/settingsdashboard.jsx";
+
+import TaxBillingConfiguration from "./components/settings/TaxBillingConfiguration";
+
 import AddSetting from "./components/settings/addsettings.jsx";
 import EditSetting from "./components/settings/EditSettings.jsx";
 import ViewSetting from "./components/settings/ViewSetting.jsx";
@@ -156,6 +159,8 @@ function AppLayout() {
 
             {/* Settings */}
             <Route path="/settings" element={<SettingsDashboard />} />
+
+            <Route path="/settings/tax-billing" element={<TaxBillingConfiguration />} />
             <Route path="/settings/add" element={<AddSetting />} />
             <Route path="/settings/edit/:key" element={<EditSetting />} />
             <Route path="/settings/view/:key" element={<ViewSetting />} />

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Eye, Trash2 } from "lucide-react";
 import "./purchaseorders.css";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const PurchaseOrders = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const PurchaseOrders = () => {
     const fetchOrders = async () => {
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/api/v1/purchaseorders/?vendor=${vendor.id}`
+          `${API_BASE_URL}/purchaseorders/?vendor=${vendor.id}`
         );
         const data = await res.json();
         setOrders(data.results || []);
