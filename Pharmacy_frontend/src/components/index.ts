@@ -16,3 +16,4 @@ export {retention_policies} from './retention_policies';
 export {common} from './common';
 export {effect} from './effect';
 export {effects} from './effects';
+export {inventory} from './inventory';
