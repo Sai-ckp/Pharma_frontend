@@ -1,0 +1,96 @@
+.billgeneration-page {
+  padding: 1.5rem;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.generate-btn {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.generate-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.kpi-container {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.kpi-card {
+  background: white;
+  flex: 1;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.bill-table, .cart-table, .invoice-table {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+}
+
+.bill-table th, .bill-table td,
+.cart-table th, .cart-table td,
+.invoice-table th, .invoice-table td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.no-data {
+  text-align: center;
+  padding: 1rem;
+  color: gray;
+}
+
+.invoice-page {
+  background: #f9fafb;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.invoice-card {
+  background: white;
+  padding: 2rem;
+  max-width: 800px;
+  margin: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.invoice-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.invoice-footer {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: gray;
+}

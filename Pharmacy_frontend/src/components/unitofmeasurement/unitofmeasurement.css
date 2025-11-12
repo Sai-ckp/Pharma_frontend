@@ -1,0 +1,218 @@
+:root {
+  --bg: #f6f7f9;
+  --card: #fff;
+  --muted: #6b7280;
+  --text: #111827;
+  --primary: #10b981;
+  --primary-dark: #0ea471;
+  --border: #e5e7eb;
+  --ring: #10b98133;
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.mfWrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+.mfHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 16px;
+}
+
+.mfBack {
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.mfHeadings h2 {
+  margin: 0 0 2px;
+}
+
+.mfHeadings p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.mfAdd {
+  margin-left: auto;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.mfAdd:hover {
+  background: var(--primary-dark);
+}
+
+.mfCard {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: var(--shadow);
+}
+
+.mfTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mfTable th,
+.mfTable td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.mfTable th {
+  background: #f2fbf7;
+  font-weight: 600;
+}
+
+.mfMuted {
+  color: var(--muted);
+}
+
+.mfActions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.mfIcon {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  margin-left: 6px;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.mfIcon:hover {
+  background: #f3f4f6;
+}
+
+.mfIcon.danger:hover {
+  background: #ffe8ea;
+  color: #b91c1c;
+}
+
+.mfModalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
+}
+
+.mfModal {
+  width: min(560px, 100%);
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+}
+
+.mfModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.mfClose {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.mfClose:hover {
+  background: #f3f4f6;
+}
+
+.mfForm {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.mfLabel {
+  display: grid;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.mfReq {
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+.mfInput {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  outline: none;
+}
+
+.mfInput:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.mfInputError {
+  border-color: #ef4444;
+}
+
+.mfError {
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.mfBtnRow {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.mfBtn {
+  border: 1px solid var(--border);
+  background: #f9fafb;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.mfBtn:hover {
+  background: #f3f4f6;
+}
+
+.mfBtn.primary {
+  background: var(--primary);
+  border-color: transparent;
+  color: #fff;
+}
+
+.mfBtn.primary:hover {
+  background: var(--primary-dark);
+}
