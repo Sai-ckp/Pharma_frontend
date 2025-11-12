@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Trash2 } from "lucide-react";
 import "./createorder.css";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const CreateOrder = () => {
   const navigate = useNavigate();
@@ -25,7 +28,7 @@ const CreateOrder = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/v1/catalog/products/");
+        const res = await fetch(`${API_BASE_URL}/catalog/products/`);
         const data = await res.json();
         setItems(data.results ? data.results.map(p => ({ ...p, quantity: 0 })) : []);
       } catch (err) {
@@ -53,6 +56,26 @@ const CreateOrder = () => {
     const newItems = [...items];
     newItems[index].quantity = Number(value);
     setItems(newItems);
+  };
+
+  const handleDelete = async (productId) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/catalog/products/${productId}/`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setItems((prev) => prev.filter((item) => item.id !== productId));
+        alert("Product deleted successfully ✅");
+      } else {
+        alert("Failed to delete product ❌");
+      }
+    } catch (err) {
+      console.error("Error deleting product:", err);
+      alert("Something went wrong ❌");
+    }
   };
 
   const handleCreateOrder = () => {
@@ -102,6 +125,7 @@ const CreateOrder = () => {
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Total</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -111,13 +135,23 @@ const CreateOrder = () => {
                       <td>
                         <input
                           type="number"
-                          value={item.quantity || 0}
+                          value={item.pack_unit || 0}
                           min="0"
                           onChange={(e) => handleQuantityChange(idx, e.target.value)}
                         />
                       </td>
                       <td>₹ {item.mrp}</td>
                       <td>₹ {(item.quantity * item.mrp || 0).toFixed(2)}</td>
+                      <td>
+  <button
+    className="delete-btn"
+    onClick={() => handleDelete(item.id)}
+    title="Delete Product"
+  >
+    <Trash2 size={18} color="red" />
+  </button>
+</td>
+
                     </tr>
                   ))}
                 </tbody>

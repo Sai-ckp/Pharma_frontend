@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./addproducts.css";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const AddProduct = () => {
 
   useEffect(() => {
     if (id) {
-      fetch(`http://127.0.0.1:8000/api/v1/catalog/products/${id}/`)
+      fetch(`${API_BASE_URL}/catalog/products/${id}/`)
         .then((res) => res.json())
         .then((data) => setFormData(data));
     }
@@ -41,8 +42,8 @@ const AddProduct = () => {
     e.preventDefault();
 
     const url = id
-      ? `http://127.0.0.1:8000/api/v1/catalog/products/${id}/`
-      : `http://127.0.0.1:8000/api/v1/catalog/products/`;
+      ? `${API_BASE_URL}/catalog/products/${id}/`
+      : `${API_BASE_URL}/catalog/products/`;
 
     const method = id ? "PUT" : "POST";
 

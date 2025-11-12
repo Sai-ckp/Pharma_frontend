@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./addvendors.css";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const EditVendor = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const EditVendor = () => {
   });
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/v1/procurement/vendors/${id}/`)
+    fetch(`${API_BASE_URL}/procurement/vendors/${id}/`)
       .then((res) => res.json())
       .then((data) => setFormData(data));
   }, [id]);
@@ -39,7 +40,7 @@ const EditVendor = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(`http://127.0.0.1:8000/api/v1/procurement/vendors/${id}/`, {
+    const res = await fetch(`${API_BASE_URL}/procurement/vendors/${id}/`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
