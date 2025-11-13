@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Eye, Trash2 } from "lucide-react";
+import { Eye, Trash2, ArrowLeft } from "lucide-react";
 import "./purchaseorders.css";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const PurchaseOrders = () => {
@@ -12,7 +13,6 @@ const PurchaseOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch orders if vendor is passed
   useEffect(() => {
     if (!vendor) {
       setLoading(false);
@@ -37,7 +37,6 @@ const PurchaseOrders = () => {
     fetchOrders();
   }, [vendor]);
 
-  // Action handlers
   const handleView = (id) => navigate(`/masters/purchaseorders/${id}`);
   const handleReceiveItems = () =>
     navigate("/masters/products/receive-items/", { state: { vendor } });
@@ -50,16 +49,13 @@ const PurchaseOrders = () => {
 
   return (
     <div className="purchaseorders-container">
-      <div className="header-row">
+      {/* ✅ Header with Back Button */}
+      <div className="purchaseorders-header">
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          <ArrowLeft size={18} />
+          <span>Back</span>
+        </button>
         <h1 className="page-title">Purchase Orders</h1>
-        {vendor && (
-          <button
-            className="receive-items-btn"
-            onClick={handleReceiveItems}
-          >
-            Receive Items
-          </button>
-        )}
       </div>
 
       {vendor ? (
@@ -69,6 +65,14 @@ const PurchaseOrders = () => {
           Vendor not selected. Please select a vendor to view orders.
         </p>
       )}
+
+      <div className="header-row">
+        {vendor && (
+          <button className="receive-items-btn" onClick={handleReceiveItems}>
+            Receive Items
+          </button>
+        )}
+      </div>
 
       <div className="orders-table-card">
         <table className="orders-table">
@@ -111,7 +115,7 @@ const PurchaseOrders = () => {
                       onClick={() => handleView(order.id)}
                     />
                     <Trash2
-                      className="action-icon"
+                      className="action-icon delete-icon"
                       onClick={() => handleDelete(order.id)}
                     />
                   </td>

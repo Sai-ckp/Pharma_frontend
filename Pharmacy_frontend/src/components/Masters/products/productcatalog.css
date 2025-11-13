@@ -1,0 +1,111 @@
+.catalog-container {
+  padding: 24px;
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+.catalog-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* ✅ Updated back button (arrow + text, no color/border) */
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: opacity 0.2s ease;
+}
+
+.back-btn:hover {
+  opacity: 0.7;
+}
+
+.catalog-header-text h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.vendor-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* Product card */
+.catalog-card {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 5px;
+}
+
+.catalog-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.catalog-card-header h2 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.catalog-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.catalog-filters input,
+.catalog-filters select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  background: #f9fafb;
+}
+
+.catalog-filters input:focus,
+.catalog-filters select:focus {
+  outline: none;
+  border-color: #0d9488;
+  background: white;
+}
+
+/* Table styling */
+.catalog-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.catalog-table th,
+.catalog-table td {
+  padding: 10px;
+  text-align: left;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.catalog-table th {
+  font-weight: 600;
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.catalog-table tr:hover td {
+  background: #f9fafb;
+}

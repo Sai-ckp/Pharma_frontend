@@ -91,4 +91,29 @@
   background-color: #2ecc71;
 }
 
+/* --- Back button styling --- */
+.purchaseorders-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  opacity: 0.7;
+}
 

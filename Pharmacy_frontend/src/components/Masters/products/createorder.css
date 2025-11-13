@@ -3,11 +3,50 @@
   font-family: Arial, sans-serif;
 }
 
-.page-title {
-  font-size: 1.4rem;
+/* Header section */
+.createorder-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
   margin-bottom: 15px;
 }
 
+/* Back button — minimal, no color, arrow + text */
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: opacity 0.2s ease;
+}
+.back-btn:hover {
+  opacity: 0.7;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.page-title {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.vendor-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* Main Layout */
 .order-main {
   display: flex;
   gap: 15px;
@@ -27,33 +66,42 @@
   gap: 12px;
 }
 
+/* KPI Cards */
 .kpi-card {
   background: #fff;
-  padding: 10px 12px;
+  padding: 12px 15px;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .kpi-card h3 {
-  margin: 0 0 8px 0;
+  margin: 0 0 10px 0;
   font-size: 1rem;
+  font-weight: 600;
+  text-align: left;
 }
 
+/* Inline form fields */
 .kpi-item {
-  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
   font-size: 0.9rem;
+  color: #333;
 }
 
 .kpi-item input,
 .kpi-item textarea {
-  width: 100%;
+  flex: 1;
   padding: 4px 6px;
-  margin-top: 2px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 0.9rem;
+  resize: none;
 }
 
+/* Order Items table */
 .add-product-card .card-header {
   display: flex;
   justify-content: space-between;
@@ -69,7 +117,6 @@
   cursor: pointer;
   font-size: 0.85rem;
 }
-
 .add-product-card .add-btn:hover {
   background-color: #45a049;
 }
@@ -79,13 +126,24 @@
   border-collapse: collapse;
   margin-top: 8px;
   font-size: 0.85rem;
+  color: #222;
 }
 
 .products-table th,
 .products-table td {
   border: 1px solid #ccc;
-  padding: 4px 6px;
+  padding: 6px 8px;
   text-align: center;
+}
+
+.products-table th {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #111;
+}
+
+.products-table tr:hover td {
+  background: #f9fafb;
 }
 
 .products-table input {
@@ -95,33 +153,26 @@
   font-size: 0.85rem;
 }
 
-.products-table th:last-child,
-.products-table td:last-child {
-  text-align: center;
-  width: 45px;
-}
-
-/* Clean Delete Icon Only */
+/* Delete icon */
 .delete-btn {
   border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 4px;
+  background: none;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  margin-right: 6px;
+  transition: transform 0.2s ease;
 }
-
 .delete-btn:hover {
   transform: scale(1.15);
 }
 
+/* Summary card */
 .summary-card .total {
   font-weight: bold;
   font-size: 1rem;
   margin-top: 8px;
 }
 
+/* Form actions */
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -142,7 +193,6 @@
   background-color: #4caf50;
   color: white;
 }
-
 .submit-btn:hover {
   background-color: #45a049;
 }
@@ -151,7 +201,6 @@
   background-color: #f44336;
   color: white;
 }
-
 .cancel-btn:hover {
   background-color: #d32f2f;
 }

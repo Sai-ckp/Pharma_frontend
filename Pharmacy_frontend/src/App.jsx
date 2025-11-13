@@ -40,6 +40,10 @@ import EditLocation from "./components/Masters/locations/editlocation.jsx";
 import ProductsDashboard from "./components/Masters/products/createorder.jsx";
 import PurchaseOrders from "./components/Masters/products/PurchaseOrders.jsx";
 import ReceiveItems from "./components/Masters/products/ReceiveItems.jsx";
+import ProductCatalog from "./components/Masters/products/ProductCatalog.jsx";
+
+
+
 import AddProduct from "./components/Masters/products/addproducts.jsx";
 import ViewProduct from "./components/Masters/products/ViewProduct.jsx";
 import EditProduct from "./components/Masters/products/EditProduct.jsx";
@@ -69,6 +73,10 @@ import ExpiryAlerts from "./components/expiryalerts/expiryalerts.jsx";
 
 // Settings / retention
 import SettingsDashboard from "./components/settings/settingsdashboard.jsx";
+import Notifications from "./components/settings/Notifications.jsx"; 
+import BackupRestore from "./components/settings/BackupRestore.jsx";
+
+
 
 import TaxBillingConfiguration from "./components/settings/TaxBillingConfiguration";
 
@@ -130,6 +138,9 @@ function AppLayout() {
             <Route path="/masters/products/edit/:id" element={<EditProduct />} />
             <Route path="/masters/products/purchase-orders" element={<PurchaseOrders />} />
             <Route path="/masters/products/receive-items" element={<ReceiveItems />} />
+            <Route path="/masters/products/vendor-catalog/:id" element={<ProductCatalog />} />
+
+
 
             <Route path="/masters/payment-methods" element={<PaymentMethods />} />
             <Route path="/masters/payment-terms" element={<PaymentTerms />} />
@@ -159,6 +170,9 @@ function AppLayout() {
 
             {/* Settings */}
             <Route path="/settings" element={<SettingsDashboard />} />
+            <Route path="/settings/notifications" element={<Notifications />} />
+            <Route path="/settings/backup-restore" element={<BackupRestore />} />
+            
 
             <Route path="/settings/tax-billing" element={<TaxBillingConfiguration />} />
             <Route path="/settings/add" element={<AddSetting />} />

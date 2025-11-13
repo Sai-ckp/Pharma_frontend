@@ -88,3 +88,30 @@
 .cancel-btn:hover {
   background: #0d9488;
 }
+
+
+/* --- Back button header styling --- */
+.editproduct-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  opacity: 0.7;
+}

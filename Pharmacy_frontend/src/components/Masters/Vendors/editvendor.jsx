@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import "./addvendors.css";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const EditVendor = () => {
@@ -56,96 +58,165 @@ const EditVendor = () => {
 
   return (
     <div className="vendors-container">
+      {/* ✅ Back button section */}
+      <div className="vendors-header">
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          <ArrowLeft size={16} />
+          <span>Back</span>
+        </button>
+      </div>
+
       <h1 className="vendors-title">Edit Vendor</h1>
 
       <form className="vendors-form" onSubmit={handleSubmit}>
-
         <div className="form-row">
           <div className="form-group">
             <label>Vendor Name</label>
-            <input name="name" value={formData.name} onChange={handleChange} required />
+            <input
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="form-group">
             <label>GSTIN</label>
-            <input name="gstin" value={formData.gstin} onChange={handleChange} />
+            <input
+              name="gstin"
+              value={formData.gstin}
+              onChange={handleChange}
+            />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>Contact Phone</label>
-            <input name="contact_phone" value={formData.contact_phone} onChange={handleChange} />
+            <input
+              name="contact_phone"
+              value={formData.contact_phone}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-group">
             <label>Email</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} />
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>Contact Person</label>
-            <input name="contact_person" value={formData.contact_person} onChange={handleChange} />
+            <input
+              name="contact_person"
+              value={formData.contact_person}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-group">
             <label>Payment Terms</label>
-            <input name="payment_terms" value={formData.payment_terms} onChange={handleChange} />
+            <input
+              name="payment_terms"
+              value={formData.payment_terms}
+              onChange={handleChange}
+            />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>Bank Name</label>
-            <input name="bank_name" value={formData.bank_name} onChange={handleChange} />
+            <input
+              name="bank_name"
+              value={formData.bank_name}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-group">
             <label>Account No</label>
-            <input name="account_no" value={formData.account_no} onChange={handleChange} />
+            <input
+              name="account_no"
+              value={formData.account_no}
+              onChange={handleChange}
+            />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>IFSC</label>
-            <input name="ifsc" value={formData.ifsc} onChange={handleChange} />
+            <input
+              name="ifsc"
+              value={formData.ifsc}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-group">
             <label>Rating</label>
-            <input type="number" name="rating" value={formData.rating} onChange={handleChange} />
+            <input
+              type="number"
+              name="rating"
+              value={formData.rating}
+              onChange={handleChange}
+            />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
             <label>Address</label>
-            <textarea name="address" value={formData.address} onChange={handleChange}></textarea>
+            <textarea
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+            ></textarea>
           </div>
 
           <div className="form-group">
             <label>Notes</label>
-            <textarea name="notes" value={formData.notes} onChange={handleChange}></textarea>
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+            ></textarea>
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group checkbox-group">
             <label>
-              <input type="checkbox" name="is_active" checked={formData.is_active} onChange={handleChange} />
+              <input
+                type="checkbox"
+                name="is_active"
+                checked={formData.is_active}
+                onChange={handleChange}
+              />
               Active
             </label>
           </div>
         </div>
 
         <div className="form-actions">
-          <button type="button" className="cancel-btn" onClick={() => navigate("/masters/vendors")}>
+          <button
+            type="button"
+            className="cancel-btn"
+            onClick={() => navigate("/masters/vendors")}
+          >
             Cancel
           </button>
-          <button type="submit" className="submit-btn">Update</button>
+          <button type="submit" className="submit-btn">
+            Update
+          </button>
         </div>
       </form>
     </div>
