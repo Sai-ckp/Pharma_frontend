@@ -4,6 +4,18 @@ import "./inventory.css";
 
 const LS_KEY = "medicines";
 
+// Normalize VITE_API_URL so both of these work:
+//  - http://127.0.0.1:8000
+//  - http://127.0.0.1:8000/api/v1
+const rawBase = import.meta.env.VITE_API_URL || "";
+const normalizeBase = (u) =>
+  u
+    .trim()
+    .replace(/\/+$/g, "")
+    .replace(/\/api\/v1$/i, "");
+const API_BASE = normalizeBase(rawBase);
+const API = API_BASE ? `${API_BASE}/api/v1/inventory/add-medicine/` : "/api/v1/inventory/add-medicine/";
+
 export default function MedicineInventory() {
   const nav = useNavigate();
   const [rows, setRows] = useState([]);
@@ -11,15 +23,38 @@ export default function MedicineInventory() {
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [tab, setTab] = useState("all"); // all | low | expiring
+  const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
-  // load medicines
+  // load medicines from backend (falls back to localStorage if backend fails)
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      setRows(raw ? JSON.parse(raw) : []);
-    } catch {
-      setRows([]);
-    }
+    const fetchList = async () => {
+      setLoading(true);
+      setServerError(null);
+      try {
+        const res = await fetch(API, { headers: { Accept: "application/json" } });
+        if (!res.ok) throw new Error(`Failed to load (${res.status})`);
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : data?.results || [];
+        setRows(list);
+        try { localStorage.setItem(LS_KEY, JSON.stringify(list)); } catch {}
+      } catch (err) {
+        console.error(err);
+        setServerError(err.message || "Error loading medicines, falling back to localStorage");
+        // fallback to localStorage
+        try {
+          const raw = localStorage.getItem(LS_KEY);
+          setRows(raw ? JSON.parse(raw) : []);
+        } catch {
+          setRows([]);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const categories = useMemo(() => {
@@ -44,7 +79,7 @@ export default function MedicineInventory() {
   const filtered = rows.filter(r => {
     const matchesSearch =
       !query ||
-      `${r.medicine_id} ${r.batch_number} ${r.medicine_name} ${r.category} ${r.manufacturer}`
+      `${r.medicine_id || ""} ${r.batch_number || ""} ${r.medicine_name || ""} ${r.category || ""} ${r.manufacturer || ""}`
         .toLowerCase()
         .includes(query.toLowerCase());
 
@@ -61,11 +96,22 @@ export default function MedicineInventory() {
     return matchesSearch && matchesCategory && matchesStatus && tabOk;
   });
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Delete this medicine?")) return;
-    const next = rows.filter(r => r.id !== id);
-    setRows(next);
-    localStorage.setItem(LS_KEY, JSON.stringify(next));
+    setDeleting(true);
+    setServerError(null);
+    try {
+      const res = await fetch(`${API}${id}/`, { method: "DELETE", headers: { Accept: "application/json" } });
+      if (!res.ok && res.status !== 204) throw new Error(`Delete failed (${res.status})`);
+      const next = rows.filter(r => r.id !== id);
+      setRows(next);
+      try { localStorage.setItem(LS_KEY, JSON.stringify(next)); } catch {}
+    } catch (err) {
+      console.error(err);
+      setServerError(err.message || "Delete failed");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const currency = (n) => (n === "" || n == null ? "" : `₹${Number(n).toFixed(2)}`);
@@ -77,13 +123,14 @@ export default function MedicineInventory() {
           <h2>Inventory Management</h2>
           <p>Manage your medicine inventory and stock levels</p>
         </div>
-        <button className="inv-add" onClick={() => nav("/inventory/medicines/add")}>
+        <button className="inv-add" onClick={() => nav("/inventory/medicines/add")} disabled={loading || deleting}>
           <span>＋</span> Add Medicine
         </button>
       </div>
 
       <div className="inv-card">
-        {/* Filters row */}
+        {/* Server error / Filters row */}
+        {serverError && <div style={{ color: "crimson", padding: 8 }}>{serverError}</div>}
         <div className="inv-filters">
           <div className="inv-search">
             <span className="inv-search-icon">🔍</span>
@@ -145,62 +192,108 @@ export default function MedicineInventory() {
 
         {/* Table */}
         <div className="inv-table-wrap">
-          <table className="inv-table">
-            <thead>
-              <tr>
-                <th>Medicine ID</th>
-                <th>Batch Number</th>
-                <th>Medicine Name</th>
-                <th>Category</th>
-                <th>Stock</th>
-                <th>Price (₹)</th>
-                <th>Expiry Date</th>
-                <th>Status</th>
-                <th style={{ width: 96, textAlign: "center" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length ? (
-                filtered.map((r) => {
-                  const status = getStatus(r);
-                  return (
-                    <tr key={r.id}>
-                      <td>{r.medicine_id}</td>
-                      <td>{r.batch_number}</td>
-                      <td>{r.medicine_name}</td>
-                      <td>{r.category}</td>
-                      <td>{r.quantity}</td>
-                      <td>{currency(r.mrp)}</td>
-                      <td>{r.expiry_date ? new Date(r.expiry_date).toLocaleDateString() : ""}</td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            status === "In Stock"
-                              ? "green"
-                              : status === "Low Stock"
-                              ? "amber"
-                              : "red"
-                          }`}
-                        >
-                          {status}
-                        </span>
-                      </td>
-                      <td className="inv-actions-cell">
-                        <button className="inv-icon" title="View" onClick={() => alert(JSON.stringify(r, null, 2))}>👁️</button>
-                        <button className="inv-icon danger" title="Delete" onClick={() => handleDelete(r.id)}>🗑️</button>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
+          {loading ? (
+            <div style={{ padding: 20 }}>Loading...</div>
+          ) : (
+            <table className="inv-table">
+              <thead>
                 <tr>
-                  <td colSpan={9} style={{ textAlign: "center", padding: 14 }}>
-                    No medicines yet. Click <strong>Add Medicine</strong>.
-                  </td>
+                  <th>Medicine ID</th>
+                  <th>Batch Number</th>
+                  <th>Medicine Name</th>
+                  <th>Category</th>
+                  <th>Stock</th>
+                  <th>Price (₹)</th>
+                  <th>Expiry Date</th>
+                  <th>Status</th>
+                  <th style={{ width: 96, textAlign: "center" }}>Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.length ? (
+                  filtered.map((r) => {
+                    const status = getStatus(r);
+                    return (
+                      <tr key={r.id}>
+                        <td>{r.medicine_id}</td>
+                        <td>{r.batch_number}</td>
+                        <td>{r.medicine_name}</td>
+                        <td>{r.category}</td>
+                        <td>{r.quantity}</td>
+                        <td>{currency(r.mrp)}</td>
+                        <td>{r.expiry_date ? new Date(r.expiry_date).toLocaleDateString() : ""}</td>
+                        <td>
+                          <span
+                            className={`badge ${
+                              status === "In Stock"
+                                ? "green"
+                                : status === "Low Stock"
+                                ? "amber"
+                                : "red"
+                            }`}
+                          >
+                            {status}
+                          </span>
+                        </td>
+<td className="inv-actions-cell">
+  <button
+    className="inv-icon"
+    title="View"
+    onClick={() => alert(JSON.stringify(r, null, 2))}
+  >
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#136FD7"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+  </button>
+
+  <button
+    className="inv-icon danger"
+    title="Delete"
+    onClick={() => handleDelete(r.id)}
+    disabled={deleting}
+  >
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#E23636"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="3 6 5 6 21 6"></polyline>
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+      <path d="M10 11v6"></path>
+      <path d="M14 11v6"></path>
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+    </svg>
+  </button>
+</td>
+
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={9} style={{ textAlign: "center", padding: 14 }}>
+                      No medicines yet. Click <strong>Add Medicine</strong>.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

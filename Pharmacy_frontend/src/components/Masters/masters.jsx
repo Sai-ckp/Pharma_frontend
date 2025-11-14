@@ -1,24 +1,81 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Pill,
-  Edit2,
-  Ruler,
-  CreditCard,
-  Calendar,
-  Package,
-  Tag,
-  FlaskConical,
-} from "lucide-react";
+import { Pill, Ruler, CreditCard, Calendar, Package } from "lucide-react";
 
 /**
- * MastersDashboard — revised visual match
- * - TailwindCSS classes (same style system your app uses)
- * - icons chosen to closely match the screenshot
- * - thin rounded borders, top-right icon pill, compact total badge
+ * MastersDashboard — realtime totals for:
+ *  - Payment Methods
+ *  - Payment Terms
+ *  - Rack Locations
+ *
+ * Uses VITE_API_URL normalization consistent with your other files.
  */
 
+const rawBase = import.meta.env.VITE_API_URL || "";
+const normalizeBase = (u) =>
+  u
+    .trim()
+    .replace(/\/+$/g, "")
+    .replace(/\/api\/v1$/i, "");
+const API_BASE = normalizeBase(rawBase);
+
+const ENDPOINTS = {
+  paymentMethods: `${API_BASE}/api/v1/settings/payment-methods/`,
+  paymentTerms: `${API_BASE}/api/v1/settings/payment-terms/`,
+  rackLocations: `${API_BASE}/api/v1/inventory/rack-locations/`,
+};
+
 export default function MastersDashboard() {
+  // states: null = loading, number >=0 = value, -1 = error
+  const [pmTotal, setPmTotal] = useState(null);
+  const [ptTotal, setPtTotal] = useState(null);
+  const [rlTotal, setRlTotal] = useState(null);
+
+  const [pmError, setPmError] = useState(null);
+  const [ptError, setPtError] = useState(null);
+  const [rlError, setRlError] = useState(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const fetchCount = async (url, setValue, setErr) => {
+      setErr(null);
+      setValue(null); // mark loading
+      try {
+        // If you need auth, add: headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
+        const res = await fetch(url, { method: "GET", headers: { Accept: "application/json" }, signal });
+        if (!res.ok) throw new Error(`Failed (${res.status})`);
+        const data = await res.json();
+
+        let count;
+        if (Array.isArray(data)) {
+          count = data.length;
+        } else if (typeof data?.count === "number") {
+          count = data.count;
+        } else if (Array.isArray(data?.results)) {
+          count = data.results.length;
+        } else {
+          // unexpected shape — treat as empty
+          count = 0;
+        }
+        setValue(count);
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        console.error("Count load error:", url, err);
+        setErr(err.message || "Error");
+        setValue(-1);
+      }
+    };
+
+    // run them in parallel
+    fetchCount(ENDPOINTS.paymentMethods, setPmTotal, setPmError);
+    fetchCount(ENDPOINTS.paymentTerms, setPtTotal, setPtError);
+    fetchCount(ENDPOINTS.rackLocations, setRlTotal, setRlError);
+
+    return () => controller.abort();
+  }, []);
+
   const items = [
     {
       path: "/medicinecategories",
@@ -45,21 +102,21 @@ export default function MastersDashboard() {
       path: "/masters/payment-methods",
       label: "Payment Methods",
       icon: <CreditCard size={16} />,
-      total: 5,
+      total: pmTotal,
       accent: "teal",
     },
     {
       path: "/masters/payment-terms",
       label: "Payment Terms",
       icon: <Calendar size={16} />,
-      total: 0,
+      total: ptTotal,
       accent: "orange",
     },
     {
       path: "/masters/rack-locations",
       label: "Rack Locations",
       icon: <Package size={16} />,
-      total: 0,
+      total: rlTotal,
       accent: "blue",
     },
   ];
@@ -80,6 +137,12 @@ export default function MastersDashboard() {
       iconText: "text-sky-500",
       border: "border-sky-300",
     },
+  };
+
+  const renderTotal = (val) => {
+    if (val === null) return <span className="text-xs">Loading…</span>;
+    if (val === -1) return <span className="text-xs text-rose-500">Error</span>;
+    return <span className="text-xs">{val}</span>;
   };
 
   return (
@@ -118,13 +181,23 @@ export default function MastersDashboard() {
                 <div className="flex items-center gap-3 text-sm text-gray-500">
                   <span>Total Items:</span>
                   <span className="inline-flex h-7 min-w-[1.6rem] items-center justify-center rounded-full border border-gray-200 px-2 text-xs text-gray-700 bg-white">
-                    {it.total ?? "—"}
+                    {/* For our three dynamic cards, it.total may be null/-1/number */}
+                    {["/masters/payment-methods", "/masters/payment-terms", "/masters/rack-locations"].includes(it.path)
+                      ? renderTotal(it.total)
+                      : (it.total ?? "—")}
                   </span>
                 </div>
               </div>
             </Link>
           );
         })}
+      </div>
+
+      {/* optional debug errors */}
+      <div className="mt-4 text-sm text-rose-600">
+        {pmError && <div>Payment methods load error: {pmError}</div>}
+        {ptError && <div>Payment terms load error: {ptError}</div>}
+        {rlError && <div>Rack locations load error: {rlError}</div>}
       </div>
     </div>
   );

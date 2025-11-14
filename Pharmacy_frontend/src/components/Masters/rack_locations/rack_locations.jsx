@@ -7,7 +7,19 @@ const LS_KEY = "rack_locations";
 
 const empty = { id: "", name: "", description: "" };
 
-export default function PaymentMethods() {
+// Normalize VITE_API_URL so both of these work:
+//  - http://127.0.0.1:8000
+//  - http://127.0.0.1:8000/api/v1
+const rawBase = import.meta.env.VITE_API_URL || "";
+const normalizeBase = (u) =>
+  u
+    .trim()
+    .replace(/\/+$/g, "")
+    .replace(/\/api\/v1$/i, "");
+const API_BASE = normalizeBase(rawBase);
+const API = API_BASE ? `${API_BASE}/api/v1/inventory/rack-locations/` : "/api/v1/inventory/rack-locations/";
+
+export default function RackLocations() {
   const nav = useNavigate();
   const [rows, setRows] = useState([]);
   const [form, setForm] = useState(empty);
@@ -15,8 +27,11 @@ export default function PaymentMethods() {
   const [showForm, setShowForm] = useState(false);
   const [showView, setShowView] = useState(null);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [serverError, setServerError] = useState(null);
 
-  // Load/persist (optional)
+  // Load from local storage if enabled (fallback)
   useEffect(() => {
     if (!USE_LOCAL_STORAGE) return;
     try {
@@ -24,12 +39,37 @@ export default function PaymentMethods() {
       if (raw) setRows(JSON.parse(raw));
     } catch {}
   }, []);
-  const save = (next) => {
+
+  // Persist local storage if enabled
+  const saveLocal = (next) => {
     setRows(next);
     if (USE_LOCAL_STORAGE) {
-      try { localStorage.setItem(LS_KEY, JSON.stringify(next)); } catch {}
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify(next));
+      } catch {}
     }
   };
+
+  // Fetch from backend
+  const fetchList = async () => {
+    setLoading(true);
+    setServerError(null);
+    try {
+      const res = await fetch(API, { headers: { Accept: "application/json" } });
+      if (!res.ok) throw new Error(`Failed to load (${res.status})`);
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : data?.results || [];
+      setRows(list);
+      if (USE_LOCAL_STORAGE) try { localStorage.setItem(LS_KEY, JSON.stringify(list)); } catch {}
+    } catch (err) {
+      console.error(err);
+      setServerError(err.message || "Error loading rack locations");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchList(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
   const nextId = useMemo(() => {
     const nums = rows.map((r) => Number(r.id) || 0);
@@ -62,33 +102,63 @@ export default function PaymentMethods() {
     return e;
   };
 
-  const handleSubmit = (e) => {
+  // CREATE or UPDATE to backend
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const eObj = validate();
     setErrors(eObj);
     if (Object.keys(eObj).length) return;
 
-    const payload = {
-      id: editingId ? editingId : nextId,
-      name: form.name.trim(),
-      description: form.description?.trim() || "",
-      created_at: editingId
-        ? rows.find((x) => x.id === editingId)?.created_at
-        : new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
+    setSaving(true);
+    setServerError(null);
 
-    if (editingId) {
-      save(rows.map((r) => (r.id === editingId ? payload : r)));
-    } else {
-      save([payload, ...rows]);
+    const payload = { name: form.name.trim(), description: form.description?.trim() || "" };
+
+    try {
+      if (editingId) {
+        const res = await fetch(`${API}${editingId}/`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(`Update failed (${res.status})`);
+        const updated = await res.json();
+        setRows((prev) => prev.map((r) => (r.id === editingId ? updated : r)));
+      } else {
+        const res = await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(`Create failed (${res.status})`);
+        const created = await res.json();
+        setRows((prev) => [created, ...prev]);
+      }
+      setShowForm(false);
+    } catch (err) {
+      console.error(err);
+      setServerError(err.message || "Save failed");
+      await fetchList();
+    } finally {
+      setSaving(false);
     }
-    closeForm();
   };
 
-  const handleDelete = (id) => {
-    if (!window.confirm("Delete this payment terms?")) return;
-    save(rows.filter((r) => r.id !== id));
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this rack location?")) return;
+    setSaving(true);
+    setServerError(null);
+    try {
+      const res = await fetch(`${API}${id}/`, { method: "DELETE", headers: { Accept: "application/json" } });
+      if (!res.ok && res.status !== 204) throw new Error(`Delete failed (${res.status})`);
+      setRows((r) => r.filter((x) => x.id !== id));
+    } catch (err) {
+      console.error(err);
+      setServerError(err.message || "Delete failed");
+      await fetchList();
+    } finally {
+      setSaving(false);
+    }
   };
 
   // ESC closes modals
@@ -107,52 +177,122 @@ export default function PaymentMethods() {
     <div className="pm-wrap">
       {/* Header */}
       <div className="pm-header">
-        <button className="pm-back" onClick={() => nav(-1)}>← Back</button>
+        <button className="pm-back" onClick={() => nav(-1)} disabled={loading}>← Back</button>
         <div className="pm-headings">
-          <h2>Payment Terms</h2>
-          {/* <p>Cash, Card, UPI, Credit, etc.</p> */}
+          <h2>Rack Locations</h2>
         </div>
-        <button className="pm-add" onClick={openAdd}>＋ Add New</button>
+        <button className="pm-add" onClick={openAdd} disabled={loading || saving}>＋ Add New</button>
       </div>
 
-      {/* List card */}
-      <div className="pm-card">
-        <table className="pm-table">
-          <thead>
-            <tr>
-              <th style={{width:"35%"}}>Name</th>
-              <th>Description</th>
-              <th style={{width:140, textAlign:"right"}}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length ? rows.map((r, i) => (
-              <tr key={r.id || i}>
-                <td>{r.name}</td>
-                <td className="pm-muted">{r.description}</td>
-                <td className="pm-actions">
-                  <button className="pm-icon" title="View" onClick={() => openView(r)}>👁️</button>
-                  <button className="pm-icon" title="Edit" onClick={() => openEdit(r)}>✎</button>
-                  <button className="pm-icon danger" title="Delete" onClick={() => handleDelete(r.id)}>🗑️</button>
-                </td>
-              </tr>
-            )) : (
+      {/* Server error / loading */}
+      {serverError && <div style={{ color: "crimson", padding: 8 }}>{serverError}</div>}
+      {loading ? (
+        <div style={{ padding: 20 }}>Loading...</div>
+      ) : (
+        <div className="pm-card">
+          <table className="pm-table">
+            <thead>
               <tr>
-                <td colSpan={3} style={{textAlign:"center", padding:16}}>
-                  No Rack Locations yet. Click <strong>Add New</strong>.
-                </td>
+                <th style={{ width: "35%" }}>Name</th>
+                <th>Description</th>
+                <th style={{ width: 140, textAlign: "right" }}>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {rows.length ? (
+                rows.map((r, i) => (
+                  <tr key={r.id || i}>
+                    <td>{r.name}</td>
+                    <td className="pm-muted">{r.description}</td>
+<td className="pm-actions">
+  <button
+    className="pm-icon"
+    title="View"
+    onClick={() => openView(r)}
+    disabled={saving}
+  >
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#136FD7"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+  </button>
+
+  <button
+    className="pm-icon"
+    title="Edit"
+    onClick={() => openEdit(r)}
+    disabled={saving}
+  >
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#000"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+      <path d="M12 17l5-5"></path>
+      <path d="M15 10l2 2"></path>
+    </svg>
+  </button>
+
+  <button
+    className="pm-icon danger"
+    title="Delete"
+    onClick={() => handleDelete(r.id)}
+    disabled={saving}
+  >
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#E23636"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="3 6 5 6 21 6"></polyline>
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+      <path d="M10 11v6"></path>
+      <path d="M14 11v6"></path>
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+    </svg>
+  </button>
+</td>
+
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3} style={{ textAlign: "center", padding: 16 }}>
+                    No rack locations yet. Click <strong>Add New</strong>.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Add / Edit Modal */}
       {showForm && (
         <div className="pm-modal-backdrop" onMouseDown={closeForm}>
-          <div className="pm-modal" onMouseDown={(e)=>e.stopPropagation()} role="dialog" aria-modal="true">
+          <div className="pm-modal" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             <div className="pm-modal-header">
-              <h3>{editingId ? "Edit Rack Locations" : "Add New Rack Locations"}</h3>
+              <h3>{editingId ? "Edit Rack Location" : "Add New Rack Location"}</h3>
               <button className="pm-close" onClick={closeForm}>✕</button>
             </div>
 
@@ -184,9 +324,9 @@ export default function PaymentMethods() {
               </label>
 
               <div className="pm-btn-row">
-                <button type="button" className="pm-btn ghost" onClick={closeForm}>Cancel</button>
-                <button type="submit" className="pm-btn primary">
-                  {editingId ? "Save Changes" : "Add Item"}
+                <button type="button" className="pm-btn ghost" onClick={closeForm} disabled={saving}>Cancel</button>
+                <button type="submit" className="pm-btn primary" disabled={saving}>
+                  {saving ? (editingId ? "Saving..." : "Adding...") : editingId ? "Save Changes" : "Add Item"}
                 </button>
               </div>
             </form>
@@ -197,9 +337,9 @@ export default function PaymentMethods() {
       {/* View Modal */}
       {showView && (
         <div className="pm-modal-backdrop" onMouseDown={() => setShowView(null)}>
-          <div className="pm-modal" onMouseDown={(e)=>e.stopPropagation()}>
+          <div className="pm-modal" onMouseDown={(e) => e.stopPropagation()}>
             <div className="pm-modal-header">
-              <h3>View Payment Method</h3>
+              <h3>View Rack Location</h3>
               <button className="pm-close" onClick={() => setShowView(null)}>✕</button>
             </div>
             <div className="pm-view">
@@ -210,7 +350,7 @@ export default function PaymentMethods() {
             </div>
             <div className="pm-btn-row">
               <button className="pm-btn ghost" onClick={() => setShowView(null)}>Close</button>
-              <button className="pm-btn" onClick={() => { setShowView(null); openEdit(showView); }}>Edit</button>
+              {/* <button className="pm-btn" onClick={() => { setShowView(null); openEdit(showView); }}>Edit</button> */}
             </div>
           </div>
         </div>

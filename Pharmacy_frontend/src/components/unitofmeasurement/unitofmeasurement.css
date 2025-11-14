@@ -10,8 +10,9 @@
   --shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
+/* Layout */
 .mfWrap {
-  max-width: 980px;
+  max-width: 900px; /* reduced width */
   margin: 0 auto;
   padding: 20px;
   font-family: sans-serif;
@@ -52,53 +53,81 @@
   cursor: pointer;
   box-shadow: var(--shadow);
 }
-
 .mfAdd:hover {
   background: var(--primary-dark);
 }
 
+/* Card */
 .mfCard {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 8px;
   box-shadow: var(--shadow);
+
+  /* center table inside */
+  display: flex;
+  justify-content: center;
+  padding: 0;
 }
 
+/* TABLE */
 .mfTable {
-  width: 100%;
+  width: 95%; /* reduced and centered */
+  margin: 0 auto;
   border-collapse: collapse;
 }
 
 .mfTable th,
 .mfTable td {
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
-  text-align: left;
+  padding: 5px 6px; /* reduced row height */
+  border: 1px solid var(--border);
+  font-size: 14px;
+  text-align: center;
 }
 
+/* center headers */
 .mfTable th {
-  background: #f2fbf7;
-  font-weight: 600;
+  background: #eafaf2;
+  font-weight: bold;
+  text-align: center !important;
 }
 
-.mfMuted {
-  color: var(--muted);
+/* Column width distribution */
+.slno-col {
+  width: 70px !important;
+  min-width: 70px;
+  max-width: 70px;
 }
 
+.name-col {
+  width: 28%;
+}
+
+.desc-col {
+  width: 35%;
+}
+
+.actions-col {
+  width: 120px; /* fixed size to avoid huge gap */
+  min-width: 120px;
+  max-width: 120px;
+}
+
+/* Actions */
 .mfActions {
-  text-align: right;
-  white-space: nowrap;
+  display: flex;
+  justify-content: center; /* no more right gaps */
+  align-items: center;
+  gap: 10px;
 }
 
 .mfIcon {
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 18px;
-  margin-left: 6px;
-  padding: 6px;
-  border-radius: 8px;
+  font-size: 16px;
+  padding: 5px;
+  border-radius: 6px;
 }
 
 .mfIcon:hover {
@@ -110,6 +139,12 @@
   color: #b91c1c;
 }
 
+/* Muted text */
+.mfMuted {
+  color: var(--muted);
+}
+
+/* Modals */
 .mfModalBackdrop {
   position: fixed;
   inset: 0;
@@ -145,11 +180,11 @@
   padding: 6px;
   border-radius: 8px;
 }
-
 .mfClose:hover {
   background: #f3f4f6;
 }
 
+/* Form */
 .mfForm {
   display: grid;
   gap: 12px;
@@ -190,9 +225,12 @@
 
 .mfBtnRow {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   justify-content: flex-end;
-  margin-top: 4px;
+}
+
+.mfBtnRow.center {
+  justify-content: center;
 }
 
 .mfBtn {
@@ -202,7 +240,6 @@
   border-radius: 10px;
   cursor: pointer;
 }
-
 .mfBtn:hover {
   background: #f3f4f6;
 }
@@ -212,7 +249,45 @@
   border-color: transparent;
   color: #fff;
 }
-
 .mfBtn.primary:hover {
   background: var(--primary-dark);
+}
+
+.mfBtn.danger {
+  background: #d9534f;
+  color: white;
+}
+.mfBtn.danger:hover {
+  background: #c9302c;
+}
+
+/* View Modal Layout */
+.mfViewTable {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mfViewRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mfViewLabel {
+  width: 120px;
+  font-weight: 600;
+  color: #333;
+}
+
+.mfViewColon {
+  padding: 0 8px;
+  color: #666;
+}
+
+.mfViewValue {
+  flex: 1;
+  color: #222;
+  word-break: break-word;
 }
