@@ -22,91 +22,92 @@ const TaxBilling = () => {
     creditSales: false,
   });
 
-  // ✅ Fetch existing settings from /settings/
+  // ✅ Fetch from /settings/app/
   useEffect(() => {
     const fetchTaxData = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/settings/app/`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.length > 0) {
-            const settings = data[0];
-            setTaxData({
-              gstRate: settings.gst_rate || "",
-              taxMethod: settings.tax_method || "inclusive",
-              cgstRate: settings.cgst_rate || "",
-              sgstRate: settings.sgst_rate || "",
-              invoicePrefix: settings.invoice_prefix || "",
-              invoiceStart: settings.invoice_start || "",
-              invoiceTemplate: settings.invoice_template || "standard",
-              invoiceFooter: settings.invoice_footer || "",
-              cashPayment: settings.cash_payment ?? true,
-              cardPayment: settings.card_payment ?? false,
-              upiPayment: settings.upi_payment ?? false,
-              creditSales: settings.credit_sales ?? false,
-            });
-          }
-        } else {
-          console.error("Failed to fetch tax & billing settings");
-        }
+        if (!response.ok) return;
+
+        const data = await response.json();
+
+        setTaxData({
+          gstRate: data.tax?.TAX_GST_RATE || "",
+          taxMethod: data.tax?.TAX_CALC_METHOD?.toLowerCase() || "inclusive",
+          cgstRate: data.tax?.TAX_CGST_RATE || "",
+          sgstRate: data.tax?.TAX_SGST_RATE || "",
+          invoicePrefix: data.invoice?.INVOICE_PREFIX || "",
+          invoiceStart: data.invoice?.INVOICE_START || "",
+          invoiceTemplate: data.invoice?.INVOICE_TEMPLATE || "standard",
+          invoiceFooter: data.invoice?.INVOICE_FOOTER || "",
+          cashPayment: data.notifications?.CASH_PAYMENT === "true",
+          cardPayment: data.notifications?.CARD_PAYMENT === "true",
+          upiPayment: data.notifications?.UPI_PAYMENT === "true",
+          creditSales: data.notifications?.CREDIT_SALES === "true",
+        });
       } catch (err) {
-        console.error("Error fetching tax & billing settings:", err);
+        console.error("Error fetching app settings:", err);
       }
     };
 
     fetchTaxData();
   }, []);
 
-  // ✅ Handle Input Changes
+  // Input handler
   const handleTaxChange = (e) => {
     const { name, value } = e.target;
     setTaxData({ ...taxData, [name]: value });
   };
 
-  // ✅ Handle Toggle Switch
-  const togglePayment = (field) => {
-    setTaxData({ ...taxData, [field]: !taxData[field] });
+  // Toggle handler
+  const togglePayment = (key) => {
+    setTaxData({ ...taxData, [key]: !taxData[key] });
   };
 
-  // ✅ Save Tax & Billing Data
+  // ----------------------------------------------------
+  //  SAVE FUNCTION: sends 1 KEY at a time to backend
+  // ----------------------------------------------------
+  const saveKeyValue = async (key, value) => {
+    await fetch(`${API_BASE_URL}/settings/settings/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key, value }),
+    });
+  };
+
+  // Save all fields
   const handleTaxSave = async () => {
     setLoading(true);
 
-    const payload = {
-      gst_rate: taxData.gstRate,
-      tax_method: taxData.taxMethod,
-      cgst_rate: taxData.cgstRate,
-      sgst_rate: taxData.sgstRate,
-      invoice_prefix: taxData.invoicePrefix,
-      invoice_start: taxData.invoiceStart,
-      invoice_template: taxData.invoiceTemplate,
-      invoice_footer: taxData.invoiceFooter,
-      cash_payment: taxData.cashPayment,
-      card_payment: taxData.cardPayment,
-      upi_payment: taxData.upiPayment,
-      credit_sales: taxData.creditSales,
+    // mapping React fields → backend keys
+    const mappings = {
+      gstRate: "TAX_GST_RATE",
+      taxMethod: "TAX_CALC_METHOD",
+      cgstRate: "TAX_CGST_RATE",
+      sgstRate: "TAX_SGST_RATE",
+      invoicePrefix: "INVOICE_PREFIX",
+      invoiceStart: "INVOICE_START",
+      invoiceTemplate: "INVOICE_TEMPLATE",
+      invoiceFooter: "INVOICE_FOOTER",
+      cashPayment: "CASH_PAYMENT",
+      cardPayment: "CARD_PAYMENT",
+      upiPayment: "UPI_PAYMENT",
+      creditSales: "CREDIT_SALES",
     };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/settings/app/`, {
-        method: "POST", // ✅ POST since PUT not allowed
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        alert("✅ Tax & Billing Configuration Saved Successfully!");
-      } else {
-        const errText = await response.text();
-        console.error("Save failed:", errText);
-        alert("⚠️ Failed to save Tax & Billing configuration.");
+      // save each one separately
+      for (let field in mappings) {
+        await saveKeyValue(mappings[field], String(taxData[field]));
       }
+
+      alert("✅ Tax & Billing Configuration Saved!");
     } catch (err) {
-      console.error("Error saving tax data:", err);
-      alert("❌ Error connecting to server. Please try again.");
-    } finally {
-      setLoading(false);
+      console.error("Save error:", err);
+      alert("⚠️ Failed to save settings");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -114,12 +115,8 @@ const TaxBilling = () => {
       <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <FileText size={28} /> Tax & Billing Configuration
       </h2>
-      <p style={{ color: "#555", marginBottom: 20 }}>
-        Configure tax rates and invoice settings
-      </p>
 
       <div className="tax-card">
-        {/* TAX SETTINGS */}
         <h3>Tax Settings</h3>
 
         <div className="alert-row-horizontal">
@@ -134,7 +131,7 @@ const TaxBilling = () => {
           </div>
 
           <div className="alert-field">
-            <label>Tax Calculation Method</label>
+            <label>Calculation Type</label>
             <select
               name="taxMethod"
               value={taxData.taxMethod}
@@ -148,7 +145,7 @@ const TaxBilling = () => {
 
         <div className="alert-row-horizontal">
           <div className="alert-field">
-            <label>CGST Rate (%)</label>
+            <label>CGST (%)</label>
             <input
               type="number"
               name="cgstRate"
@@ -158,7 +155,7 @@ const TaxBilling = () => {
           </div>
 
           <div className="alert-field">
-            <label>SGST Rate (%)</label>
+            <label>SGST (%)</label>
             <input
               type="number"
               name="sgstRate"
@@ -170,8 +167,8 @@ const TaxBilling = () => {
 
         <hr className="divider" />
 
-        {/* INVOICE SETTINGS */}
         <h3>Invoice Settings</h3>
+
         <div className="alert-row-horizontal">
           <div className="alert-field">
             <label>Invoice Prefix</label>
@@ -184,7 +181,7 @@ const TaxBilling = () => {
           </div>
 
           <div className="alert-field">
-            <label>Starting Number</label>
+            <label>Start Number</label>
             <input
               type="number"
               name="invoiceStart"
@@ -209,7 +206,7 @@ const TaxBilling = () => {
           </div>
 
           <div className="alert-field">
-            <label>Invoice Footer Text</label>
+            <label>Invoice Footer</label>
             <input
               type="text"
               name="invoiceFooter"
@@ -221,20 +218,17 @@ const TaxBilling = () => {
 
         <hr className="divider" />
 
-        {/* PAYMENT METHODS */}
         <h3>Payment Methods</h3>
+
         <div className="payment-methods">
           {[
-            ["cashPayment", "Cash Payment", "Accept cash payments"],
-            ["cardPayment", "Card Payment", "Accept debit/credit card payments"],
-            ["upiPayment", "UPI Payment", "Accept UPI and QR-based payments"],
-            ["creditSales", "Credit Sales", "Allow credit sales for customers"],
-          ].map(([key, label, desc]) => (
+            ["cashPayment", "Cash Payment"],
+            ["cardPayment", "Card Payment"],
+            ["upiPayment", "UPI Payment"],
+            ["creditSales", "Credit Sales"],
+          ].map(([key, label]) => (
             <div className="payment-row" key={key}>
-              <div>
-                <label>{label}</label>
-                <p>{desc}</p>
-              </div>
+              <label>{label}</label>
               <label className="switch">
                 <input
                   type="checkbox"

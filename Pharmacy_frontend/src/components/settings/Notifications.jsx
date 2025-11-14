@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./notifications.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL; // ✅ from .env
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const Notifications = () => {
   const [emailEnabled, setEmailEnabled] = useState(false);
@@ -21,16 +21,18 @@ const Notifications = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch existing notification settings from backend
+  // ✅ Fetch all notification settings
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/notifications/`);
+        const res = await fetch(`${API_BASE_URL}/settings/app/
+`);
         const data = await res.json();
         const n = data.notifications || {};
 
         setEmailEnabled(n.NOTIFY_EMAIL_ENABLED === "true");
         setSmsEnabled(n.NOTIFY_SMS_ENABLED === "true");
+
         setLowStock(n.NOTIFY_LOW_STOCK === "true");
         setExpiry(n.NOTIFY_EXPIRY === "true");
         setDailyReports(n.NOTIFY_DAILY_REPORT === "true");
@@ -46,10 +48,11 @@ const Notifications = () => {
         console.error("Error fetching notification settings:", error);
       }
     };
+
     fetchSettings();
   }, []);
 
-  // ✅ Save all notification settings
+  // ✅ Save ALL settings using POST → /api/v1/settings/settings/
   const handleSave = async () => {
     setLoading(true);
 
@@ -59,8 +62,10 @@ const Notifications = () => {
       NOTIFY_LOW_STOCK: lowStock,
       NOTIFY_EXPIRY: expiry,
       NOTIFY_DAILY_REPORT: dailyReports,
+
       NOTIFY_EMAIL: emailAddress,
       NOTIFY_SMS_PHONE: phoneNumber,
+
       SMTP_HOST: smtpServer,
       SMTP_PORT: port,
       SMTP_USER: username,
@@ -68,28 +73,25 @@ const Notifications = () => {
     };
 
     try {
-      // Save each key-value pair using KVDetailView (PUT)
       for (const [key, value] of Object.entries(settingsData)) {
-        await fetch(`${API_BASE_URL}/api/settings/${key}/`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ value }),
+        await fetch(`${API_BASE_URL}/settings/settings/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key, value }),
         });
       }
 
-      alert("✅ Notification preferences saved successfully!");
+      alert("✅ Notification settings saved successfully!");
     } catch (error) {
-      console.error("Error saving notification settings:", error);
-      alert("❌ Failed to save settings. Please try again.");
+      console.error("Save error:", error);
+      alert("❌ Failed to save notifications");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleTestConnection = async () => {
-    alert("Testing SMTP connection (mock).");
+  const handleTestConnection = () => {
+    alert("Testing SMTP connection (mock)");
   };
 
   return (
@@ -99,7 +101,7 @@ const Notifications = () => {
         Configure how and when you receive notifications.
       </p>
 
-      {/* Email Notifications Card */}
+      {/* Email Notifications */}
       <div className="tax-card">
         <h3>Email Notifications</h3>
         <div className="payment-methods">
@@ -128,6 +130,7 @@ const Notifications = () => {
                   <span className="slider"></span>
                 </label>
               </div>
+
               <div className="payment-row">
                 <label>Expiry Alerts</label>
                 <label className="switch">
@@ -139,6 +142,7 @@ const Notifications = () => {
                   <span className="slider"></span>
                 </label>
               </div>
+
               <div className="payment-row">
                 <label>Daily Reports</label>
                 <label className="switch">
@@ -153,10 +157,10 @@ const Notifications = () => {
 
               <div className="alert-row-horizontal">
                 <div className="alert-field">
-                  <label>Notification Email Address</label>
+                  <label>Email Address</label>
                   <input
                     type="email"
-                    placeholder="Enter email address"
+                    placeholder="Enter email"
                     value={emailAddress}
                     onChange={(e) => setEmailAddress(e.target.value)}
                   />
@@ -167,7 +171,7 @@ const Notifications = () => {
         </div>
       </div>
 
-      {/* SMS Notifications Card */}
+      {/* SMS Notifications */}
       <div className="tax-card">
         <h3>SMS Notifications</h3>
         <div className="payment-methods">
@@ -186,7 +190,7 @@ const Notifications = () => {
           {smsEnabled && (
             <div className="alert-row-horizontal">
               <div className="alert-field">
-                <label>Notification Phone Number</label>
+                <label>Phone Number</label>
                 <input
                   type="tel"
                   placeholder="Enter phone number"
@@ -199,26 +203,28 @@ const Notifications = () => {
         </div>
       </div>
 
-      {/* Email Integration Card */}
+      {/* SMTP Settings */}
       <div className="tax-card">
-        <h3>Email Integration</h3>
+        <h3>Email Integration (SMTP)</h3>
+
         <div className="alert-row-horizontal">
           <div className="alert-field">
             <label>SMTP Server</label>
             <input
               type="text"
-              placeholder="Enter SMTP server"
               value={smtpServer}
               onChange={(e) => setSmtpServer(e.target.value)}
+              placeholder="SMTP host"
             />
           </div>
+
           <div className="alert-field">
             <label>Port</label>
             <input
               type="text"
-              placeholder="Enter port number"
               value={port}
               onChange={(e) => setPort(e.target.value)}
+              placeholder="Port"
             />
           </div>
         </div>
@@ -228,18 +234,19 @@ const Notifications = () => {
             <label>Username</label>
             <input
               type="text"
-              placeholder="Enter username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username"
             />
           </div>
+
           <div className="alert-field">
             <label>Password</label>
             <input
               type="password"
-              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
             />
           </div>
         </div>
@@ -251,13 +258,9 @@ const Notifications = () => {
         </div>
       </div>
 
-      {/* Save Button */}
+      {/* Save */}
       <div className="save-btn-container">
-        <button
-          className="save-btn"
-          onClick={handleSave}
-          disabled={loading}
-        >
+        <button className="save-btn" onClick={handleSave} disabled={loading}>
           {loading ? "Saving..." : "Save Notifications"}
         </button>
       </div>
