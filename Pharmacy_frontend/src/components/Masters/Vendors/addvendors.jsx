@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import "./addvendors.css";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const AddVendor = () => {
   const navigate = useNavigate();
+
+  const [paymentTermsList, setPaymentTermsList] = useState([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -13,14 +17,29 @@ const AddVendor = () => {
     email: "",
     contact_person: "",
     address: "",
+    product_info: "",
     payment_terms: "",
     bank_name: "",
     account_no: "",
     ifsc: "",
     notes: "",
     rating: "",
-    is_active: true
+    is_active: true,
   });
+
+  // Fetch payment terms
+  useEffect(() => {
+    const loadTerms = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/settings/payment-terms/`);
+        const data = await res.json();
+        setPaymentTermsList(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error loading payment terms", error);
+      }
+    };
+    loadTerms();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -32,7 +51,6 @@ const AddVendor = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const res = await fetch(`${API_BASE_URL}/procurement/vendors/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -49,115 +67,147 @@ const AddVendor = () => {
 
   return (
     <div className="vendors-container">
-      <h1 className="vendors-title">Add Supplier</h1>
+
+      {/* Page Header: Back + Title */}
+      <div className="page-header">
+        <button className="back-btn" onClick={() => navigate("/masters/vendors")}>
+          <ArrowLeft size={18} />
+          <span>Back</span>
+        </button>
+
+        <h1 className="vendors-title">Add Supplier</h1>
+      </div>
 
       <form className="vendors-form" onSubmit={handleSubmit}>
 
         {/* BASIC INFORMATION */}
-        <div className="section">
-          <h2 className="section-title">Basic Information</h2>
+        <div className="section-card">
+          <h2 className="section-heading">Basic Information</h2>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Supplier Name:</label>
+          <div className="row">
+            <div className="field">
+              <label>Supplier Name *</label>
               <input type="text" name="name" value={formData.name} onChange={handleChange} required />
             </div>
 
-            <div className="form-group">
-              <label>Contact Person:</label>
+            <div className="field">
+              <label>Contact Person *</label>
               <input type="text" name="contact_person" value={formData.contact_person} onChange={handleChange} />
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Phone Number:</label>
+          <div className="row">
+            <div className="field">
+              <label>Phone Number *</label>
               <input type="text" name="contact_phone" value={formData.contact_phone} onChange={handleChange} />
             </div>
 
-            <div className="form-group">
-              <label>Email:</label>
+            <div className="field">
+              <label>Email Address *</label>
               <input type="email" name="email" value={formData.email} onChange={handleChange} />
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>GSTIN:</label>
+          <div className="row">
+            <div className="field">
+              <label>GST Number *</label>
               <input type="text" name="gstin" value={formData.gstin} onChange={handleChange} />
             </div>
 
-            <div className="form-group checkbox-group">
-              <label>
-                <input type="checkbox" name="is_active" checked={formData.is_active} onChange={handleChange} />
-                Active
-              </label>
+            <div className="field">
+              <label>Status</label>
+              <select
+                name="is_active"
+                value={formData.is_active ? "1" : "0"}
+                onChange={(e) => setFormData({ ...formData, is_active: e.target.value === "1" })}
+              >
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+              </select>
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-group" style={{ flex: "1" }}>
-              <label>Address:</label>
-              <textarea name="address" value={formData.address} onChange={handleChange}></textarea>
-            </div>
-          </div>
-        </div>
-
-
-        {/* BUSINESS TERMS */}
-        <div className="section">
-          <h2 className="section-title">Business Terms</h2>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Payment Terms:</label>
-              <input type="text" name="payment_terms" value={formData.payment_terms} onChange={handleChange} />
-            </div>
+          <div className="field full">
+            <label>Address *</label>
+            <textarea name="address" value={formData.address} onChange={handleChange}></textarea>
           </div>
         </div>
 
+        {/* PRODUCTS */}
+        <div className="section-card">
+          <h2 className="section-heading">Products & Supply Information</h2>
 
-        {/* BANK INFORMATION */}
-        <div className="section">
-          <h2 className="section-title">Bank Information (Optional)</h2>
+          <div className="field full">
+            <label>What Products Can This Supplier Deliver? *</label>
+            <textarea
+              name="product_info"
+              value={formData.product_info}
+              onChange={handleChange}
+              placeholder="Eg: Antibiotics, Surgical Items, Diabetic Medicines, etc."
+            ></textarea>
+          </div>
+        </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Bank Name:</label>
+        {/* PAYMENT TERMS */}
+        <div className="section-card">
+          <h2 className="section-heading">Business Terms</h2>
+
+          <div className="row">
+            <div className="field">
+              <label>Payment Terms *</label>
+              <select name="payment_terms" value={formData.payment_terms} onChange={handleChange}>
+                <option value="">Select</option>
+                {paymentTermsList.map((pt) => (
+                  <option key={pt.id} value={pt.id}>
+                    {pt.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field"></div>
+          </div>
+        </div>
+
+        {/* BANK DETAILS */}
+        <div className="section-card">
+          <h2 className="section-heading">Banking Information (Optional)</h2>
+
+          <div className="row">
+            <div className="field">
+              <label>Bank Name</label>
               <input type="text" name="bank_name" value={formData.bank_name} onChange={handleChange} />
             </div>
 
-            <div className="form-group">
-              <label>IFSC Code:</label>
-              <input type="text" name="ifsc" value={formData.ifsc} onChange={handleChange} />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Account Number:</label>
+            <div className="field">
+              <label>Account Number</label>
               <input type="text" name="account_no" value={formData.account_no} onChange={handleChange} />
             </div>
           </div>
+
+          <div className="row">
+            <div className="field">
+              <label>IFSC Code</label>
+              <input type="text" name="ifsc" value={formData.ifsc} onChange={handleChange} />
+            </div>
+            <div className="field"></div>
+          </div>
         </div>
 
+        {/* NOTES */}
+        <div className="section-card">
+          <h2 className="section-heading">Additional Notes</h2>
 
-        {/* ADDITIONAL NOTES */}
-        <div className="section">
-          <h2 className="section-title">Additional Notes</h2>
-
-          <div className="form-group">
+          <div className="field full">
             <textarea name="notes" value={formData.notes} onChange={handleChange}></textarea>
           </div>
         </div>
 
-
-        <div className="form-actions">
+        {/* BUTTONS */}
+        <div className="action-row">
           <button type="button" className="cancel-btn" onClick={() => navigate("/masters/vendors")}>
             Cancel
           </button>
-
-          <button type="submit" className="submit-btn">Save</button>
+          <button type="submit" className="save-btn">Save</button>
         </div>
 
       </form>
