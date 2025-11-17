@@ -194,8 +194,8 @@ function AppLayout() {
             <Route path="/saleslines" element={<Saleslines />} />
             <Route path="/h1registerentries" element={<H1registerentries />} />
             <Route path="/ndpsdailyentries" element={<Ndpsdailyentries />} />
-
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+             <Route path="/dashboard" element={<Dashboard />} />
+            {/* <Route path="*" element={<Navigate to="/dashboard" replace />} /> */}
           </Routes>
         </main>
         <Footer />
