@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CheckCircle, Package, Calendar, ClipboardList } from "lucide-react";
 import "./receiveitems.css";
+import { formatDateDDMMYYYY } from "../../../utils/dateFormat";
 
 const ReceiveItems = () => {
   // Sample state data (replace with API calls)
@@ -43,14 +44,14 @@ const ReceiveItems = () => {
           <h3>Purchase Order Details</h3>
           <div className="kpi-item"><strong>PO Number:</strong> {purchaseOrder.po_number}</div>
           <div className="kpi-item"><strong>Supplier:</strong> {purchaseOrder.supplier}</div>
-          <div className="kpi-item"><strong>Order Date:</strong> {purchaseOrder.order_date}</div>
-          <div className="kpi-item"><strong>Expected Date:</strong> {purchaseOrder.expected_date}</div>
+          <div className="kpi-item"><strong>Order Date:</strong> {formatDateDDMMYYYY(purchaseOrder.order_date)}</div>
+          <div className="kpi-item"><strong>Expected Date:</strong> {formatDateDDMMYYYY(purchaseOrder.expected_date)}</div>
         </div>
 
         {/* KPI Card 2: Receiving Details */}
         <div className="kpi-card">
           <h3>Receiving Details</h3>
-          <div className="kpi-item"><strong>Received Date:</strong> {receivingDetails.received_date}</div>
+          <div className="kpi-item"><strong>Received Date:</strong> {formatDateDDMMYYYY(receivingDetails.received_date)}</div>
           <div className="kpi-item"><strong>Received By:</strong> {receivingDetails.received_by}</div>
           <div className="kpi-item"><strong>Invoice Number:</strong> {receivingDetails.invoice_number}</div>
         </div>
@@ -78,7 +79,7 @@ const ReceiveItems = () => {
                     <td>{item.received}</td>
                     <td>{item.damaged}</td>
                     <td>{item.batch}</td>
-                    <td>{item.mfg_date}</td>
+                    <td>{formatDateDDMMYYYY(item.mfg_date)}</td>
                   </tr>
                 ))}
               </tbody>
