@@ -24,7 +24,7 @@ const PurchaseOrders = () => {
     const fetchOrders = async () => {
       try {
         const res = await authFetch(
-          `${API_BASE_URL}/purchaseorders/?vendor=${vendor.id}`
+          `${API_BASE_URL}/procurement/purchase-orders/?vendor=${vendor.id}`
         );
         const data = await res.json();
         setOrders(data.results || []);
@@ -39,9 +39,10 @@ const PurchaseOrders = () => {
     fetchOrders();
   }, [vendor]);
 
-  const handleView = (id) => navigate(`/masters/purchaseorders/${id}`);
-  const handleReceiveItems = () =>
-    navigate("/masters/products/receive-items/", { state: { vendor } });
+   const handleView = (id) =>
+    navigate(`/masters/products/receive-items/${id}`, {
+      state: { vendor },
+    });
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this order?")) {
       console.log("Delete order id:", id);
@@ -68,13 +69,7 @@ const PurchaseOrders = () => {
         </p>
       )}
 
-      <div className="header-row">
-        {vendor && (
-          <button className="receive-items-btn" onClick={handleReceiveItems}>
-            Receive Items
-          </button>
-        )}
-      </div>
+      
 
       <div className="orders-table-card">
         <table className="orders-table">

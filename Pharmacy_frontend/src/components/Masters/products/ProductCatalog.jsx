@@ -23,7 +23,8 @@ const ProductCatalog = () => {
     const fetchProducts = async () => {
       try {
         const res = await authFetch(
-          `${API_BASE_URL}/procurement/vendors/${vendor.id}/products/`
+          fetch(`${API_BASE}/purchase-orders/?vendor=${vendorId}`)
+
         );
         const data = await res.json();
         setProducts(data);
