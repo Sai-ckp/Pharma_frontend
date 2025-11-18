@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import "./expiryalerts.css";
+import { authFetch } from "../../api/http";
 
 export default function ExpiryAlerts() {
   const [activeTab, setActiveTab] = useState("All");
@@ -13,7 +14,7 @@ export default function ExpiryAlerts() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch("/api/expiry-alerts"); // <-- Replace this
+        const response = await authFetch("/api/expiry-alerts"); // <-- Replace this
         if (!response.ok) throw new Error("Failed to load data");
         const data = await response.json();
         setMedicines(data);

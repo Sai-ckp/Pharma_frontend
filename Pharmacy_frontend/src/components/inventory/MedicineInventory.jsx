@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./inventory.css";
+import { authFetch } from "../../api/http";
 
 const LS_KEY = "medicines";
 
@@ -33,7 +34,7 @@ export default function MedicineInventory() {
       setLoading(true);
       setServerError(null);
       try {
-        const res = await fetch(API, { headers: { Accept: "application/json" } });
+        const res = await authFetch(API, { headers: { Accept: "application/json" } });
         if (!res.ok) throw new Error(`Failed to load (${res.status})`);
         const data = await res.json();
         const list = Array.isArray(data) ? data : data?.results || [];
@@ -101,7 +102,7 @@ export default function MedicineInventory() {
     setDeleting(true);
     setServerError(null);
     try {
-      const res = await fetch(`${API}${id}/`, { method: "DELETE", headers: { Accept: "application/json" } });
+      const res = await authFetch(`${API}${id}/`, { method: "DELETE", headers: { Accept: "application/json" } });
       if (!res.ok && res.status !== 204) throw new Error(`Delete failed (${res.status})`);
       const next = rows.filter(r => r.id !== id);
       setRows(next);

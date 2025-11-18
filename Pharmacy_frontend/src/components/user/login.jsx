@@ -3,8 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../common/logo";
 import MedicalCarousel from "../common/MedicalCarousel";
-
-const SESSION_TOKEN_KEY = "session_token";
+import { login as apiLogin } from "../../api/auth";
 
 export default function Login() {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -15,37 +14,25 @@ export default function Login() {
   const [hovered, setHovered] = useState(false); // used for opening "mouth"
   const navigate = useNavigate();
 
-  // always ask login on full page reload
-  useEffect(() => {
-    const nav = performance.getEntriesByType("navigation")[0];
-    if (nav && nav.type === "reload") sessionStorage.removeItem(SESSION_TOKEN_KEY);
-  }, []);
-
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setErr("");
     setLoading(true);
 
-    // simulate quick server check
-    setTimeout(() => {
-      const ok =
-        (form.username === "Admin" && form.password === "admin123") ||
-        (form.username === "admin@college.com" && form.password === "admin123");
-      if (ok) {
-        sessionStorage.setItem(SESSION_TOKEN_KEY, "ok");
-        setCarouselOn(true);
-        // show carousel briefly then navigate
-        setTimeout(() => {
-          setCarouselOn(false);
-          navigate("/dashboard", { replace: true });
-        }, 1600);
-      } else {
-        setErr("Invalid credentials. Please try again.");
-      }
+    try {
+      await apiLogin(form.username, form.password);
+      setCarouselOn(true);
+      setTimeout(() => {
+        setCarouselOn(false);
+        navigate("/dashboard", { replace: true });
+      }, 1600);
+    } catch (error) {
+      setErr(error.message || "Invalid credentials. Please try again.");
+    } finally {
       setLoading(false);
-    }, 640);
+    }
   };
 
   return (

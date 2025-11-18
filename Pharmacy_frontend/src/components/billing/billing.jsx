@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./billing.css";
+import { authFetch } from "../../api/http";
 
 const API_BASE = "http://127.0.0.1:8000/api"; // ✅ Django backend base URL
 
@@ -30,7 +31,7 @@ export default function Billing() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${API_BASE}/bills/`); // ✅ Correct full path
+      const res = await authFetch(`${API_BASE}/bills/`); // ✅ Correct full path
       if (!res.ok) throw new Error(`Failed to fetch bills (${res.status})`);
       const data = await res.json();
       setBills(data);
@@ -50,7 +51,7 @@ export default function Billing() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE}/bills/`, {
+      const res = await authFetch(`${API_BASE}/bills/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import "./createorder.css";
+import { authFetch } from "../../../api/http";
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace(/\/+$/, "");
 
@@ -32,7 +33,7 @@ const CreateOrder = () => {
 
     const fetchVendor = async () => {
       try {
-        const res = await fetch(
+        const res = await authFetch(
           `${API_BASE}/procurement/vendors/${vendor.id}/`
         );
         if (res.ok) {
@@ -49,7 +50,7 @@ const CreateOrder = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await fetch(`${API_BASE}/catalog/products/`);
+      const res = await authFetch(`${API_BASE}/catalog/products/`);
       const data = await res.json();
 
       setItems(
@@ -147,7 +148,7 @@ const CreateOrder = () => {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/procurement/purchase-orders/`, {
+      const res = await authFetch(`${API_BASE}/procurement/purchase-orders/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

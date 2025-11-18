@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./medicinecategories.css";
+import { authFetch } from "../../api/http";
 
 const empty = { id: "", name: "", description: "" };
 
@@ -26,7 +27,7 @@ export default function MedicineCategories() {
     setLoading(true);
     setServerError(null);
     try {
-      const res = await fetch(API, { headers: { Accept: "application/json" } });
+      const res = await authFetch(API, { headers: { Accept: "application/json" } });
       if (!res.ok) throw new Error(`Failed to load (${res.status})`);
 
       const data = await res.json();
@@ -93,7 +94,7 @@ export default function MedicineCategories() {
     setSaving(true);
     try {
       if (editingId) {
-        const res = await fetch(`${API}${editingId}/`, {
+        const res = await authFetch(`${API}${editingId}/`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify(payload),
@@ -104,7 +105,7 @@ export default function MedicineCategories() {
         const updated = await res.json();
         setRows((prev) => prev.map((r) => (r.id === editingId ? updated : r)));
       } else {
-        const res = await fetch(API, {
+        const res = await authFetch(API, {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify(payload),
@@ -133,7 +134,7 @@ export default function MedicineCategories() {
 
     setSaving(true);
     try {
-      const res = await fetch(`${API}${deleteItem.id}/`, {
+      const res = await authFetch(`${API}${deleteItem.id}/`, {
         method: "DELETE",
         headers: { Accept: "application/json" },
       });

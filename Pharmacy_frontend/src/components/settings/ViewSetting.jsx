@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./addsettings.css";
+import { authFetch } from "../../api/http";
 
 const ViewSetting = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const ViewSetting = () => {
   });
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/v1/settings/settings/${encodeURIComponent(key)}/`)
+    authFetch(`http://127.0.0.1:8000/api/v1/settings/settings/${encodeURIComponent(key)}/`)
       .then(res => res.json())
       .then(data => {
         setFormData({

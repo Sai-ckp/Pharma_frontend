@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./batchlots.css";
+import { authFetch } from "../../api/http";
 
 const Batchlots = () => {
   const [batchlots, setBatchlots] = useState([]);
@@ -17,7 +18,7 @@ const Batchlots = () => {
   // FETCH ALL BATCHES FROM API
   const fetchBatches = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/v1/catalog/batches/");
+      const res = await authFetch("http://127.0.0.1:8000/api/v1/catalog/batches/");
       const data = await res.json();
 
       setBatchlots(data.results); // if paginated
@@ -44,7 +45,7 @@ const Batchlots = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/v1/catalog/batches/", {
+      const res = await authFetch("http://127.0.0.1:8000/api/v1/catalog/batches/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

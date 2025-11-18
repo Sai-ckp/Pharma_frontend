@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./billgeneration.css";
+import { authFetch } from "../../api/http";
 
 export default function BillList() {
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ export default function BillList() {
 
   // ✅ Fetch bills and calculate KPIs
   useEffect(() => {
-    fetch("/api/bills")
+    authFetch("/api/bills")
       .then((res) => res.json())
       .then((data) => {
         const billsData = data.bills || [];

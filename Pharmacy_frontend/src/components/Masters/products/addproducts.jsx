@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import "./addproducts.css";
+import { authFetch } from "../../../api/http";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -28,7 +29,7 @@ const AddProduct = () => {
 
   useEffect(() => {
     if (id) {
-      fetch(`${API_BASE_URL}/catalog/products/${id}/`)
+      authFetch(`${API_BASE_URL}/catalog/products/${id}/`)
         .then((res) => res.json())
         .then((data) =>
           setFormData({
@@ -59,7 +60,7 @@ const AddProduct = () => {
       preferred_vendor: formData.preferred_vendor ? Number(formData.preferred_vendor) : null,
     };
 
-    const res = await fetch(url, {
+    const res = await authFetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
