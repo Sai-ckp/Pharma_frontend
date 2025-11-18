@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import "./productcatalog.css";
+import { authFetch } from "../../../api/http";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -21,7 +22,7 @@ const ProductCatalog = () => {
     // Fetch vendor-specific products
     const fetchProducts = async () => {
       try {
-        const res = await fetch(
+        const res = await authFetch(
           `${API_BASE_URL}/procurement/vendors/${vendor.id}/products/`
         );
         const data = await res.json();
@@ -38,7 +39,7 @@ const ProductCatalog = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/catalog/categories/`);
+        const res = await authFetch(`${API_BASE_URL}/catalog/categories/`);
         const data = await res.json();
 
         // API returns results? Use results format (depending on your backend)

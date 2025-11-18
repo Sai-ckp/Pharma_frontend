@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./billgeneration.css";
+import { authFetch } from "../../api/http";
  
 export default function GenerateBill() {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ export default function GenerateBill() {
  
   // Fetch products (medicines)
   useEffect(() => {
-    fetch("/api/products")
+    authFetch("/api/products")
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch(() => setProducts([]));
@@ -67,7 +68,7 @@ export default function GenerateBill() {
       date: new Date().toISOString(),
     };
  
-    fetch("/api/bills", {
+    authFetch("/api/bills", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(bill),

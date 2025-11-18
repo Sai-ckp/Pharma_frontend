@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import "./addproducts.css"; // reuse same CSS as AddProduct
+import { authFetch } from "../../../api/http";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -28,7 +29,7 @@ const EditProduct = () => {
 
   // Fetch product details by ID and pre-fill form
   useEffect(() => {
-    fetch(`${API_BASE_URL}/catalog/products/${id}/`)
+    authFetch(`${API_BASE_URL}/catalog/products/${id}/`)
       .then((res) => res.json())
       .then((data) => setFormData(data))
       .catch((err) => console.error("Error fetching product:", err));
@@ -47,7 +48,7 @@ const EditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE_URL}/catalog/products/${id}/`, {
+      const res = await authFetch(`${API_BASE_URL}/catalog/products/${id}/`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

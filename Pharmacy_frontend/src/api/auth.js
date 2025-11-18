@@ -1,52 +1,84 @@
-import axios from "axios";
+const rawBase = import.meta.env.VITE_API_URL || "";
+const API_BASE = rawBase.replace(/\/+$/g, "");
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === "1";
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api",
-});
+const ACCESS_TOKEN_KEY = "access_token";
+const REFRESH_TOKEN_KEY = "refresh_token";
 
-// --- Simple mock db (change as you like) ---
-const MOCK_USERS = [
-  { id: 1, username: "Sai", password: "password123", name: "Sai Shashank", role: "Admin" },
-  { id: 2, username: "demo", password: "demo", name: "Demo User", role: "Staff" },
-];
+export function getAccessToken() {
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
+}
 
-function delay(ms) {
-  return new Promise((res) => setTimeout(res, ms));
+export function getRefreshToken() {
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
+}
+
+export function storeTokens({ access, refresh }) {
+  if (access) localStorage.setItem(ACCESS_TOKEN_KEY, access);
+  if (refresh) localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
+}
+
+export function clearTokens() {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
 }
 
 export async function login(username, password) {
-  if (USE_MOCK) {
-    await delay(500); // simulate network
-    const user = MOCK_USERS.find(
-      (u) => u.username === username && u.password === password
-    );
-    if (!user) {
-      const err = new Error("Invalid username or password");
-      err.status = 401;
-      throw err;
-    }
-    return {
-      token: "mock-token-" + btoa(username),
-      user: { id: user.id, name: user.name, username: user.username, role: user.role },
-    };
+  const response = await fetch(`${API_BASE}/auth/token/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ username, password }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    const message =
+      errorBody.detail ||
+      errorBody.non_field_errors?.[0] ||
+      "Login failed. Please check credentials.";
+    const error = new Error(message);
+    error.status = response.status;
+    error.body = errorBody;
+    throw error;
   }
 
-  // Real API (enable once backend is ready)
-  const { data } = await api.post("/auth/login/", { username, password });
-  return data; // expected shape: { token: "...", user: {...} }
+  const data = await response.json();
+  storeTokens({ access: data.access, refresh: data.refresh });
+  return data;
+}
+
+export async function refreshAccessToken() {
+  const refresh = getRefreshToken();
+  if (!refresh) {
+    clearTokens();
+    return null;
+  }
+
+  const response = await fetch(`${API_BASE}/auth/token/refresh/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ refresh }),
+  });
+
+  if (!response.ok) {
+    clearTokens();
+    return null;
+  }
+
+  const data = await response.json();
+  if (data.access) {
+    storeTokens({ access: data.access, refresh });
+    return data.access;
+  }
+
+  return null;
 }
 
 export function logout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-}
-
-export function storeSession({ token, user }) {
-  localStorage.setItem("token", token);
-  localStorage.setItem("user", JSON.stringify(user));
-}
-
-export function getToken() {
-  return localStorage.getItem("token");
+  clearTokens();
 }
