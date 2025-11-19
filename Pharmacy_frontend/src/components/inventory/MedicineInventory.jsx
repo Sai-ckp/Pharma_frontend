@@ -15,7 +15,9 @@ const normalizeBase = (u) =>
     .replace(/\/+$/g, "")
     .replace(/\/api\/v1$/i, "");
 const API_BASE = normalizeBase(rawBase);
-const API = API_BASE ? `${API_BASE}/api/v1/inventory/add-medicine/` : "/api/v1/inventory/add-medicine/";
+const LIST_API = API_BASE
+  ? `${API_BASE}/api/v1/inventory/medicines/?location_id=1`
+  : "/api/v1/inventory/medicines/?location_id=1";
 
 export default function MedicineInventory() {
   const nav = useNavigate();
@@ -34,7 +36,7 @@ export default function MedicineInventory() {
       setLoading(true);
       setServerError(null);
       try {
-        const res = await authFetch(API, { headers: { Accept: "application/json" } });
+        const res = await authFetch(LIST_API, { headers: { Accept: "application/json" } });
         if (!res.ok) throw new Error(`Failed to load (${res.status})`);
         const data = await res.json();
         const list = Array.isArray(data) ? data : data?.results || [];
@@ -102,7 +104,7 @@ export default function MedicineInventory() {
     setDeleting(true);
     setServerError(null);
     try {
-      const res = await authFetch(`${API}${id}/`, { method: "DELETE", headers: { Accept: "application/json" } });
+      // backend delete is not wired yet; keep local delete only
       if (!res.ok && res.status !== 204) throw new Error(`Delete failed (${res.status})`);
       const next = rows.filter(r => r.id !== id);
       setRows(next);
