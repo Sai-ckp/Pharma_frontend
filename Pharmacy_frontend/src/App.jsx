@@ -137,8 +137,7 @@ function AppLayout() {
             <Route path="/masters/products/view/:id" element={<ViewProduct />} />
             <Route path="/masters/products/edit/:id" element={<EditProduct />} />
             <Route path="/masters/products/purchase-orders" element={<PurchaseOrders />} />
-            <Route path="/masters/products/receive-items/:id"element={<ReceiveItems />}/>
-
+            <Route path="/masters/products/receive-items" element={<ReceiveItems />} />
             <Route path="/masters/products/vendor-catalog/:id" element={<ProductCatalog />} />
 
 
