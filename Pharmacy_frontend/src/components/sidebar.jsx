@@ -33,6 +33,7 @@ import {
   CreditCard,
   FolderTree,
   Hourglass,
+  BarChart3,
 } from "lucide-react";
 import "./Sidebar.css";
 
@@ -42,6 +43,8 @@ const Sidebar = () => {
     {path: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { path: "/inventory/medicines/", label: "Inventory Management", icon: <Boxes size={18} /> },
     { path: "/billgeneration/billlist", label: "Billing", icon: <FileText size={18} /> },
+
+    { path: "/reports/sales", label: "Reports", icon: <BarChart3 size={18} /> },
 
     { path: "/masters/vendors", label: "Suppliers", icon: <Store size={18} /> },
     { path: "/masters/customers", label: "Customers", icon: <UserCircle size={18} /> },
