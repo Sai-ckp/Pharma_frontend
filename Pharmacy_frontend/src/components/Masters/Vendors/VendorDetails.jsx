@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import "./vendorDetails.css";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -31,9 +32,13 @@ const VendorDetails = () => {
 
   return (
     <div className="customers-container">
-      <div className="header-row">
-        <h1 className="customers-title">{vendor.name || "Vendor Details"}</h1>
-        <button className="add-btn" onClick={() => navigate("/masters/vendors")}>Back</button>
+      {/* Page Header Like Edit Supplier */}
+      <div className="page-header">
+        <button className="back-btn" onClick={() => navigate("/masters/vendors")}>
+          <ArrowLeft size={18} />
+          <span>Back</span>
+        </button>
+        <h1 className="vendors-title">{vendor.name || "Vendor Details"}</h1>
       </div>
       <p className="customers-heading">Supplier Details & KPIs</p>
 
@@ -78,7 +83,6 @@ const VendorDetails = () => {
         <div className="vendor-card quick-actions-card">
           <h3 className="card-title">Quick Actions</h3>
           <div className="card-body quick-actions-body">
-            {/* Pass vendor via state */}
             <button
               className="action-btn"
               onClick={() => navigate(`/masters/products`, { state: { vendor } })}

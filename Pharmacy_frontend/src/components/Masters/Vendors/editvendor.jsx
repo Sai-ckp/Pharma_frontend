@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { authFetch } from "../../../api/http"; // Use this if you handle auth (token) in your project
 import "./addvendors.css";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL; // e.g. http://127.0.0.1:8000/api/v1
 
 const EditVendor = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
+  const [loading, setLoading] = useState(true);
   const [paymentTermsList, setPaymentTermsList] = useState([]);
-
   const [formData, setFormData] = useState({
     name: "",
     gstin: "",
@@ -28,15 +29,19 @@ const EditVendor = () => {
     is_active: true,
   });
 
-  // Fetch payment terms list
+  // Fetch payment terms list (correct endpoint!)
   useEffect(() => {
     const loadTerms = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/settings/payment-terms/`);
+        // Endpoint is BASE_URL/settings/payment-terms/ (no extra /api/v1!)
+        const res = await authFetch(`${API_BASE_URL}/settings/payment-terms/`);
         const data = await res.json();
-        setPaymentTermsList(Array.isArray(data) ? data : []);
+        // Handle paginated and plain array
+        const list = data.results ? data.results : data;
+        setPaymentTermsList(Array.isArray(list) ? list : []);
       } catch (error) {
-        console.error("Failed to load payment terms", error);
+        console.error("Error loading payment terms", error);
+        setPaymentTermsList([]);
       }
     };
     loadTerms();
@@ -45,54 +50,77 @@ const EditVendor = () => {
   // Fetch vendor data
   useEffect(() => {
     const loadVendor = async () => {
+      setLoading(true);
       try {
-        const res = await fetch(`${API_BASE_URL}/procurement/vendors/${id}/`);
+        const res = await authFetch(`${API_BASE_URL}/procurement/vendors/${id}/`);
+        if (!res.ok) throw new Error(`Fetch error: ${res.status}`);
         const data = await res.json();
-
         setFormData({
-          ...data,
-          payment_terms: data.payment_terms || "",
-          is_active: data.is_active ?? true,
+          name: data.name || "",
+          gstin: data.gstin || "",
+          contact_phone: data.contact_phone || "",
+          email: data.email || "",
+          contact_person: data.contact_person || "",
+          address: data.address || "",
+          product_info: data.product_info || "",
+          payment_terms: String(data.payment_terms || ""),
+          bank_name: data.bank_name || "",
+          account_no: data.account_no || "",
+          ifsc: data.ifsc || "",
+          notes: data.notes || "",
+          rating: data.rating || "",
+          is_active: !!data.is_active,
         });
       } catch (error) {
         console.error("Error loading vendor", error);
+        alert("Failed to load vendor information.");
+      } finally {
+        setLoading(false);
       }
     };
-
-    loadVendor();
+    if (id) loadVendor();
   }, [id]);
 
+  // Controlled input change
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value,
-    });
+    }));
   };
 
+  // Submit update
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const res = await fetch(`${API_BASE_URL}/procurement/vendors/${id}/`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-
-    if (res.ok) {
-      alert("Vendor Updated Successfully!");
-      navigate("/masters/vendors");
-    } else {
-      alert("Failed to Update Vendor!");
+    try {
+      const res = await authFetch(`${API_BASE_URL}/procurement/vendors/${id}/`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        alert("Vendor Updated Successfully!");
+        navigate("/masters/vendors");
+      } else {
+        const errData = await res.json();
+        alert("Failed to Update Vendor! " + JSON.stringify(errData));
+      }
+    } catch (err) {
+      console.error("Error updating vendor:", err);
+      alert("Error updating vendor. See console for details.");
     }
   };
 
+  if (loading) {
+    return <div className="vendors-container"><p>Loading...</p></div>;
+  }
+
   return (
     <div className="vendors-container">
-
-      {/* Header */}
+      {/* Page Header */}
       <div className="page-header">
-        <button className="back-btn" onClick={() => navigate("/masters/vendors")}>
+        <button className="back-btn" onClick={() => navigate(-1)}>
           <ArrowLeft size={18} />
           <span>Back</span>
         </button>
@@ -100,41 +128,34 @@ const EditVendor = () => {
       </div>
 
       <form className="vendors-form" onSubmit={handleSubmit}>
-
         {/* BASIC INFORMATION */}
         <div className="section-card">
           <h2 className="section-heading">Basic Information</h2>
-
           <div className="row">
             <div className="field">
               <label>Supplier Name *</label>
               <input type="text" name="name" value={formData.name} onChange={handleChange} required />
             </div>
-
             <div className="field">
               <label>Contact Person *</label>
               <input type="text" name="contact_person" value={formData.contact_person} onChange={handleChange} />
             </div>
           </div>
-
           <div className="row">
             <div className="field">
               <label>Phone Number *</label>
               <input type="text" name="contact_phone" value={formData.contact_phone} onChange={handleChange} />
             </div>
-
             <div className="field">
               <label>Email Address *</label>
               <input type="email" name="email" value={formData.email} onChange={handleChange} />
             </div>
           </div>
-
           <div className="row">
             <div className="field">
               <label>GST Number *</label>
               <input type="text" name="gstin" value={formData.gstin} onChange={handleChange} />
             </div>
-
             <div className="field">
               <label>Status</label>
               <select
@@ -147,7 +168,6 @@ const EditVendor = () => {
               </select>
             </div>
           </div>
-
           <div className="field full">
             <label>Address *</label>
             <textarea name="address" value={formData.address} onChange={handleChange}></textarea>
@@ -157,7 +177,6 @@ const EditVendor = () => {
         {/* PRODUCTS */}
         <div className="section-card">
           <h2 className="section-heading">Products & Supply Information</h2>
-
           <div className="field full">
             <label>What Products Can This Supplier Deliver? *</label>
             <textarea
@@ -172,20 +191,16 @@ const EditVendor = () => {
         {/* PAYMENT TERMS */}
         <div className="section-card">
           <h2 className="section-heading">Business Terms</h2>
-
           <div className="row">
             <div className="field">
               <label>Payment Terms *</label>
-              <select name="payment_terms" value={formData.payment_terms} onChange={handleChange}>
+              <select name="payment_terms" value={formData.payment_terms} onChange={handleChange} required>
                 <option value="">Select</option>
                 {paymentTermsList.map((pt) => (
-                  <option key={pt.id} value={pt.id}>
-                    {pt.name}
-                  </option>
+                  <option key={pt.id} value={pt.id}>{pt.name}</option>
                 ))}
               </select>
             </div>
-
             <div className="field"></div>
           </div>
         </div>
@@ -193,25 +208,21 @@ const EditVendor = () => {
         {/* BANK DETAILS */}
         <div className="section-card">
           <h2 className="section-heading">Banking Information (Optional)</h2>
-
           <div className="row">
             <div className="field">
               <label>Bank Name</label>
               <input type="text" name="bank_name" value={formData.bank_name} onChange={handleChange} />
             </div>
-
             <div className="field">
               <label>Account Number</label>
               <input type="text" name="account_no" value={formData.account_no} onChange={handleChange} />
             </div>
           </div>
-
           <div className="row">
             <div className="field">
               <label>IFSC Code</label>
               <input type="text" name="ifsc" value={formData.ifsc} onChange={handleChange} />
             </div>
-
             <div className="field"></div>
           </div>
         </div>
@@ -231,7 +242,6 @@ const EditVendor = () => {
           </button>
           <button type="submit" className="save-btn">Update</button>
         </div>
-
       </form>
     </div>
   );
