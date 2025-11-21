@@ -98,10 +98,6 @@ import Saleslines from "./components/saleslines/saleslines.jsx";
 import H1registerentries from "./components/h1registerentries/h1registerentries.jsx";
 import Ndpsdailyentries from "./components/ndpsdailyentries/ndpsdailyentries.jsx";
 
-/* Reports */
-import SalesReport from "./components/reports/SalesReport";
-import PurchaseReport from "./components/reports/PurchaseReport.jsx";
-
 /** Shell for authenticated pages */
 function AppLayout() {
   return (
@@ -200,10 +196,6 @@ function AppLayout() {
             <Route path="/ndpsdailyentries" element={<Ndpsdailyentries />} />
              <Route path="/dashboard" element={<Dashboard />} />
             {/* <Route path="*" element={<Navigate to="/dashboard" replace />} /> */}
-
-            {/*Reports*/}
-            <Route path="/reports/sales" element={<SalesReport />} />
-            <Route path="/reports/purchases" element={<PurchaseReport />} />
           </Routes>
         </main>
         <Footer />
