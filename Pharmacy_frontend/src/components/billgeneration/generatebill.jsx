@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./billgeneration.css";
 import { authFetch } from "../../api/http";
+import QRCode from "react-qr-code";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api/v1";
 
@@ -14,13 +15,46 @@ export default function GenerateBill() {
     email: "",
     city: "",
   });
+
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [cart, setCart] = useState([]);
   const [gst, setGst] = useState(12);
 
+  // Payment
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+  const [showQRPopup, setShowQRPopup] = useState(false);
+  const [showCashPopup, setShowCashPopup] = useState(false);
+
+  const [upiStatus, setUpiStatus] = useState("pending"); // pending | paid | expired
+  const [timeLeft, setTimeLeft] = useState(180);
+
+  // Cash
+  const [cashPaid, setCashPaid] = useState("");
+  const [cashChange, setCashChange] = useState(0);
+
+  const timerRef = useRef(null);
   const locationId = 1;
 
+  // ------------------ FETCH PAYMENT METHODS ------------------
+  useEffect(() => {
+    async function loadPM() {
+      try {
+        const res = await authFetch(`${API_BASE}/settings/payment-methods/`);
+        const data = await res.json();
+        const items = Array.isArray(data) ? data : data.results || [];
+        setPaymentMethods(items);
+      } catch {
+        setPaymentMethods([]);
+      }
+    }
+    loadPM();
+  }, []);
+
+  // ------------------ FETCH PRODUCTS ------------------
   useEffect(() => {
     const controller = new AbortController();
 
@@ -35,23 +69,20 @@ export default function GenerateBill() {
           `${API_BASE}/sales/billing/medicines/?${params.toString()}`,
           { signal: controller.signal }
         );
-        if (!res.ok) {
-          setProducts([]);
-          return;
-        }
+        if (!res.ok) return setProducts([]);
+
         const data = await res.json();
-        const mapped = data.map((p) => ({
-          id: p.product_id,
-          name: p.name,
-          mrp: Number(p.mrp || 0),
-          gstPercent: Number(p.gst_percent || 0),
-          stock: p.stock || 0,
-        }));
-        setProducts(mapped);
+        setProducts(
+          data.map((p) => ({
+            id: p.product_id,
+            name: p.name,
+            mrp: Number(p.mrp || 0),
+            gstPercent: Number(p.gst_percent || 0),
+            stock: p.stock || 0,
+          }))
+        );
       } catch (e) {
-        if (e.name !== "AbortError") {
-          setProducts([]);
-        }
+        if (e.name !== "AbortError") setProducts([]);
       }
     }
 
@@ -65,16 +96,10 @@ export default function GenerateBill() {
 
   async function fetchBatchLotId(productId) {
     try {
-      const res = await authFetch(
-        `${API_BASE}/catalog/batches/?product=${productId}`
-      );
-      if (!res.ok) {
-        return null;
-      }
+      const res = await authFetch(`${API_BASE}/catalog/batches/?product=${productId}`);
       const data = await res.json();
       const rows = Array.isArray(data) ? data : data.results || [];
-      if (!rows.length) return null;
-      return rows[0].id;
+      return rows.length ? rows[0].id : null;
     } catch {
       return null;
     }
@@ -93,12 +118,7 @@ export default function GenerateBill() {
       return;
     }
 
-    let batchLotId = null;
-    try {
-      batchLotId = await fetchBatchLotId(product.id);
-    } catch {
-      batchLotId = null;
-    }
+    const batchLotId = await fetchBatchLotId(product.id);
 
     setCart([
       ...cart,
@@ -120,24 +140,94 @@ export default function GenerateBill() {
 
   const removeItem = (id) => setCart(cart.filter((item) => item.id !== id));
 
-  const subtotal = cart.reduce(
-    (sum, item) => sum + item.mrp * item.qty,
-    0
-  );
+  const subtotal = cart.reduce((sum, item) => sum + item.mrp * item.qty, 0);
   const gstAmount = (subtotal * gst) / 100;
   const total = subtotal + gstAmount;
 
-  const submitInvoice = async (opts = { autoPrint: false }) => {
+  // ------------------ PAYMENT POPUP ------------------
+  const openPaymentPopup = () => {
     if (!customer.name || !customer.phone || cart.length === 0) {
       alert("Please fill all customer info and add items to cart.");
       return;
     }
+    setShowPaymentPopup(true);
+  };
 
+  const handleSelectPayment = (pm) => {
+    setSelectedPaymentMethod(pm);
+    setShowPaymentPopup(false);
+
+    if (pm.name.toUpperCase() === "CASH") {
+      setCashPaid("");
+      setCashChange(0);
+      setShowCashPopup(true);
+    } else if (pm.name.toUpperCase() === "UPI") {
+      setUpiStatus("pending");
+      setTimeLeft(180);
+      setShowQRPopup(true);
+      startUPITimer();
+    } else {
+      submitInvoice(pm.id);
+    }
+  };
+
+  // ------------------ CASH PAYMENT ------------------
+  useEffect(() => {
+    const paid = parseFloat(cashPaid || "0");
+    const change = paid - total;
+    setCashChange(change > 0 ? change : 0);
+  }, [cashPaid, total]);
+
+  const handleCashSubmit = () => {
+    const paid = parseFloat(cashPaid || "0");
+    if (isNaN(paid) || paid <= 0) {
+      alert("Enter a valid amount paid.");
+      return;
+    }
+
+    setShowCashPopup(false);
+    submitInvoice(selectedPaymentMethod.id, paid);
+  };
+
+  // ------------------ UPI ------------------
+  const startUPITimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          setUpiStatus("expired");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  useEffect(() => {
+    if (upiStatus !== "pending") return;
+
+    const poll = setInterval(() => {
+      if (timeLeft <= 165 && upiStatus === "pending") {
+        setUpiStatus("paid");
+        clearInterval(timerRef.current);
+      }
+    }, 3000);
+
+    return () => clearInterval(poll);
+  }, [upiStatus, timeLeft]);
+
+  const handleUPIConfirmed = () => {
+    setShowQRPopup(false);
+    submitInvoice(selectedPaymentMethod.id);
+  };
+
+  // ------------------ INVOICE ------------------
+  const submitInvoice = async (paymentMethodId, amountPaid) => {
     const withoutBatch = cart.filter((item) => !item.batch_lot_id);
     if (withoutBatch.length) {
-      alert(
-        "Some items do not have an associated stock batch. Please create batches/stock entries for these medicines in the backend before billing."
-      );
+      alert("Some items do not have stock batches. Add stock before billing.");
       return;
     }
 
@@ -159,6 +249,8 @@ export default function GenerateBill() {
       customer_email: customer.email || "",
       customer_city: customer.city || "",
       lines,
+      payment_method: paymentMethodId,
+      amount_paid: amountPaid !== undefined ? amountPaid : total,
     };
 
     try {
@@ -167,35 +259,18 @@ export default function GenerateBill() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       if (!res.ok) {
-        let msg = "Failed to create invoice";
-        try {
-          const errJson = await res.json();
-          msg += `: ${JSON.stringify(errJson)}`;
-        } catch {
-          const errText = await res.text();
-          if (errText) msg += `: ${errText}`;
-        }
-        console.error(msg);
-        alert(msg);
+        const t = await res.text();
+        alert("Invoice failed: " + t);
         return;
       }
+
       const invoice = await res.json();
-
-      await authFetch(
-        `${API_BASE}/sales/invoices/${invoice.id}/complete-payment/`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode: "CASH", amount: "auto" }),
-        }
-      );
-
-      const suffix = opts.autoPrint ? "?print=1" : "";
-      navigate(`/billgeneration/invoice/${invoice.id}${suffix}`);
+      navigate(`/billgeneration/invoice/${invoice.id}`);
     } catch (e) {
+      alert("Payment failed");
       console.error(e);
-      alert("Failed to save and complete payment");
     }
   };
 
@@ -207,110 +282,112 @@ export default function GenerateBill() {
   };
 
   return (
-    <div
-      className="billgeneration-page"
-      style={{ maxWidth: "1200px", margin: "auto", padding: "1rem" }}
-    >
-      <h1
-        className="page-title"
-        style={{ fontWeight: "600", marginBottom: "1.5rem" }}
-      >
-        Billing &amp; Invoicing
+    <div className="billgeneration-page" style={{ maxWidth: "1200px", margin: "auto", padding: "1rem" }}>
+      <h1 className="page-title" style={{ fontWeight: "600", marginBottom: "1.5rem" }}>
+        Billing & Invoicing
       </h1>
 
-      <div
-        className="grid-container"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr 1fr",
-          gap: "1rem",
-          fontSize: "0.9rem",
-        }}
-      >
-        {/* Customer Information */}
+      {/* PAYMENT POPUP */}
+      {showPaymentPopup && (
+        <div className="popup-overlay">
+          <div className="popup-card">
+            <h3>Select Payment Method</h3>
+
+            {paymentMethods.length === 0 && <p style={{ color: "#888" }}>No payment methods found.</p>}
+
+            {paymentMethods.map((pm) => (
+              <button
+                key={pm.id}
+                className="popup-btn cash"
+                onClick={() => handleSelectPayment(pm)}
+              >
+                {pm.name}
+              </button>
+            ))}
+
+            <button className="popup-close" onClick={() => setShowPaymentPopup(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* CASH POPUP */}
+      {showCashPopup && (
+        <div className="popup-overlay">
+          <div className="popup-card">
+            <h3>Cash Payment</h3>
+            <p>Total: ₹{total.toFixed(2)}</p>
+            <input
+              type="number"
+              placeholder="Enter amount paid"
+              value={cashPaid}
+              onChange={(e) => setCashPaid(e.target.value)}
+            />
+            <p>Change: ₹{cashChange.toFixed(2)}</p>
+            <button className="popup-btn" onClick={handleCashSubmit}>OK</button>
+            <button className="popup-close" onClick={() => setShowCashPopup(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* UPI POPUP */}
+      {showQRPopup && (
+        <div className="popup-overlay">
+          <div className="popup-card">
+            <h3>Scan & Pay (UPI)</h3>
+
+            {upiStatus === "pending" && (
+              <>
+                <QRCode
+                  value={`upi://pay?pa=9480084459@axl&pn=Shreyas%20P%20S&am=${total.toFixed(2)}&cu=INR`}
+                  size={200}
+                />
+                <p style={{ marginTop: "1rem" }}>
+                  Amount: <strong>₹{total.toFixed(2)}</strong>
+                </p>
+                <p style={{ marginTop: "0.5rem", color: "#6b7280" }}>Time left: {timeLeft} sec</p>
+              </>
+            )}
+
+            {upiStatus === "paid" && (
+              <>
+                <p style={{ fontSize: "1.2rem", color: "green", fontWeight: 600 }}>✅ Payment Received</p>
+                <button className="popup-btn cash" onClick={handleUPIConfirmed}>Continue</button>
+              </>
+            )}
+
+            {upiStatus === "expired" && (
+              <p style={{ fontSize: "1.2rem", color: "red", fontWeight: 600 }}>❌ Payment Expired</p>
+            )}
+
+            <button className="popup-close" onClick={() => setShowQRPopup(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* MAIN GRID */}
+      <div className="grid-container" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "1rem", fontSize: "0.9rem" }}>
+        {/* CUSTOMER INFO */}
         <div className="card" style={cardStyle}>
-          <h3 style={{ marginBottom: "1rem", fontWeight: "600" }}>
-            Customer Information
-          </h3>
+          <h3 style={{ marginBottom: "1rem", fontWeight: "600" }}>Customer Information</h3>
           <label>Customer Name</label>
-          <input
-            type="text"
-            placeholder="Enter customer name"
-            value={customer.name}
-            onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
-            style={{
-              width: "100%",
-              padding: "0.5rem",
-              marginBottom: "1rem",
-              borderRadius: "4px",
-              border: "1px solid #d1d5db",
-            }}
-          />
-          <label>Phone Number</label>
-          <input
-            type="text"
-            placeholder="Enter phone number"
-            value={customer.phone}
-            onChange={(e) =>
-              setCustomer({ ...customer, phone: e.target.value })
-            }
-            style={{
-              width: "100%",
-              padding: "0.5rem",
-              borderRadius: "4px",
-              border: "1px solid #d1d5db",
-            }}
-          />
-          <label style={{ marginTop: "0.75rem" }}>Customer Email</label>
-          <input
-            type="email"
-            placeholder="Enter customer email"
-            value={customer.email}
-            onChange={(e) =>
-              setCustomer({ ...customer, email: e.target.value })
-            }
-            style={{
-              width: "100%",
-              padding: "0.5rem",
-              borderRadius: "4px",
-              border: "1px solid #d1d5db",
-              marginBottom: "0.75rem",
-            }}
-          />
-          <label>City</label>
-          <input
-            type="text"
-            placeholder="Enter city"
-            value={customer.city}
-            onChange={(e) =>
-              setCustomer({ ...customer, city: e.target.value })
-            }
-            style={{
-              width: "100%",
-              padding: "0.5rem",
-              borderRadius: "4px",
-              border: "1px solid #d1d5db",
-            }}
-          />
+          <input type="text" value={customer.name} placeholder="Enter customer name" onChange={(e) => setCustomer({ ...customer, name: e.target.value })} />
+          <label style={{ marginTop: "0.75rem" }}>Phone</label>
+          <input type="text" value={customer.phone} placeholder="Phone number" onChange={(e) => setCustomer({ ...customer, phone: e.target.value })} />
+          <label style={{ marginTop: "0.75rem" }}>Email</label>
+          <input type="email" value={customer.email} placeholder="Customer email" onChange={(e) => setCustomer({ ...customer, email: e.target.value })} />
+          <label style={{ marginTop: "0.75rem" }}>City</label>
+          <input type="text" value={customer.city} placeholder="Customer city" onChange={(e) => setCustomer({ ...customer, city: e.target.value })} />
         </div>
 
-        {/* Select Medicines */}
+        {/* MEDICINES */}
         <div className="card" style={cardStyle}>
-          <h3 style={{ marginBottom: "1rem", fontWeight: "600" }}>
-            Select Medicines
-          </h3>
+          <h3 style={{ marginBottom: "1rem", fontWeight: "600" }}>Select Medicines</h3>
+
           <input
             type="text"
             placeholder="Search medicines..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "0.5rem",
-              marginBottom: "1rem",
-              borderRadius: "4px",
-              border: "1px solid #e5e7eb",
-            }}
           />
 
           <div style={{ maxHeight: "360px", overflowY: "auto" }}>
@@ -318,28 +395,21 @@ export default function GenerateBill() {
               <div
                 key={product.id}
                 style={{
+                  marginBottom: "0.5rem",
+                  padding: "0.75rem",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "6px",
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "0.75rem",
-                  borderRadius: "6px",
-                  border: "1px solid #e5e7eb",
-                  marginBottom: "0.5rem",
                 }}
               >
                 <div>
-                  <div style={{ fontWeight: 500 }}>{product.name}</div>
-                  <div
-                    style={{
-                      fontSize: "0.75rem",
-                      color: "#6b7280",
-                      marginTop: "0.25rem",
-                    }}
-                  >
-                    Stock: {product.stock} &nbsp; | &nbsp; ₹
-                    {product.mrp.toFixed(2)}
+                  <strong>{product.name}</strong>
+                  <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                    Stock: {product.stock} | ₹{product.mrp}
                   </div>
                 </div>
+
                 <button
                   onClick={() => addToCart(product)}
                   style={{
@@ -348,8 +418,7 @@ export default function GenerateBill() {
                     border: "none",
                     borderRadius: "999px",
                     padding: "0.25rem 0.75rem",
-                    cursor: "pointer",
-                    fontSize: "1.25rem",
+                    fontSize: "1.3rem",
                   }}
                 >
                   +
@@ -359,21 +428,20 @@ export default function GenerateBill() {
           </div>
         </div>
 
-        {/* Cart Items */}
+        {/* CART */}
         <div className="card" style={cardStyle}>
           <h3 style={{ marginBottom: "1rem", fontWeight: "600" }}>Cart Items</h3>
+
           {cart.length === 0 ? (
-            <p style={{ color: "#6b7280", fontSize: "0.9rem" }}>
-              No items added yet.
-            </p>
+            <p style={{ color: "#6b7280" }}>No items added.</p>
           ) : (
             <table className="cart-table">
               <thead>
                 <tr>
                   <th>Item</th>
-                  <th style={{ textAlign: "center" }}>Qty</th>
-                  <th style={{ textAlign: "right" }}>Price</th>
-                  <th style={{ textAlign: "right" }}>Total</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>Total</th>
                   <th></th>
                 </tr>
               </thead>
@@ -382,47 +450,17 @@ export default function GenerateBill() {
                   <tr key={item.id}>
                     <td>{item.name}</td>
                     <td style={{ textAlign: "center" }}>
-                      <button
-                        onClick={() => updateQty(item.id, -1)}
-                        style={{
-                          backgroundColor: "#e5e7eb",
-                          border: "none",
-                          borderRadius: "4px",
-                          padding: "0 0.5rem",
-                          cursor: "pointer",
-                        }}
-                      >
-                        -
-                      </button>
-                      <span style={{ margin: "0 0.5rem" }}>{item.qty}</span>
-                      <button
-                        onClick={() => updateQty(item.id, 1)}
-                        style={{
-                          backgroundColor: "#e5e7eb",
-                          border: "none",
-                          borderRadius: "4px",
-                          padding: "0 0.5rem",
-                          cursor: "pointer",
-                        }}
-                      >
-                        +
-                      </button>
+                      <button onClick={() => updateQty(item.id, -1)}>−</button>
+                      <span style={{ margin: "0 6px" }}>{item.qty}</span>
+                      <button onClick={() => updateQty(item.id, 1)}>+</button>
                     </td>
-                    <td style={{ textAlign: "right" }}>₹{item.mrp.toFixed(2)}</td>
-                    <td style={{ textAlign: "right" }}>
-                      ₹{(item.qty * item.mrp).toFixed(2)}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
+
+                    <td>₹{item.mrp.toFixed(2)}</td>
+                    <td>₹{(item.qty * item.mrp).toFixed(2)}</td>
+                    <td>
                       <button
+                        style={{ color: "red", fontSize: "1.2rem" }}
                         onClick={() => removeItem(item.id)}
-                        style={{
-                          backgroundColor: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          color: "#ef4444",
-                          fontSize: "1.1rem",
-                        }}
-                        title="Remove item"
                       >
                         ×
                       </button>
@@ -434,144 +472,42 @@ export default function GenerateBill() {
           )}
         </div>
 
-        {/* Bill Summary */}
+        {/* SUMMARY */}
         <div className="card" style={cardStyle}>
           <h3 style={{ marginBottom: "1rem", fontWeight: "600" }}>Bill Summary</h3>
 
-          <div
-            style={{
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              padding: "1rem",
-            }}
-          >
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      borderBottom: "1px solid #d1d5db",
-                      paddingBottom: "0.5rem",
-                    }}
-                  >
-                    Item
-                  </th>
-                  <th
-                    style={{
-                      textAlign: "center",
-                      borderBottom: "1px solid #d1d5db",
-                      paddingBottom: "0.5rem",
-                    }}
-                  >
-                    Qty
-                  </th>
-                  <th
-                    style={{
-                      textAlign: "right",
-                      borderBottom: "1px solid #d1d5db",
-                      paddingBottom: "0.5rem",
-                    }}
-                  >
-                    Price
-                  </th>
-                  <th
-                    style={{
-                      textAlign: "right",
-                      borderBottom: "1px solid #d1d5db",
-                      paddingBottom: "0.5rem",
-                    }}
-                  >
-                    Total
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {cart.map((item) => (
-                  <tr key={item.id}>
-                    <td style={{ padding: "0.3rem 0" }}>{item.name}</td>
-                    <td style={{ textAlign: "center" }}>{item.qty}</td>
-                    <td style={{ textAlign: "right" }}>
-                      ₹{item.mrp.toFixed(2)}
-                    </td>
-                    <td style={{ textAlign: "right" }}>
-                      ₹{(item.qty * item.mrp).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <p style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>Subtotal:</span> <strong>₹{subtotal.toFixed(2)}</strong>
+          </p>
 
-            <hr style={{ margin: "0.5rem 0" }} />
+          <p style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>GST ({gst}%):</span> <strong>₹{gstAmount.toFixed(2)}</strong>
+          </p>
 
-            <p
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                margin: "0.2rem 0",
-              }}
-            >
-              <span>Subtotal:</span>
-              <span>₹{subtotal.toFixed(2)}</span>
-            </p>
+          <hr />
 
-            <p
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                margin: "0.2rem 0",
-              }}
-            >
-              <span>GST ({gst}%):</span>
-              <span>₹{gstAmount.toFixed(2)}</span>
-            </p>
-
-            <hr style={{ margin: "0.5rem 0" }} />
-
-            <p
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontWeight: "600",
-                fontSize: "1.2rem",
-              }}
-            >
-              <span>Total:</span>
-              <span>₹{total.toFixed(2)}</span>
-            </p>
-          </div>
+          <p style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>
+            <strong>Total:</strong> <strong>₹{total.toFixed(2)}</strong>
+          </p>
 
           <button
-            onClick={() => submitInvoice({ autoPrint: false })}
             className="generate-btn"
-            style={{
-              marginTop: "1rem",
-              backgroundColor: "#14b8a6",
-              color: "white",
-              width: "100%",
-              borderRadius: "6px",
-              padding: "0.7rem",
-              cursor: "pointer",
-              fontWeight: "600",
-            }}
+            style={{ width: "100%", marginTop: "1rem" }}
+            onClick={openPaymentPopup}
           >
             Complete Payment
           </button>
+
           <button
-            onClick={() => submitInvoice({ autoPrint: true })}
             className="generate-btn"
             style={{
+              width: "100%",
               marginTop: "0.75rem",
               backgroundColor: "#0f766e",
-              color: "white",
-              width: "100%",
-              borderRadius: "6px",
-              padding: "0.7rem",
-              cursor: "pointer",
-              fontWeight: "600",
             }}
+            onClick={() => submitInvoice(paymentMethods[0]?.id)}
           >
-            Print Bill (Cash)
+            Print Bill (Default Method)
           </button>
         </div>
       </div>

@@ -31,6 +31,8 @@ const PurchaseOrders = () => {
         const data = await res.json();
         const ordersList = data.results || [];
 
+        
+
         // For each order, fetch its lines and calculate total items
         const ordersWithItems = await Promise.all(
           ordersList.map(async (order) => {

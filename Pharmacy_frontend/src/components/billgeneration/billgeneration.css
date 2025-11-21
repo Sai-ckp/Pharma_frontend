@@ -94,3 +94,167 @@
   font-size: 0.9rem;
   color: gray;
 }
+
+/* ===== POPUP OVERLAY ===== */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+/* ===== POPUP CARD ===== */
+.popup-card {
+  background: white;
+  padding: 1.8rem;
+  border-radius: 10px;
+  width: 360px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.popup-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* ===== POPUP BUTTONS ===== */
+.popup-btn {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 0.75rem;
+}
+
+.popup-btn.cash {
+  background: #16a34a;
+}
+
+.popup-btn.cash:hover {
+  background: #15803d;
+}
+
+.popup-btn.upi {
+  background: #2563eb;
+}
+
+.popup-btn.upi:hover {
+  background: #1d4ed8;
+}
+
+.popup-close {
+  background: #dc2626;
+  color: white;
+  padding: 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.popup-close:hover {
+  background: #b91c1c;
+}
+
+/* ===== Fade in animation ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+
+/* ===== GLASS MORPHISM POPUP OVERLAY ===== */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(8px) brightness(0.7);
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* ===== GLASS POPUP CARD ===== */
+.popup-card {
+  width: 360px;
+  padding: 1.8rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  animation: popupScale 0.25s ease-out;
+}
+
+.popup-card h3 {
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: #111;
+}
+
+/* POPUP BUTTONS */
+.popup-btn {
+  width: 100%;
+  padding: 0.8rem;
+  margin: 0.4rem 0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+/* Green button */
+.popup-btn.cash {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+}
+.popup-btn.cash:hover {
+  opacity: 0.9;
+}
+
+/* Close button */
+.popup-close {
+  margin-top: 0.6rem;
+  padding: 0.6rem;
+  width: 100%;
+  border: none;
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.popup-close:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes popupScale {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
