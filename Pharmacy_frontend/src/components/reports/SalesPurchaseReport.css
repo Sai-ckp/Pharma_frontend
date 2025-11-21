@@ -1,0 +1,96 @@
+/* Wrapper */
+.sr-wrap {
+  padding: 24px;
+  background: #f7f9fc;
+}
+
+/* Titles */
+.sr-title {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.sr-sub {
+  margin-top: 4px;
+  color: #777;
+}
+
+/* Tabs */
+.sr-tabs {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.sr-tabs button {
+  padding: 8px 16px;
+  background: #ececec;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sr-tabs .active {
+  background: #13b57d;
+  color: white;
+}
+
+/* KPI Cards — FLEXIBLE GRID */
+.sr-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* KPI Card Box */
+.sr-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Text inside KPI card */
+.sr-card p {
+  margin-bottom: 6px;
+  color: #555;
+  font-weight: 500;
+}
+
+.sr-card h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #222;
+}
+
+/* KPI Card COLOR VARIANTS — EXACT UI MATCH */
+.sr-card.green {
+  border-color: rgba(19, 181, 125, 0.30); /* Light green border */
+}
+
+.sr-card.orange {
+  border-color: rgba(255, 167, 38, 0.35);
+}
+
+.sr-card.blue {
+  border-color: rgba(66, 165, 245, 0.35);
+}
+
+/* Chart container */
+.sr-chart-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  min-height: 360px;
+}
+
+.sr-chart-card h4 {
+  margin-bottom: 14px;
+  font-weight: 600;
+  color: #333;
+}

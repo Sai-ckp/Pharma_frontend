@@ -22,33 +22,26 @@ export function clearTokens() {
   localStorage.removeItem(REFRESH_TOKEN_KEY);
 }
 
+/**
+ * ✔ FAKE LOGIN
+ *   - No backend call
+ *   - Generates token locally
+ */
 export async function login(username, password) {
-  const response = await fetch(`${API_BASE}/auth/token/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({ username, password }),
-  });
+  const fakeAccess = "fake_access_token_" + Date.now();
+  const fakeRefresh = "fake_refresh_token_" + Date.now();
 
-  if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({}));
-    const message =
-      errorBody.detail ||
-      errorBody.non_field_errors?.[0] ||
-      "Login failed. Please check credentials.";
-    const error = new Error(message);
-    error.status = response.status;
-    error.body = errorBody;
-    throw error;
-  }
+  storeTokens({ access: fakeAccess, refresh: fakeRefresh });
 
-  const data = await response.json();
-  storeTokens({ access: data.access, refresh: data.refresh });
-  return data;
+  return {
+    access: fakeAccess,
+    refresh: fakeRefresh,
+  };
 }
 
+/**
+ * ✔ FAKE REFRESH (always returns same token)
+ */
 export async function refreshAccessToken() {
   const refresh = getRefreshToken();
   if (!refresh) {
@@ -56,27 +49,10 @@ export async function refreshAccessToken() {
     return null;
   }
 
-  const response = await fetch(`${API_BASE}/auth/token/refresh/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({ refresh }),
-  });
+  const newAccess = "fake_access_token_" + Date.now();
+  storeTokens({ access: newAccess, refresh });
 
-  if (!response.ok) {
-    clearTokens();
-    return null;
-  }
-
-  const data = await response.json();
-  if (data.access) {
-    storeTokens({ access: data.access, refresh });
-    return data.access;
-  }
-
-  return null;
+  return newAccess;
 }
 
 export function logout() {
