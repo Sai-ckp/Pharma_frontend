@@ -1,0 +1,141 @@
+/* Wrapper */
+.ts-wrap {
+  padding: 24px;
+  background: #f7f9fc;
+}
+
+/* Header */
+.ts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Titles */
+.ts-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+}
+.ts-sub {
+  margin-top: 4px;
+  color: #777;
+  margin-bottom: 0;
+}
+
+/* Controls (select + export) */
+.ts-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.ts-select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  background: #fff;
+}
+.ts-export {
+  background: #13b57d;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Tabs */
+.ts-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 18px 0;
+}
+.ts-tab {
+  padding: 8px 14px;
+  background: #ececec;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+}
+.ts-tab.active {
+  background: #13b57d;
+  color: #fff;
+}
+
+/* Card / Table */
+.ts-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.03);
+}
+.ts-card-title {
+  margin: 0 0 14px 0;
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
+}
+
+.ts-table-wrap {
+  overflow-x: auto;
+}
+.ts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.ts-table thead th {
+  text-align: left;
+  padding: 12px 8px;
+  color: #666;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+}
+.ts-table tbody td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #f2f2f2;
+  color: #333;
+}
+.ts-table .td-left {
+  text-align: left;
+}
+.ts-no-data {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+}
+
+/* Rank badge */
+.ts-rank {
+  display: inline-block;
+  min-width: 36px;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 12px;
+  background: rgba(19,181,125,0.12);
+  color: #13b57d;
+  font-weight: 600;
+  text-align: center;
+  padding: 0 8px;
+}
+
+/* Chart area */
+.ts-chart-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  margin-top: 20px;
+}
+.ts-chart {
+  height: 300px;
+  position: relative;
+}
+.ts-chart canvas {
+  width: 100% !important;
+  height: 100% !important;
+}

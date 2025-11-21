@@ -101,6 +101,7 @@ import Ndpsdailyentries from "./components/ndpsdailyentries/ndpsdailyentries.jsx
 /* Reports */
 import SalesReport from "./components/reports/SalesReport";
 import PurchaseReport from "./components/reports/PurchaseReport.jsx";
+import ExpiryReport from "./components/reports/ExpiryReport.jsx";
 
 /** Shell for authenticated pages */
 function AppLayout() {
@@ -204,6 +205,7 @@ function AppLayout() {
             {/*Reports*/}
             <Route path="/reports/sales" element={<SalesReport />} />
             <Route path="/reports/purchases" element={<PurchaseReport />} />
+            <Route path="/reports/expiry" element={<ExpiryReport />} />
           </Routes>
         </main>
         <Footer />

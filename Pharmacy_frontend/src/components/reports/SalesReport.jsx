@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./SalesPurchaseReport.css";
 import { Line } from "react-chartjs-2";
+import { Link, useLocation } from "react-router-dom";
 
 import {
   Chart as ChartJS,
@@ -11,8 +12,6 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-
-import { Link, useLocation } from "react-router-dom";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
@@ -25,6 +24,29 @@ export default function SalesReport() {
   const [summary, setSummary] = useState(null);
   const [serverError, setServerError] = useState(null);
 
+    // ⭐ ADD EXPORT FUNCTION HERE
+  async function handleExport(reportType) {
+    try {
+      const res = await fetch(`${API_BASE}/reports/exports/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          report_type: reportType,
+          params: {} // later we will add date filters
+        }),
+      });
+
+      const data = await res.json();
+      alert("Export started! Check Export List.");
+    } catch (err) {
+      console.error(err);
+      alert("Export failed.");
+    }
+  }
+
   const fetchSummary = async () => {
     setLoading(true);
     setServerError(null);
@@ -32,18 +54,14 @@ export default function SalesReport() {
     try {
       const res = await fetch(SALES_SUMMARY_API, {
         method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
+        headers: { Accept: "application/json" },
       });
 
-      if (!res.ok) {
-        throw new Error(`Request failed (${res.status})`);
-      }
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
 
       const data = await res.json();
 
-      const formatted = {
+      setSummary({
         total_revenue: data.total_revenue,
         total_transactions: data.total_transactions,
         avg_bill_value: data.average_bill_value,
@@ -51,9 +69,7 @@ export default function SalesReport() {
           month: t.month,
           revenue: t.total,
         })),
-      };
-
-      setSummary(formatted);
+      });
     } catch (err) {
       setServerError(err.message);
     } finally {
@@ -90,37 +106,42 @@ export default function SalesReport() {
 
       {/* Tabs */}
       <div className="sr-tabs">
-      <Link
-        to="/reports/sales"
-        className={location.pathname === "/reports/sales" ? "active" : ""}
-      >
-        Sales Report
-      </Link>
+        <Link to="/reports/sales" className={location.pathname === "/reports/sales" ? "active" : ""}>
+          Sales Report
+        </Link>
 
-      <Link
-        to="/reports/purchases"
-        className={location.pathname === "/reports/purchases" ? "active" : ""}
-      >
-        Purchase Report
-      </Link>
+        <Link
+          to="/reports/purchases"
+          className={location.pathname === "/reports/purchases" ? "active" : ""}
+        >
+          Purchase Report
+        </Link>
 
-      <Link
-        to="/reports/expiry"
-        className={location.pathname === "/reports/expiry" ? "active" : ""}
-      >
-        Expiry Report
-      </Link>
+        <Link
+          to="/reports/expiry"
+          className={location.pathname === "/reports/expiry" ? "active" : ""}
+        >
+          Expiry Report
+        </Link>
 
-      <Link
-        to="/reports/top-selling"
-        className={location.pathname === "/reports/top-selling" ? "active" : ""}
-      >
-        Top Selling
-      </Link>
-    </div>
+        <Link
+          to="/reports/top-selling"
+          className={location.pathname === "/reports/top-selling" ? "active" : ""}
+        >
+          Top Selling
+        </Link>
+      </div>
+      {/* NEW: FILTER + EXPORT BUTTON */}
+      <div className="report-controls">
+        <select className="report-select">
+          <option>Last 10 Months</option>
+          <option>Last 6 Months</option>
+          <option>Last 12 Months</option>
+        </select>
+        <button className="report-export-btn" onClick={() => handleExport("SALES_REGISTER")}>Export</button>
+      </div>
 
-
-      {/* KPI Cards */}
+      {/* KPI CARDS */}
       <div className="sr-cards">
         <div className="sr-card green">
           <p>Total Revenue</p>
@@ -138,17 +159,19 @@ export default function SalesReport() {
         </div>
       </div>
 
-      {/* Chart */}
+      {/* CHART */}
       <div className="sr-chart-card">
         <h4>Monthly Sales Trend</h4>
-        <Line
-          height={75}
-          data={chartData}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-          }}
-        />
+
+        <div className="sr-chart-wrapper">
+          <Line
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+            }}
+          />
+        </div>
       </div>
     </div>
   );

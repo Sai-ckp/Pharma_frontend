@@ -1,51 +1,73 @@
-/* Wrapper */
-.sr-wrap {
+/* =========================================================
+   COMMON WRAPPER
+   ========================================================= */
+.sr-wrap,
+.pr-wrap {
   padding: 24px;
   background: #f7f9fc;
 }
 
-/* Titles */
-.sr-title {
+/* =========================================================
+   TITLES
+   ========================================================= */
+.sr-title,
+.pr-title {
   font-size: 22px;
   font-weight: 600;
 }
 
-.sr-sub {
+.sr-sub,
+.pr-sub {
   margin-top: 4px;
   color: #777;
 }
 
-/* Tabs */
-.sr-tabs {
+/* =========================================================
+   TABS (Sales + Purchase)
+   ========================================================= */
+.sr-tabs,
+.pr-tabs {
   display: flex;
   gap: 12px;
   margin: 24px 0;
 }
 
-.sr-tabs button {
+.sr-tabs button,
+.pr-tabs button,
+.sr-tabs a,
+.pr-tabs a {
   padding: 8px 16px;
   background: #ececec;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  text-decoration: none;
+  color: #333;
 }
 
-.sr-tabs .active {
+.sr-tabs .active,
+.pr-tabs .active,
+.sr-tabs a.active,
+.pr-tabs a.active {
   background: #13b57d;
   color: white;
 }
 
-/* KPI Cards — FLEXIBLE GRID */
-.sr-cards {
+/* =========================================================
+   KPI CARDS (Flexible Grid)
+   ========================================================= */
+.sr-cards,
+.pr-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
 }
 
-/* KPI Card Box */
-.sr-card {
+/* KPI CARD BOX */
+.sr-card,
+.pr-card {
   background: #ffffff;
   border-radius: 12px;
   padding: 18px;
@@ -53,26 +75,30 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-/* Text inside KPI card */
-.sr-card p {
+/* KPI TEXT */
+.sr-card p,
+.pr-card p {
   margin-bottom: 6px;
   color: #555;
   font-weight: 500;
 }
 
-.sr-card h3 {
+.sr-card h3,
+.pr-card h3 {
   margin: 0;
   font-size: 22px;
   font-weight: 600;
   color: #222;
 }
 
-/* KPI Card COLOR VARIANTS — EXACT UI MATCH */
-.sr-card.green {
-  border-color: rgba(19, 181, 125, 0.30); /* Light green border */
+/* KPI COLOR VARIANTS */
+.sr-card.green,
+.pr-card.card-green {
+  border-color: rgba(19, 181, 125, 0.30);
 }
 
-.sr-card.orange {
+.sr-card.orange,
+.pr-card.card-orange {
   border-color: rgba(255, 167, 38, 0.35);
 }
 
@@ -80,17 +106,110 @@
   border-color: rgba(66, 165, 245, 0.35);
 }
 
-/* Chart container */
-.sr-chart-card {
+/* KPI Subtitle (Purchase Report style) */
+.pr-kpi-sub {
+  margin-top: 6px;
+  display: inline-block;
+  font-size: 12px;
+  color: #13b57d;
+}
+
+/* =========================================================
+   PURCHASE REPORT HEADER CONTROLS
+   ========================================================= */
+.pr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pr-controls {
+  display: flex;
+  gap: 12px;
+}
+
+.pr-select {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.pr-export {
+  background: #13b57d;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* =========================================================
+   CHART CARD (Shared for both)
+   ========================================================= */
+.sr-chart-card,
+.pr-chart-card {
   background: #ffffff;
   padding: 20px;
   border-radius: 14px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  min-height: 360px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
 }
 
-.sr-chart-card h4 {
-  margin-bottom: 14px;
+.sr-chart-card h4,
+.pr-chart-card h4 {
+  margin-bottom: 12px;
   font-weight: 600;
   color: #333;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   CHART WRAPPER (Works for both Sales + Purchase)
+   ========================================================= */
+.sr-chart-wrapper,
+.pr-chart {
+  flex: 1;
+  position: relative;
+}
+
+.sr-chart-wrapper canvas,
+.pr-chart canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* REPORT PAGE CONTROLS (Filter + Export) */
+.report-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.report-select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: white;
+  font-size: 14px;
+}
+
+.report-export-btn {
+  padding: 8px 14px;
+  background: #13b57d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.report-export-btn:hover {
+  opacity: 0.9;
 }
