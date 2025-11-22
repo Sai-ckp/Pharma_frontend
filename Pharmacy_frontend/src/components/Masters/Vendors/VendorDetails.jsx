@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { authFetch } from "../../../api/http";
+import { formatDateDDMMYYYY } from "../../../utils/dateFormat";
 import "./vendorDetails.css";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const VendorDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [purchaseHistory, setPurchaseHistory] = useState([]);
+  const [suppliedProducts, setSuppliedProducts] = useState([]);
+
+  const [activeTab, setActiveTab] = useState("purchase"); // purchase | products
+
+  // Fetch Vendor Basic Details
   useEffect(() => {
     const fetchVendor = async () => {
       try {
@@ -27,12 +37,53 @@ const VendorDetails = () => {
     fetchVendor();
   }, [id]);
 
+  // Fetch Purchase Orders
+  useEffect(() => {
+    if (!vendor) return;
+
+    const loadPurchaseHistory = async () => {
+      try {
+        const res = await authFetch(
+          `${API_BASE_URL}/procurement/purchase-orders/?vendor=${vendor.id}`
+        );
+        const data = await res.json();
+        const orders = data.results || [];
+        setPurchaseHistory(orders);
+      } catch (err) {
+        console.error("Error loading purchase history:", err);
+      }
+    };
+
+    loadPurchaseHistory();
+  }, [vendor]);
+
+  // Fetch Supplied Products
+  useEffect(() => {
+    if (!vendor) return;
+
+    const loadSuppliedProducts = async () => {
+      try {
+        const res = await authFetch(
+          `${API_BASE_URL}/catalog/products/?vendor=${vendor.id}`
+        );
+        const data = await res.json();
+        const productsList = data.results || data;
+        setSuppliedProducts(productsList);
+      } catch (err) {
+        console.error("Failed to fetch vendor products:", err);
+        setSuppliedProducts([]);
+      }
+    };
+
+    loadSuppliedProducts();
+  }, [vendor]);
+
   if (loading) return <p className="loading-text">Loading vendor details...</p>;
   if (!vendor) return <p className="loading-text">Vendor not found!</p>;
 
   return (
     <div className="customers-container">
-      {/* Page Header Like Edit Supplier */}
+      {/* Page Header */}
       <div className="page-header">
         <button className="back-btn" onClick={() => navigate("/masters/vendors")}>
           <ArrowLeft size={18} />
@@ -40,6 +91,7 @@ const VendorDetails = () => {
         </button>
         <h1 className="vendors-title">{vendor.name || "Vendor Details"}</h1>
       </div>
+
       <p className="customers-heading">Supplier Details & KPIs</p>
 
       <div className="cards-grid">
@@ -65,11 +117,11 @@ const VendorDetails = () => {
 
           <div className="metrics-row">
             <div className="metric">
-              <div className="metric-value">{vendor.supplied_products || 0}</div>
+              <div className="metric-value">{suppliedProducts.length}</div>
               <div className="metric-label">Products</div>
             </div>
             <div className="metric divider">
-              <div className="metric-value">{vendor.total_purchases || 0}</div>
+              <div className="metric-value">{purchaseHistory.length}</div>
               <div className="metric-label">Orders</div>
             </div>
             <div className="metric">
@@ -83,41 +135,71 @@ const VendorDetails = () => {
         <div className="vendor-card quick-actions-card">
           <h3 className="card-title">Quick Actions</h3>
           <div className="card-body quick-actions-body">
-            <button
-              className="action-btn"
-              onClick={() => navigate(`/masters/products`, { state: { vendor } })}
-            >
-              Create Order
-            </button>
-            <button
-              className="action-btn"
-              onClick={() => navigate(`/masters/products/vendor-catalog/${id}`, { state: { vendor } })}
-            >
-              View Catalog
-            </button>
-            <button
-              className="action-btn"
-              onClick={() => navigate(`/masters/vendors/edit/${id}`, { state: { vendor } })}
-            >
-              Edit Supplier
-            </button>
-            <button
-              className="action-btn"
-              onClick={() => navigate(`/masters/products/purchase-orders/`, { state: { vendor } })}
-            >
-              Purchase Orders
-            </button>
+            <button className="action-btn" onClick={() => navigate(`/masters/products`, { state: { vendor } })}>Create Order</button>
+            <button className="action-btn" onClick={() => navigate(`/masters/products/vendor-catalog/${id}`, { state: { vendor } })}>View Catalog</button>
+            <button className="action-btn" onClick={() => navigate(`/masters/vendors/edit/${id}`, { state: { vendor } })}>Edit Supplier</button>
+            <button className="action-btn" onClick={() => navigate(`/masters/products/purchase-orders/`, { state: { vendor } })}>Purchase Orders</button>
           </div>
         </div>
 
-        {/* Bank Details */}
-        <div className="vendor-card bank-card">
-          <h3 className="card-title">Bank Details</h3>
+        {/* TAB SECTION */}
+        <div className="vendor-card">
+          <div className="tabs">
+            <div className={`tab ${activeTab === "purchase" ? "active" : ""}`} onClick={() => setActiveTab("purchase")}>Purchase History</div>
+            <div className={`tab ${activeTab === "products" ? "active" : ""}`} onClick={() => setActiveTab("products")}>Supplied Products</div>
+          </div>
+
+          {/* TAB CONTENT */}
           <div className="card-body">
-            <div className="contact-row"><strong>Bank Name:</strong> {vendor.bank_name || "-"}</div>
-            <div className="contact-row"><strong>Account No:</strong> {vendor.account_no || "-"}</div>
-            <div className="contact-row"><strong>IFSC:</strong> {vendor.ifsc || "-"}</div>
-            <div className="contact-row"><strong>Notes:</strong> {vendor.notes || "-"}</div>
+            {activeTab === "purchase" && (
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>PO No</th>
+                    <th>Order Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {purchaseHistory.length === 0 ? (
+                    <tr><td colSpan="3">No purchase history found.</td></tr>
+                  ) : (
+                    purchaseHistory.map((order) => (
+                      <tr key={order.id}>
+                        <td>{order.po_number}</td>
+                        <td>{formatDateDDMMYYYY(order.order_date)}</td>
+                        <td>{order.status}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
+
+            {activeTab === "products" && (
+              <table className="table">
+                <thead>
+                  <tr>.tabs
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {suppliedProducts.length === 0 ? (
+                    <tr><td colSpan="3">No products supplied.</td></tr>
+                  ) : (
+                    suppliedProducts.map((prod) => (
+                      <tr key={prod.id}>
+                        <td>{prod.name}</td>
+                        <td>{prod.category_name || "-"}</td>
+                         <td>{prod.is_active === true ? "Active" : "Inactive"}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>

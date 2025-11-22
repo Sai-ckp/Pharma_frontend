@@ -98,12 +98,12 @@ import Saleslines from "./components/saleslines/saleslines.jsx";
 import H1registerentries from "./components/h1registerentries/h1registerentries.jsx";
 import Ndpsdailyentries from "./components/ndpsdailyentries/ndpsdailyentries.jsx";
 
+
 /* Reports */
 import SalesReport from "./components/reports/SalesReport";
 import PurchaseReport from "./components/reports/PurchaseReport.jsx";
 import ExpiryReport from "./components/reports/ExpiryReport.jsx";
 
-/** Shell for authenticated pages */
 function AppLayout() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -206,6 +206,7 @@ function AppLayout() {
             <Route path="/reports/sales" element={<SalesReport />} />
             <Route path="/reports/purchases" element={<PurchaseReport />} />
             <Route path="/reports/expiry" element={<ExpiryReport />} />
+
           </Routes>
         </main>
         <Footer />
