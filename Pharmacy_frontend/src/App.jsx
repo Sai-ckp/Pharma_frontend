@@ -208,11 +208,7 @@ function AppLayout() {
             <Route path="/reports/sales" element={<SalesReport />} />
             <Route path="/reports/purchases" element={<PurchaseReport />} />
             <Route path="/reports/expiry" element={<ExpiryReport />} />
-<<<<<<< HEAD
-=======
             <Route path="/reports/top-selling" element={<TopSellingReport />} />
-
->>>>>>> Dev_frontend
           </Routes>
         </main>
         <Footer />
