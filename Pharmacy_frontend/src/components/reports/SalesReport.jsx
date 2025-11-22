@@ -24,7 +24,7 @@ export default function SalesReport() {
   const [summary, setSummary] = useState(null);
   const [serverError, setServerError] = useState(null);
 
-    // ⭐ ADD EXPORT FUNCTION HERE
+  // ⭐ EXPORT FUNCTION (place this inside the component, above return)
   async function handleExport(reportType) {
     try {
       const res = await fetch(`${API_BASE}/reports/exports/`, {
@@ -34,16 +34,21 @@ export default function SalesReport() {
           Accept: "application/json",
         },
         body: JSON.stringify({
-          report_type: reportType,
-          params: {} // later we will add date filters
+          report_type: reportType,   // SALES_REGISTER, H1_REGISTER, etc.
+          params: {}                  // date filters can be added later
         }),
       });
+
+      if (!res.ok) {
+        alert("Export failed. Server error.");
+        return;
+      }
 
       const data = await res.json();
       alert("Export started! Check Export List.");
     } catch (err) {
       console.error(err);
-      alert("Export failed.");
+      alert("Export failed. Please try again.");
     }
   }
 
