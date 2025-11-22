@@ -43,6 +43,8 @@ const Sidebar = () => {
     { path: "/inventory/medicines/", label: "Inventory Management", icon: <Boxes size={18} /> },
     { path: "/billgeneration/billlist", label: "Billing", icon: <FileText size={18} /> },
 
+    { path: "/reports/sales", label: "Reports", icon: <FileText size={18} /> },
+
     { path: "/masters/vendors", label: "Suppliers", icon: <Store size={18} /> },
     { path: "/masters/customers", label: "Customers", icon: <UserCircle size={18} /> },
     { path: "/expiryalrets", label: "Expiry Alerts", icon: <Hourglass size={18} /> },
