@@ -50,7 +50,6 @@ const Sidebar = () => {
     { path: "/masters/customers", label: "Customers", icon: <UserCircle size={18} /> },
     { path: "/expiryalrets", label: "Expiry Alerts", icon: <Hourglass size={18} /> },
     { path: "/settings", label: "Settings", icon: <ShoppingCart size={18} /> },
-    { path: "/reports/sales", label: "Report", icon: <ShoppingCart size={18} /> },
     
 
     // { path: "/retention-policies", label: "Retention Policies", icon: <ShoppingCart size={18} /> },
