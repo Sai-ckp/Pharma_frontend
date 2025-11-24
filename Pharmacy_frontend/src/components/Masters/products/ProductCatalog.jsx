@@ -1,8 +1,3 @@
-
-
-
-
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -28,19 +23,26 @@ const ProductCatalog = () => {
     }
   }, [vendor, navigate]);
 
-  // Fetch only products belonging to this vendor
+  // Fetch only this vendor's products
   useEffect(() => {
     if (!vendor?.id) return;
 
     const fetchVendorProducts = async () => {
       try {
-        // Fetch all products with a query param filtering by vendor
+        // Use preferred_vendor filter (your DB field)
         const res = await authFetch(
-          `${API_BASE_URL}/catalog/products/?vendor=${vendor.id}`
+          `${API_BASE_URL}/catalog/products/?preferred_vendor=${vendor.id}`
         );
+
         const data = await res.json();
         const list = data.results || data;
-        setProducts(list);
+
+        // Extra safety: filter again in frontend
+        const vendorProducts = list.filter(
+          (p) => Number(p.preferred_vendor) === Number(vendor.id)
+        );
+
+        setProducts(vendorProducts);
       } catch (err) {
         console.error("Failed to fetch vendor products:", err);
         setProducts([]);
@@ -66,7 +68,7 @@ const ProductCatalog = () => {
     fetchCategories();
   }, []);
 
-  // Filter products based on search and category
+  // Filter products for UI
   const filteredProducts = products.filter(
     (p) =>
       p.name?.toLowerCase().includes(search.toLowerCase()) &&
@@ -91,6 +93,8 @@ const ProductCatalog = () => {
       <div className="catalog-card">
         <div className="catalog-card-header">
           <h2>Available Products</h2>
+
+          {/* Filters */}
           <div className="catalog-filters">
             <input
               type="text"
@@ -98,6 +102,7 @@ const ProductCatalog = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
@@ -121,6 +126,7 @@ const ProductCatalog = () => {
               <th>Last Updated</th>
             </tr>
           </thead>
+
           <tbody>
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (

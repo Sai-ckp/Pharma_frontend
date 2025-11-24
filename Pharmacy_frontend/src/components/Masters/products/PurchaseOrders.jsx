@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Eye, Trash2, ArrowLeft } from "lucide-react";
@@ -17,39 +16,42 @@ const PurchaseOrders = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!vendor) {
+    if (!vendor?.id) {
       setLoading(false);
       return;
     }
 
     const fetchOrders = async () => {
       try {
-        // Fetch all purchase orders for the vendor
+        // Fetch orders filtered by vendor from backend
         const res = await authFetch(
           `${API_BASE_URL}/procurement/purchase-orders/?vendor=${vendor.id}`
         );
+
         const data = await res.json();
-        const ordersList = data.results || [];
+        const ordersList = data.results || data || [];
 
-        
+        // Extra safety: filter in React also
+        const filteredOrders = ordersList.filter(
+          (order) => Number(order.vendor) === Number(vendor.id)
+        );
 
-        // For each order, fetch its lines and calculate total items
-        const ordersWithItems = await Promise.all(
-          ordersList.map(async (order) => {
+        // Fetch PO lines and calculate total items for each order
+        const enrichedOrders = await Promise.all(
+          filteredOrders.map(async (order) => {
             try {
               const linesRes = await authFetch(
                 `${API_BASE_URL}/procurement/purchase-orders/${order.id}/lines/`
               );
               const linesData = await linesRes.json();
 
-              // Handle both cases: nested `lines` or direct array
-              const totalItemsArray = Array.isArray(linesData.lines)
+              const linesArray = Array.isArray(linesData.lines)
                 ? linesData.lines
                 : Array.isArray(linesData)
                 ? linesData
                 : [];
 
-              const totalItems = totalItemsArray.reduce(
+              const totalItems = linesArray.reduce(
                 (sum, line) => sum + Number(line.qty_packs_ordered || 0),
                 0
               );
@@ -62,7 +64,7 @@ const PurchaseOrders = () => {
           })
         );
 
-        setOrders(ordersWithItems);
+        setOrders(enrichedOrders);
       } catch (err) {
         console.error("Error fetching purchase orders:", err);
         setOrders([]);
@@ -74,36 +76,33 @@ const PurchaseOrders = () => {
     fetchOrders();
   }, [vendor]);
 
- const handleReceiveItems = (id) =>
+  const handleReceiveItems = (id) =>
     navigate(`/masters/products/receive-items/${id}`, {
       state: { vendor },
     });
 
-
   const handleDelete = async (id) => {
-  if (!window.confirm("Are you sure you want to delete this order?")) return;
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
 
-  try {
-    const res = await authFetch(
-      `${API_BASE_URL}/procurement/purchase-orders/${id}/`,
-      { method: "DELETE" }
-    );
+    try {
+      const res = await authFetch(
+        `${API_BASE_URL}/procurement/purchase-orders/${id}/`,
+        { method: "DELETE" }
+      );
 
-    if (res.ok) {
-      // Remove the deleted order from the state
-      setOrders((prev) => prev.filter((order) => order.id !== id));
-      alert("Purchase order deleted successfully!");
-    } else {
-      const errData = await res.json();
-      console.error("Delete failed:", errData);
-      alert("Failed to delete purchase order.");
+      if (res.ok) {
+        setOrders((prev) => prev.filter((order) => order.id !== id));
+        alert("Purchase order deleted successfully!");
+      } else {
+        const errData = await res.json();
+        console.error("Delete failed:", errData);
+        alert("Failed to delete purchase order.");
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Error deleting purchase order.");
     }
-  } catch (err) {
-    console.error("Delete error:", err);
-    alert("Error deleting purchase order.");
-  }
-};
-
+  };
 
   return (
     <div className="purchaseorders-container">
@@ -138,9 +137,7 @@ const PurchaseOrders = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="6" className="no-orders">
-                  Loading orders...
-                </td>
+                <td colSpan="6" className="no-orders">Loading orders...</td>
               </tr>
             ) : orders.length === 0 ? (
               <tr>
@@ -157,12 +154,13 @@ const PurchaseOrders = () => {
                   <td>{order.total_items}</td>
                   <td>{order.status}</td>
                   <td className="actions-cell">
-                   <button
+                    <button
                       className="receive-btn"
                       onClick={() => handleReceiveItems(order.id)}
                     >
                       Receive Items
                     </button>
+
                     <Trash2
                       className="action-icon delete-icon"
                       onClick={() => handleDelete(order.id)}

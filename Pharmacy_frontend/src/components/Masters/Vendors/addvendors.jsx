@@ -56,7 +56,7 @@ const AddVendor = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await authFetch(`${API_BASE_URL}/api/v1/procurement/vendors/`, {
+      const res = await authFetch(`${API_BASE_URL}/procurement/vendors/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

@@ -20,6 +20,7 @@ const CreateOrder = () => {
   const [notes, setNotes] = useState("");
 
   const [items, setItems] = useState([]);
+  
 
   const [categories, setCategories] = useState([]);
 
@@ -221,7 +222,7 @@ const CreateOrder = () => {
       }
 
       alert("Order created successfully!");
-      navigate("/procurement/orders");
+     
     } catch (err) {
       console.error("Order error:", err);
       alert("Error creating order");

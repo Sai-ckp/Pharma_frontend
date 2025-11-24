@@ -17,7 +17,7 @@ const VendorDetails = () => {
   const [purchaseHistory, setPurchaseHistory] = useState([]);
   const [suppliedProducts, setSuppliedProducts] = useState([]);
 
-  const [activeTab, setActiveTab] = useState("purchase"); // purchase | products
+  const [activeTab, setActiveTab] = useState("purchase");
 
   // Fetch Vendor Basic Details
   useEffect(() => {
@@ -25,6 +25,7 @@ const VendorDetails = () => {
       try {
         const res = await fetch(`${API_BASE_URL}/procurement/vendors/${id}/`);
         if (!res.ok) throw new Error("Vendor not found");
+
         const data = await res.json();
         setVendor(data);
       } catch (err) {
@@ -34,6 +35,7 @@ const VendorDetails = () => {
         setLoading(false);
       }
     };
+
     fetchVendor();
   }, [id]);
 
@@ -46,9 +48,16 @@ const VendorDetails = () => {
         const res = await authFetch(
           `${API_BASE_URL}/procurement/purchase-orders/?vendor=${vendor.id}`
         );
+
         const data = await res.json();
-        const orders = data.results || [];
-        setPurchaseHistory(orders);
+        const orders = data.results || data || [];
+
+        // EXTRA SAFETY — React-side vendor filter
+        const filteredOrders = orders.filter(
+          (ord) => Number(ord.vendor) === Number(vendor.id)
+        );
+
+        setPurchaseHistory(filteredOrders);
       } catch (err) {
         console.error("Error loading purchase history:", err);
       }
@@ -66,9 +75,16 @@ const VendorDetails = () => {
         const res = await authFetch(
           `${API_BASE_URL}/catalog/products/?vendor=${vendor.id}`
         );
+
         const data = await res.json();
         const productsList = data.results || data;
-        setSuppliedProducts(productsList);
+
+        // EXTRA SAFETY — React-side vendor filter
+        const filteredProducts = productsList.filter(
+          (prod) => Number(prod.vendor) === Number(vendor.id)
+        );
+
+        setSuppliedProducts(filteredProducts);
       } catch (err) {
         console.error("Failed to fetch vendor products:", err);
         setSuppliedProducts([]);
@@ -120,14 +136,11 @@ const VendorDetails = () => {
               <div className="metric-value">{suppliedProducts.length}</div>
               <div className="metric-label">Products</div>
             </div>
-            <div className="metric divider">
+            <div className="metric ">
               <div className="metric-value">{purchaseHistory.length}</div>
               <div className="metric-label">Orders</div>
             </div>
-            <div className="metric">
-              <div className="metric-value">₹ {vendor.total_amount || 0}</div>
-              <div className="metric-label">Amount</div>
-            </div>
+           
           </div>
         </div>
 
@@ -145,8 +158,18 @@ const VendorDetails = () => {
         {/* TAB SECTION */}
         <div className="vendor-card">
           <div className="tabs">
-            <div className={`tab ${activeTab === "purchase" ? "active" : ""}`} onClick={() => setActiveTab("purchase")}>Purchase History</div>
-            <div className={`tab ${activeTab === "products" ? "active" : ""}`} onClick={() => setActiveTab("products")}>Supplied Products</div>
+            <div
+              className={`tab ${activeTab === "purchase" ? "active" : ""}`}
+              onClick={() => setActiveTab("purchase")}
+            >
+              Purchase History
+            </div>
+            <div
+              className={`tab ${activeTab === "products" ? "active" : ""}`}
+              onClick={() => setActiveTab("products")}
+            >
+              Supplied Products
+            </div>
           </div>
 
           {/* TAB CONTENT */}
@@ -179,7 +202,7 @@ const VendorDetails = () => {
             {activeTab === "products" && (
               <table className="table">
                 <thead>
-                  <tr>.tabs
+                  <tr>
                     <th>Name</th>
                     <th>Category</th>
                     <th>Status</th>
@@ -193,7 +216,7 @@ const VendorDetails = () => {
                       <tr key={prod.id}>
                         <td>{prod.name}</td>
                         <td>{prod.category_name || "-"}</td>
-                         <td>{prod.is_active === true ? "Active" : "Inactive"}</td>
+                        <td>{prod.is_active ? "Active" : "Inactive"}</td>
                       </tr>
                     ))
                   )}
