@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
 import "./TopSellingReport.css";
 import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from "chart.js";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend
+} from "chart.js";
 import { Link, useLocation } from "react-router-dom";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -14,45 +21,60 @@ export default function TopSellingReport() {
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([]);
   const [error, setError] = useState(null);
+
+  /** ⭐ FILTER STATE */
   const [monthsRange, setMonthsRange] = useState("Last 6 Months");
 
-  async function handleExport(reportType = "SALES_REGISTER") {
-    try {
-        const res = await fetch(`${API_BASE}/reports/exports/`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: JSON.stringify({
-            report_type: reportType,
-            params: {} // optional filters later
-        }),
-        });
+  /** Convert "Last 6 Months" → 6 */
+  function getMonths(label) {
+    return parseInt(label.replace("Last ", "").replace(" Months", ""));
+  }
 
-        await res.json();
-        alert("Export started! Check export list.");
-    } catch (err) {
-        console.error(err);
-        alert("Export failed");
-    }
- }
+  /** ⭐ EXPORT (includes months filter) */
+  function handleExport(reportType = "TOP_SELLING") {
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = `${API_BASE}/reports/exports/`;
+    form.style.display = "none";
 
+    form.appendChild(Object.assign(document.createElement("input"), {
+      type: "hidden",
+      name: "report_type",
+      value: reportType,
+    }));
 
+    form.appendChild(Object.assign(document.createElement("input"), {
+      type: "hidden",
+      name: "params",
+      value: JSON.stringify({ months: getMonths(monthsRange) }),
+    }));
+
+    document.body.appendChild(form);
+    form.submit();
+    setTimeout(() => form.remove(), 1500);
+  }
+
+  /** ⭐ Fetch data with months filter */
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [monthsRange]);
 
   async function fetchData() {
     setLoading(true);
     setError(null);
+
+    const months = getMonths(monthsRange);
+
     try {
-      const res = await fetch(TOP_SELLING_API, { method: "GET", headers: { Accept: "application/json" } });
+      const res = await fetch(`${TOP_SELLING_API}?months=${months}`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+
       if (!res.ok) throw new Error(`Failed (${res.status})`);
+
       const data = await res.json();
-      // Expecting backend to return: [{ medicine_name, units_sold, revenue }, ...]
-      setRows(Array.isArray(data) ? data : []);
+      setRows(data.table || []);
     } catch (err) {
       setError(err.message || String(err));
     } finally {
@@ -60,9 +82,8 @@ export default function TopSellingReport() {
     }
   }
 
-  // Prepare chart: horizontal bar of units sold
-  const labels = rows.map((r) => r.medicine_name || r.product_name || "—");
-  const units = rows.map((r) => Number(r.units_sold ?? r.units ?? 0));
+  const labels = rows.map((r) => r.medicine_name);
+  const units = rows.map((r) => r.units_sold);
 
   const chartData = {
     labels,
@@ -86,21 +107,23 @@ export default function TopSellingReport() {
         </div>
 
         <div className="ts-controls">
-          <select className="ts-select" value={monthsRange} onChange={(e) => setMonthsRange(e.target.value)}>
+          <select
+            className="ts-select"
+            value={monthsRange}
+            onChange={(e) => setMonthsRange(e.target.value)}
+          >
             <option>Last 6 Months</option>
             <option>Last 10 Months</option>
             <option>Last 12 Months</option>
           </select>
-          <button
-            className="report-export-btn"
-            onClick={() => handleExport("SALES_REGISTER")} 
-            >
-            Export
-            </button>
 
+          <button className="report-export-btn" onClick={() => handleExport("TOP_SELLING")}>
+            Export
+          </button>
         </div>
       </div>
 
+      {/* Tabs */}
       <div className="ts-tabs">
         <Link to="/reports/sales" className={location.pathname === "/reports/sales" ? "ts-tab active" : "ts-tab"}>Sales Report</Link>
         <Link to="/reports/purchases" className={location.pathname === "/reports/purchases" ? "ts-tab active" : "ts-tab"}>Purchase Report</Link>
@@ -108,6 +131,7 @@ export default function TopSellingReport() {
         <Link to="/reports/top-selling" className={location.pathname === "/reports/top-selling" ? "ts-tab active" : "ts-tab"}>Top Selling</Link>
       </div>
 
+      {/* TABLE */}
       <div className="ts-card">
         <h4 className="ts-card-title">Top 5 Best Selling Medicines</h4>
 
@@ -132,12 +156,10 @@ export default function TopSellingReport() {
                 ) : (
                   rows.map((r, i) => (
                     <tr key={i}>
-                      <td>
-                        <span className="ts-rank">#{i + 1}</span>
-                      </td>
-                      <td className="td-left">{r.medicine_name || r.product_name || "-"}</td>
-                      <td>{Number(r.units_sold ?? r.units ?? 0)}</td>
-                      <td>₹ {Number(r.revenue ?? r.sale_amount ?? 0).toLocaleString()}</td>
+                      <td><span className="ts-rank">#{i + 1}</span></td>
+                      <td className="td-left">{r.medicine_name}</td>
+                      <td>{r.units_sold}</td>
+                      <td>₹ {Number(r.revenue).toLocaleString()}</td>
                     </tr>
                   ))
                 )}
@@ -147,6 +169,7 @@ export default function TopSellingReport() {
         </div>
       </div>
 
+      {/* CHART */}
       <div className="ts-chart-card">
         <h4 className="ts-card-title">Sales Distribution</h4>
         <div className="ts-chart">

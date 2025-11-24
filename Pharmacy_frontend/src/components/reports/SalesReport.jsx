@@ -24,40 +24,46 @@ export default function SalesReport() {
   const [summary, setSummary] = useState(null);
   const [serverError, setServerError] = useState(null);
 
-  // ⭐ EXPORT FUNCTION (place this inside the component, above return)
-  async function handleExport(reportType) {
-    try {
-      const res = await fetch(`${API_BASE}/reports/exports/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          report_type: reportType,   // SALES_REGISTER, H1_REGISTER, etc.
-          params: {}                  // date filters can be added later
-        }),
-      });
+  /** ⭐ FILTER STATE */
+  const [monthsRange, setMonthsRange] = useState("Last 10 Months");
 
-      if (!res.ok) {
-        alert("Export failed. Server error.");
-        return;
-      }
-
-      const data = await res.json();
-      alert("Export started! Check Export List.");
-    } catch (err) {
-      console.error(err);
-      alert("Export failed. Please try again.");
-    }
+  /** Convert "Last 6 Months" → 6 */
+  function getMonths(label) {
+    return parseInt(label.replace("Last ", "").replace(" Months", ""));
   }
 
+  /** ⭐ XLSX EXPORT — Safe download */
+  function handleExport(reportType) {
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = `${API_BASE}/reports/exports/`;
+    form.style.display = "none";
+
+    form.appendChild(Object.assign(document.createElement("input"), {
+      type: "hidden",
+      name: "report_type",
+      value: reportType,
+    }));
+
+    form.appendChild(Object.assign(document.createElement("input"), {
+      type: "hidden",
+      name: "params",
+      value: JSON.stringify({ months: getMonths(monthsRange) }),
+    }));
+
+    document.body.appendChild(form);
+    form.submit();
+    setTimeout(() => form.remove(), 1500);
+  }
+
+  /** ⭐ FETCH SUMMARY WITH FILTER APPLIED */
   const fetchSummary = async () => {
     setLoading(true);
     setServerError(null);
 
     try {
-      const res = await fetch(SALES_SUMMARY_API, {
+      const months = getMonths(monthsRange);
+      const res = await fetch(`${SALES_SUMMARY_API}?months=${months}`, {
         method: "GET",
         headers: { Accept: "application/json" },
       });
@@ -82,9 +88,10 @@ export default function SalesReport() {
     }
   };
 
+  /** Fetch again when filter changes */
   useEffect(() => {
     fetchSummary();
-  }, []);
+  }, [monthsRange]);
 
   if (loading) return <div style={{ padding: 20 }}>Loading...</div>;
   if (serverError) return <div style={{ color: "red" }}>{serverError}</div>;
@@ -114,68 +121,58 @@ export default function SalesReport() {
         <Link to="/reports/sales" className={location.pathname === "/reports/sales" ? "active" : ""}>
           Sales Report
         </Link>
-
-        <Link
-          to="/reports/purchases"
-          className={location.pathname === "/reports/purchases" ? "active" : ""}
-        >
+        <Link to="/reports/purchases" className={location.pathname === "/reports/purchases" ? "active" : ""}>
           Purchase Report
         </Link>
-
-        <Link
-          to="/reports/expiry"
-          className={location.pathname === "/reports/expiry" ? "active" : ""}
-        >
+        <Link to="/reports/expiry" className={location.pathname === "/reports/expiry" ? "active" : ""}>
           Expiry Report
         </Link>
-
-        <Link
-          to="/reports/top-selling"
-          className={location.pathname === "/reports/top-selling" ? "active" : ""}
-        >
+        <Link to="/reports/top-selling" className={location.pathname === "/reports/top-selling" ? "active" : ""}>
           Top Selling
         </Link>
       </div>
-      {/* NEW: FILTER + EXPORT BUTTON */}
+
+      {/* Filter + Export */}
       <div className="report-controls">
-        <select className="report-select">
-          <option>Last 10 Months</option>
+        <select
+          className="report-select"
+          value={monthsRange}
+          onChange={(e) => setMonthsRange(e.target.value)}
+        >
           <option>Last 6 Months</option>
+          <option>Last 10 Months</option>
           <option>Last 12 Months</option>
         </select>
-        <button className="report-export-btn" onClick={() => handleExport("SALES_REGISTER")}>Export</button>
+
+        <button
+          className="report-export-btn"
+          onClick={() => handleExport("SALES_REGISTER")}
+        >
+          Export
+        </button>
       </div>
 
-      {/* KPI CARDS */}
+      {/* KPI Cards */}
       <div className="sr-cards">
         <div className="sr-card green">
           <p>Total Revenue</p>
           <h3>₹ {summary.total_revenue.toLocaleString()}</h3>
         </div>
-
         <div className="sr-card orange">
           <p>Total Transactions</p>
           <h3>{summary.total_transactions}</h3>
         </div>
-
         <div className="sr-card blue">
           <p>Average Bill Value</p>
           <h3>₹ {summary.avg_bill_value}</h3>
         </div>
       </div>
 
-      {/* CHART */}
+      {/* Chart */}
       <div className="sr-chart-card">
         <h4>Monthly Sales Trend</h4>
-
         <div className="sr-chart-wrapper">
-          <Line
-            data={chartData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-            }}
-          />
+          <Line data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
         </div>
       </div>
     </div>

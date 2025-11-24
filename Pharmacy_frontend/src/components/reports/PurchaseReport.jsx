@@ -23,35 +23,48 @@ export default function PurchaseReport() {
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState(null);
 
-    // ⭐ ADD EXPORT FUNCTION HERE
-  async function handleExport(reportType) {
-    try {
-      const res = await fetch(`${API_BASE}/reports/exports/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          report_type: reportType,
-          params: {} // later we will add date filters
-        }),
-      });
+  /** ⭐ FILTER STATE */
+  const [monthsRange, setMonthsRange] = useState("Last 10 Months");
 
-      const data = await res.json();
-      alert("Export started! Check Export List.");
-    } catch (err) {
-      console.error(err);
-      alert("Export failed.");
-    }
+  /** Convert "Last 6 Months" → 6 */
+  function getMonths(label) {
+    return parseInt(label.replace("Last ", "").replace(" Months", ""));
   }
 
+  /** ⭐ XLSX FILE DOWNLOAD */
+  function handleExport(reportType) {
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = `${API_BASE}/reports/exports/`;
+    form.style.display = "none";
+
+    form.appendChild(Object.assign(document.createElement("input"), {
+      type: "hidden",
+      name: "report_type",
+      value: reportType,
+    }));
+
+    form.appendChild(Object.assign(document.createElement("input"), {
+      type: "hidden",
+      name: "params",
+      value: JSON.stringify({ months: getMonths(monthsRange) }),
+    }));
+
+    document.body.appendChild(form);
+    form.submit();
+
+    setTimeout(() => form.remove(), 1500);
+  }
+
+  /** ⭐ FETCH PURCHASE SUMMARY WITH MONTHS FILTER */
   const fetchSummary = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const res = await fetch(PURCHASE_SUMMARY_API, {
+      const months = getMonths(monthsRange);
+
+      const res = await fetch(`${PURCHASE_SUMMARY_API}?months=${months}`, {
         method: "GET",
         headers: { Accept: "application/json" },
       });
@@ -75,9 +88,10 @@ export default function PurchaseReport() {
     }
   };
 
+  /** Re-fetch summary when filter changes */
   useEffect(() => {
     fetchSummary();
-  }, []);
+  }, [monthsRange]);
 
   if (loading) return <div style={{ padding: 20 }}>Loading...</div>;
   if (error) return <div style={{ color: "red", padding: 20 }}>{error}</div>;
@@ -97,7 +111,7 @@ export default function PurchaseReport() {
 
   return (
     <div className="pr-wrap">
-      {/* ===================== HEADER ====================== */}
+      {/* HEADER */}
       <div className="pr-header">
         <div>
           <h2 className="pr-title">Reports & Analytics</h2>
@@ -106,68 +120,48 @@ export default function PurchaseReport() {
 
         {/* FILTER + EXPORT */}
         <div className="report-controls">
-          <select className="report-select">
-            <option>Last 10 Months</option>
+          <select
+            className="report-select"
+            value={monthsRange}
+            onChange={(e) => setMonthsRange(e.target.value)}
+          >
             <option>Last 6 Months</option>
+            <option>Last 10 Months</option>
             <option>Last 12 Months</option>
           </select>
+
           <button
             className="report-export-btn"
             onClick={() => handleExport("STOCK_LEDGER")}
           >
             Export
           </button>
-
         </div>
       </div>
 
-      {/* ===================== TABS ====================== */}
+      {/* TABS */}
       <div className="pr-tabs">
-        <Link to="/reports/sales" className={location.pathname === "/reports/sales" ? "active" : ""}>
-          Sales Report
-        </Link>
-
-        <Link
-          to="/reports/purchases"
-          className={location.pathname === "/reports/purchases" ? "active" : ""}
-        >
-          Purchase Report
-        </Link>
-
-        <Link
-          to="/reports/expiry"
-          className={location.pathname === "/reports/expiry" ? "active" : ""}
-        >
-          Expiry Report
-        </Link>
-
-        <Link
-          to="/reports/top-selling"
-          className={location.pathname === "/reports/top-selling" ? "active" : ""}
-        >
-          Top Selling
-        </Link>
+        <Link to="/reports/sales" className={location.pathname === "/reports/sales" ? "active" : ""}>Sales Report</Link>
+        <Link to="/reports/purchases" className={location.pathname === "/reports/purchases" ? "active" : ""}>Purchase Report</Link>
+        <Link to="/reports/expiry" className={location.pathname === "/reports/expiry" ? "active" : ""}>Expiry Report</Link>
+        <Link to="/reports/top-selling" className={location.pathname === "/reports/top-selling" ? "active" : ""}>Top Selling</Link>
       </div>
 
-      {/* ===================== KPI CARDS ====================== */}
+      {/* KPI CARDS */}
       <div className="pr-cards">
         <div className="pr-card card-green">
           <p>Total Purchase</p>
           <h3>₹ {Number(summary.total_purchase).toLocaleString()}</h3>
-          <small className="pr-kpi-sub">▲ +15.2% from last period</small>
         </div>
-
         <div className="pr-card card-orange">
           <p>Total Orders</p>
           <h3>{summary.total_orders}</h3>
-          <small className="pr-kpi-sub">▲ +11.7% from last period</small>
         </div>
       </div>
 
-      {/* ===================== CHART ====================== */}
+      {/* CHART */}
       <div className="pr-chart-card">
         <h4>Monthly Purchase Trend</h4>
-
         <div className="pr-chart">
           <Bar
             data={chartData}
