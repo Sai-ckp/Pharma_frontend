@@ -65,13 +65,14 @@
   align-items: center;
 }
 
-/* Force black text everywhere */
+/* Force black text */
 .kpi-item input,
 .kpi-item textarea,
 .add-product-box input,
 .products-table td,
 .products-table th,
-.products-table input {
+.products-table input,
+.products-table select {
   color: #000 !important;
   background: #fff !important;
   border: 1px solid #ccc;
@@ -105,6 +106,16 @@
   align-items: center;
 }
 
+.add-product-box input,
+.add-product-box select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc !important;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #000;
+}
+
 /* Table */
 .products-table {
   width: 100%;
@@ -127,12 +138,6 @@
   cursor: pointer;
 }
 
-.summary-card .total {
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-/* Form actions */
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -155,12 +160,7 @@
   border-radius: 4px;
 }
 
-/* small screens */
-@media (max-width: 900px) {
-  .order-main {
-    flex-direction: column;
-  }
-}
+/* Popup */
 .custom-popup-overlay {
   position: fixed;
   top: 0;
@@ -183,45 +183,62 @@
   box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
 }
 
-.custom-popup-box h2 {
-  margin-bottom: 10px;
-  color: #28a745;
-}
+/* ---------------------------------- */
+/*         FIXES ADDED BELOW         */
+/* ---------------------------------- */
 
-.custom-popup-box button {
-  margin-top: 15px;
-  background-color: #28a745;
-  color: white;
-  padding: 10px 18px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 15px;
-}
-
-.custom-popup-box button:hover {
-  background-color: #218838;
-}
-.add-product-box select {
+/* FIX: UOM dropdown text visible */
+.products-table select,
+.products-table select option {
   color: #000 !important;
   background-color: #fff !important;
 }
 
-.add-product-box input,
-.add-product-box select {
+/* Inputs inside table */
+.products-table td select,
+.products-table td input {
+  color: #000 !important;
+  background: #fff !important;
+}
+
+/* Popup */
+.custom-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc !important;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.custom-popup-box {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  text-align: center;
+  width: 350px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* ⭐ Center content */
+  gap: 20px; /* spacing between text and button */
+}
+
+.custom-popup-box h3 {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.custom-popup-box button {
+  padding: 8px 16px;
+  border: none;
   border-radius: 6px;
-  background-color: #fff;
-  color: #000;
-  font-size: 14px;
-  outline: none;
+  background: #4caf50;
+  color: #fff;
+  cursor: pointer;
+  text-align: center; /* ensure centered text */
 }
-
-.add-product-box select option {
-  color: #000;
-  background-color: #fff;
-}
-

@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Trash2 } from "lucide-react";
@@ -14,22 +12,25 @@ const CreateOrder = () => {
   const vendor = location.state?.vendor;
 
   const [vendorData, setVendorData] = useState(null);
-
   const [orderDate, setOrderDate] = useState(new Date().toISOString().slice(0, 10));
   const [expectedDate, setExpectedDate] = useState("");
   const [notes, setNotes] = useState("");
 
   const [items, setItems] = useState([]);
-  
-
   const [categories, setCategories] = useState([]);
+  const [uoms, setUoms] = useState([]);
 
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [manualProductName, setManualProductName] = useState("");
   const [manualQty, setManualQty] = useState(1);
   const [manualCategory, setManualCategory] = useState("");
+  const [manualUOM, setManualUOM] = useState("");
 
   const [totalItems, setTotalItems] = useState(0);
+
+  // ⭐ Popup state
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     if (!vendor) {
@@ -51,17 +52,27 @@ const CreateOrder = () => {
     fetchVendor();
   }, [vendor, navigate]);
 
+  const fetchUOMs = async () => {
+    try {
+      const res = await authFetch(`${API_BASE}/catalog/uoms/`);
+      const data = await res.json();
+      setUoms(Array.isArray(data) ? data : data.results || []);
+    } catch (err) {
+      console.error("UOM fetch error:", err);
+    }
+  };
+
   const fetchProductsAndCategories = async () => {
     try {
       const pRes = await authFetch(`${API_BASE}/catalog/products/`);
       const pData = await pRes.json();
-      const productList = Array.isArray(pData.results) ? pData.results : pData;
+      const productList = Array.isArray(pData) ? pData : pData.results || [];
 
       const cRes = await authFetch(`${API_BASE}/catalog/categories/`);
       let categoryList = [];
       if (cRes.ok) {
         const cData = await cRes.json();
-        categoryList = Array.isArray(cData.results) ? cData.results : cData;
+        categoryList = Array.isArray(cData) ? cData : cData.results || [];
       }
 
       setCategories(categoryList);
@@ -70,9 +81,10 @@ const CreateOrder = () => {
         uid: `p_${p.id}`,
         id: p.id,
         name: p.name,
-        quantity: Number(p.pack_unit) || 0, // <-- use pack_unit from DB
+        quantity: Number(p.pack_unit) || 0,
         expected_unit_cost: p.purchase_price || 0,
         category: typeof p.category === "object" ? p.category.id : p.category || null,
+        uom: p.base_unit || "",
         isNew: false,
       }));
 
@@ -83,7 +95,10 @@ const CreateOrder = () => {
   };
 
   useEffect(() => {
-    if (vendorData) fetchProductsAndCategories();
+    if (vendorData) {
+      fetchProductsAndCategories();
+      fetchUOMs();
+    }
   }, [vendorData]);
 
   useEffect(() => {
@@ -103,6 +118,7 @@ const CreateOrder = () => {
     if (!manualProductName.trim()) return alert("Enter product name");
     if (!manualQty || Number(manualQty) <= 0) return alert("Enter valid qty");
     if (!manualCategory) return alert("Select category");
+    if (!manualUOM) return alert("Select UOM");
     if (!vendorData?.id) return alert("Vendor not loaded");
 
     const productPayload = {
@@ -115,7 +131,7 @@ const CreateOrder = () => {
       pack_size: "",
       manufacturer: "",
       mrp: 0,
-      base_unit: "NOS",
+      base_unit: manualUOM,
       pack_unit: String(manualQty),
       units_per_pack: 1,
       base_unit_step: 1,
@@ -144,7 +160,6 @@ const CreateOrder = () => {
       }
 
       const created = await productRes.json();
-
       const newItem = {
         uid: `p_${created.id}`,
         id: created.id,
@@ -155,14 +170,15 @@ const CreateOrder = () => {
           typeof created.category === "object"
             ? created.category.id
             : created.category || Number(manualCategory),
+        uom: manualUOM,
         isNew: false,
       };
 
       setItems((prev) => [...prev, newItem]);
-
       setManualProductName("");
       setManualQty(1);
       setManualCategory("");
+      setManualUOM("");
       setShowAddProduct(false);
     } catch (err) {
       console.error("Manual product error:", err);
@@ -175,6 +191,11 @@ const CreateOrder = () => {
       prev.map((it) => (it.uid === uid ? { ...it, quantity: Number(value) || 0 } : it))
     );
 
+  const handleUOMChange = (uid, value) =>
+    setItems((prev) =>
+      prev.map((it) => (it.uid === uid ? { ...it, uom: value } : it))
+    );
+
   const handleDelete = (uid) =>
     setItems((prev) => prev.filter((it) => it.uid !== uid));
 
@@ -184,27 +205,23 @@ const CreateOrder = () => {
     const orderRows = items.filter((r) => Number(r.quantity) > 0);
     if (orderRows.length === 0) return alert("Add at least one product");
 
-    // ⭐ FIXED: backend expects `product` field, not `product_id`
     const lines = orderRows.map((r) => ({
-      product: Number(r.id),
+      product: r.id,
+      requested_name: "",
       qty_packs_ordered: Number(r.quantity),
+      expected_unit_cost: r.expected_unit_cost || null,
+      gst_percent_override: null,
+      uom: r.uom || null,
     }));
-
-
-    const netTotal = orderRows.reduce(
-    (acc, it) => acc + (Number(it.quantity) * Number(it.expected_unit_cost) || 0),
-    0
-);
-
 
     const payload = {
       vendor: Number(vendorData.id),
       location: Number(vendorData.default_location || vendorData.location_id || 1),
       order_date: orderDate,
       expected_date: expectedDate || null,
+      status: "DRAFT",
       note: notes || "",
-      lines,
-      net_total: netTotal  // <-- add this
+      lines: lines,
     };
 
     try {
@@ -217,15 +234,18 @@ const CreateOrder = () => {
       if (!res.ok) {
         const err = await res.json();
         console.log("❌ PO Create Failed:", err);
-        alert("Order failed");
+        setPopupMessage("Order creation failed!");
+        setShowPopup(true);
         return;
       }
 
-      alert("Order created successfully!");
-     
+      // ✅ Show success popup
+      setPopupMessage("Order created successfully!");
+      setShowPopup(true);
     } catch (err) {
       console.error("Order error:", err);
-      alert("Error creating order");
+      setPopupMessage("Error creating order");
+      setShowPopup(true);
     }
   };
 
@@ -233,6 +253,7 @@ const CreateOrder = () => {
 
   return (
     <div className="createorder-container">
+      {/* Header */}
       <div className="page-header">
         <button className="back-btn" onClick={() => navigate(-1)}>
           <ArrowLeft size={18} />
@@ -241,12 +262,13 @@ const CreateOrder = () => {
         <h1 className="page-title">Create Order</h1>
       </div>
 
+      {/* Main */}
       <div className="order-main">
         <div className="left-section">
+          {/* Supplier Info */}
           <div className="kpi-card">
             <h3>Supplier Info</h3>
             <div className="kpi-item">Supplier: {vendorData.name}</div>
-
             <div className="kpi-item">
               Order Date:
               <input
@@ -257,6 +279,7 @@ const CreateOrder = () => {
             </div>
           </div>
 
+          {/* Products */}
           <div className="kpi-card add-product-card">
             <div className="card-header">
               <h3>Order Items</h3>
@@ -273,7 +296,6 @@ const CreateOrder = () => {
                   value={manualProductName}
                   onChange={(e) => setManualProductName(e.target.value)}
                 />
-
                 <select
                   value={manualCategory}
                   onChange={(e) => setManualCategory(e.target.value)}
@@ -285,16 +307,25 @@ const CreateOrder = () => {
                     </option>
                   ))}
                 </select>
-
                 <input
                   type="number"
                   min="1"
                   value={manualQty}
                   onChange={(e) => setManualQty(e.target.value)}
                 />
-
+                <select
+                  value={manualUOM}
+                  onChange={(e) => setManualUOM(e.target.value)}
+                >
+                  <option value="">Select UOM</option>
+                  {uoms.map((u) => (
+                    <option key={u.id} value={u.code}>
+                      {u.name}
+                    </option>
+                  ))}
+                </select>
                 <button className="submit-btn" onClick={handleAddManualProduct}>
-                  Add & Create Product
+                  Add
                 </button>
               </div>
             )}
@@ -308,22 +339,18 @@ const CreateOrder = () => {
                     <th>Product</th>
                     <th>Category</th>
                     <th>Qty</th>
+                    <th>UOM</th>
                     <th></th>
                   </tr>
                 </thead>
-
                 <tbody>
                   {items.map((item) => (
                     <tr key={item.uid}>
                       <td>{item.name}</td>
-
                       <td>
-                        {
-                          (categories.find((c) => String(c.id) === String(item.category)) ||
-                            {}).name || "—"
-                        }
+                        {categories.find((c) => String(c.id) === String(item.category))
+                          ?.name || "—"}
                       </td>
-
                       <td>
                         <input
                           type="number"
@@ -334,7 +361,19 @@ const CreateOrder = () => {
                           }
                         />
                       </td>
-
+                      <td>
+                        <select
+                          value={item.uom || ""}
+                          onChange={(e) => handleUOMChange(item.uid, e.target.value)}
+                        >
+                          <option value="">Select</option>
+                          {uoms.map((u) => (
+                            <option key={u.id} value={u.code}>
+                              {u.name}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
                       <td>
                         <button
                           className="delete-btn"
@@ -350,9 +389,9 @@ const CreateOrder = () => {
             )}
           </div>
 
+          {/* Additional Info */}
           <div className="kpi-card">
             <h3>Additional Information</h3>
-
             <div className="kpi-item">
               Expected Delivery:
               <input
@@ -361,7 +400,6 @@ const CreateOrder = () => {
                 onChange={(e) => setExpectedDate(e.target.value)}
               />
             </div>
-
             <div className="kpi-item">
               Notes:
               <textarea
@@ -373,6 +411,7 @@ const CreateOrder = () => {
           </div>
         </div>
 
+        {/* Right Section */}
         <div className="right-section">
           <div className="kpi-card summary-card">
             <h3>Summary</h3>
@@ -389,10 +428,23 @@ const CreateOrder = () => {
           </div>
         </div>
       </div>
+
+      {/* ⭐ Popup */}
+      {showPopup && (
+        <div className="custom-popup-overlay">
+          <div className="custom-popup-box">
+            <h3>{popupMessage}</h3>
+            <button
+              className="submit-btn"
+              onClick={() => setShowPopup(false)}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default CreateOrder;
-
-
