@@ -10,7 +10,7 @@ const CustomerDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [customer, setCustomer] = useState(null);
+  const [customerData, setCustomerData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [showInvoices, setShowInvoices] = useState(false);
@@ -19,7 +19,7 @@ const CustomerDetails = () => {
 
   const fetchedOnce = useRef(false);
 
-  // Fetch customer details
+  // Fetch customer details with summary
   useEffect(() => {
     if (!id || fetchedOnce.current) return;
     fetchedOnce.current = true;
@@ -29,7 +29,8 @@ const CustomerDetails = () => {
         const res = await fetch(`${API_BASE}/customers/${id}/?summary=true`);
         if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
         const data = await res.json();
-        setCustomer(data);
+        console.log("Fetched customer summary:", data); // Debug log
+        setCustomerData(data); // Store full backend response
       } catch (err) {
         console.error("Customer Fetch Error:", err);
       } finally {
@@ -40,16 +41,13 @@ const CustomerDetails = () => {
     fetchCustomer();
   }, [id]);
 
-  // FIXED: Load invoices correctly
+  // Load invoices
   const loadInvoices = async () => {
     if (!showInvoices) {
-      // Opening → Load invoices
       setShowInvoices(true);
       setInvoiceLoading(true);
       try {
-        const res = await authFetch(
-          `${API_BASE}/sales/invoices/?customer=${id}&ordering=-invoice_date`
-        );
+        const res = await authFetch(`${API_BASE}/customers/${id}/invoices/`);
         if (res.ok) {
           const data = await res.json();
           setInvoices(Array.isArray(data) ? data : data.results || []);
@@ -63,16 +61,14 @@ const CustomerDetails = () => {
         setInvoiceLoading(false);
       }
     } else {
-      // Closing → Don't load again
       setShowInvoices(false);
     }
   };
 
   if (loading) return <p>Loading customer details...</p>;
-  if (!customer) return <p>Customer not found!</p>;
+  if (!customerData) return <p>Customer not found!</p>;
 
-  const stats = customer.stats || {};
-  const thisMonth = stats.this_month || {};
+  const { customer, active, purchase_status, this_month } = customerData;
 
   return (
     <div className="customer-details-container">
@@ -80,23 +76,25 @@ const CustomerDetails = () => {
         <button className="back-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
-        <h1 className="customer-name">{customer.name}</h1>
+        <h1 className="customer-name">{customer?.name}</h1>
       </div>
 
       <div className="customer-kpi-container">
+        {/* Contact Info */}
         <div className="kpi-card contact-info">
           <h3>Contact Information</h3>
           <div className="contact-item">
-            <Phone size={18} /> {customer.phone || "-"}
+            <Phone size={18} /> {customer?.phone || "-"}
           </div>
           <div className="contact-item">
-            <Mail size={18} /> {customer.email || "-"}
+            <Mail size={18} /> {customer?.email || "-"}
           </div>
           <div className="contact-item">
-            <MapPin size={18} /> {customer.shipping_address || "-"}
+            <MapPin size={18} /> {customer?.shipping_address || "-"}
           </div>
         </div>
 
+        {/* Additional Actions */}
         <div className="kpi-card additional-info">
           <h3>Additional Actions</h3>
           <div className="additional-btns">
@@ -122,7 +120,6 @@ const CustomerDetails = () => {
                       <th>Action</th>
                     </tr>
                   </thead>
-
                   <tbody>
                     {invoices.length === 0 ? (
                       <tr>
@@ -133,28 +130,12 @@ const CustomerDetails = () => {
                     ) : (
                       invoices.map((inv) => (
                         <tr key={inv.id}>
-                          <td>{inv.invoice_no}</td>
-                          <td>{inv.invoice_date?.slice(0, 10)}</td>
-
-                          <td>
-                            {inv.lines && inv.lines.length
-                              ? inv.lines
-                                  .map((l) => l.product_name || "-")
-                                  .join(", ")
-                              : "-"}
-                          </td>
-
-                          <td>₹ {inv.net_total}</td>
+                          <td>{inv.invoice_no || inv.id}</td>
+                          <td>{inv.date?.slice(0, 10) || "-"}</td>
+                          <td>{inv.items || 0}</td>
+                          <td>₹ {inv.amount || 0}</td>
                           <td>{inv.payment_status || "-"}</td>
-
-                          <td
-                            className={
-                              inv.status === "PAID" ? "paid" : "pending"
-                            }
-                          >
-                            {inv.status}
-                          </td>
-
+                          <td>{inv.payment_status || "-"}</td>
                           <td>
                             <button
                               className="view-btn"
@@ -175,23 +156,26 @@ const CustomerDetails = () => {
           )}
         </div>
 
+        {/* Customer Status */}
         <div className="kpi-card customer-status small-card">
           <h3>Customer Status</h3>
           <UserCheck size={30} />
-          <p>{customer.is_active ? "Active" : "Inactive"}</p>
-          <p>Total Bills: {stats.total_bills || 0}</p>
+          <p>{active?.is_active ? "Active" : "Inactive"}</p>
+          <p>Total Bills: {active?.total_bills || 0}</p>
         </div>
 
+        {/* Purchase Stats */}
         <div className="kpi-card purchase-stats">
           <h3>Purchase Stats</h3>
-          <p>Total Purchases: ₹ {stats.total_purchases || 0}</p>
-          <p>Avg Bill: ₹ {stats.average_bill_value || 0}</p>
+          <p>Total Purchases: ₹ {purchase_status?.total_purchases || 0}</p>
+          <p>Avg Bill: ₹ {purchase_status?.avg_bill_value || 0}</p>
         </div>
 
+        {/* This Month */}
         <div className="kpi-card this-month">
           <h3>This Month</h3>
-          <p>Visits: {thisMonth.visits || 0}</p>
-          <p>Amount Spent: ₹ {thisMonth.amount_spent || 0}</p>
+          <p>Visits: {this_month?.visits || 0}</p>
+          <p>Amount Spent: ₹ {this_month?.amount_spent || 0}</p>
         </div>
       </div>
     </div>

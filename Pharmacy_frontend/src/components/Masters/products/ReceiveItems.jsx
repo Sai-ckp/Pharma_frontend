@@ -240,157 +240,80 @@ const ReceiveItems = () => {
       <h1 className="page-title">Receive Items</h1>
 
       <div className="kpi-cards-grid">
-        {/* Purchase Order Details */}
+        {/* 1. Purchase Order Details */}
         <div className="kpi-card">
           <h3>Purchase Order Details</h3>
-          <div className="kpi-item">
-            <strong>PO Number:</strong> {purchaseOrder.po_number}
-          </div>
-          <div className="kpi-item">
-            <strong>Supplier:</strong> {purchaseOrder.supplier}
-          </div>
-          <div className="kpi-item">
-            <strong>Order Date:</strong> {formatDateDDMMYYYY(purchaseOrder.order_date)}
-          </div>
-          <div className="kpi-item">
-            <strong>Expected Date:</strong> {formatDateDDMMYYYY(purchaseOrder.expected_date)}
-          </div>
+          <div className="kpi-item"><strong>PO Number:</strong> {purchaseOrder.po_number}</div>
+          <div className="kpi-item"><strong>Supplier:</strong> {purchaseOrder.supplier}</div>
+          <div className="kpi-item"><strong>Order Date:</strong> {formatDateDDMMYYYY(purchaseOrder.order_date)}</div>
+          <div className="kpi-item"><strong>Expected Date:</strong> {formatDateDDMMYYYY(purchaseOrder.expected_date)}</div>
         </div>
 
-        {/* Receiving Details */}
+        {/* 2. Receiving Details */}
         <div className="kpi-card">
           <h3>Receiving Details</h3>
           {receivingDetails ? (
             <>
-              <div className="kpi-item">
-                <strong>Received Date:</strong> {formatDateDDMMYYYY(receivingDetails.received_date)}
-              </div>
-              <div className="kpi-item">
-                <strong>Received By:</strong> {receivingDetails.received_by}
-              </div>
-              <div className="kpi-item">
-                <strong>Invoice Number:</strong> {receivingDetails.invoice_number}
-              </div>
+              <div className="kpi-item"><strong>Received Date:</strong> {formatDateDDMMYYYY(receivingDetails.received_date)}</div>
+              <div className="kpi-item"><strong>Received By:</strong> {receivingDetails.received_by}</div>
+              <div className="kpi-item"><strong>Invoice Number:</strong> {receivingDetails.invoice_number}</div>
             </>
           ) : (
-            <div className="kpi-item" style={{ color: "#d97706" }}>
-              Not yet received
-            </div>
+            <div className="kpi-item" style={{ color: "#d97706" }}>Not yet received</div>
           )}
         </div>
 
-        {/* Items Table */}
-        <div className="kpi-card">
-          <h3>Items Received</h3>
-          <div className="table-wrapper">
-            <table className="items-received-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Ordered</th>
-                  <th>Received</th>
-                  <th>Damaged</th>
-                  <th>Batch</th>
-                  <th>MFG Date</th>
-                  <th>Expiry Date</th>
-                  <th>Rack No</th>
-                  <th>Unit Cost</th>
-                  <th>MRP</th>
-                </tr>
-              </thead>
-              <tbody>
-                {itemsReceived.map((item, idx) => (
-                  <tr key={item.id}>
-                    <td>{item.product_name}</td>
-                    <td>{item.ordered}</td>
-                    <td>
-                      <input
-                        type="number"
-                        min={0}
-                        value={item.received}
-                        onChange={(e) => handleItemEdit(idx, "received", e.target.value)}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        min={0}
-                        value={item.damaged}
-                        onChange={(e) => handleItemEdit(idx, "damaged", e.target.value)}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        value={item.batch}
-                        onChange={(e) => handleItemEdit(idx, "batch", e.target.value)}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="date"
-                        value={item.mfg_date}
-                        onChange={(e) => handleItemEdit(idx, "mfg_date", e.target.value)}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="date"
-                        value={item.expiry_date}
-                        onChange={(e) => handleItemEdit(idx, "expiry_date", e.target.value)}
-                      />
-                    </td>
-                    <td>
-                      <select
-                        value={item.rack_no || ""}
-                        onChange={(e) => handleItemEdit(idx, "rack_no", e.target.value)}
-                      >
-                        <option value="">Select Rack</option>
-                        {rackLocations.map((rack) => (
-                          <option key={rack.id} value={rack.name}>
-                            {rack.name}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={item.unit_cost}
-                        onChange={(e) => handleItemEdit(idx, "unit_cost", e.target.value)}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={item.mrp}
-                        onChange={(e) => handleItemEdit(idx, "mrp", e.target.value)}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Receiving Summary */}
+        {/* 3. Receiving Summary */}
         <div className="kpi-card summary-card">
           <h3>Receiving Summary</h3>
-          <div className="summary-row">
-            <CheckCircle size={16} /> Total Ordered: {summary.total_ordered}
-          </div>
-          <div className="summary-row">
-            <Package size={16} /> Total Received: {summary.total_received}
-          </div>
-          <div className="summary-row">
-            <ClipboardList size={16} /> Completion: {summary.completion}
-          </div>
-          <button className="complete-btn" onClick={handleCompleteReceiving}>
-            Complete Receiving
-          </button>
+          <div className="summary-row"><CheckCircle size={16} /> Total Ordered: {summary.total_ordered}</div>
+          <div className="summary-row"><Package size={16} /> Total Received: {summary.total_received}</div>
+          <div className="summary-row"><ClipboardList size={16} /> Completion: {summary.completion}</div>
+          <button className="complete-btn" onClick={handleCompleteReceiving}>Complete Receiving</button>
+        </div>
+
+        {/* 4. Items Received (full width) */}
+        <div className="kpi-card items-table-card">
+          <h3>Items Received</h3>
+          <table className="items-received-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Ordered</th>
+                <th>Received</th>
+                <th>Damaged</th>
+                <th>Batch</th>
+                
+                <th>Rack No</th>
+                <th>Unit Cost</th>
+                <th>MRP</th>
+                <th>MFG Date</th>
+                <th>Expiry Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {itemsReceived.map((item, idx) => (
+                <tr key={item.id}>
+                  <td>{item.product_name}</td>
+                  <td>{item.ordered}</td>
+                  <td><input type="number" min={0} value={item.received} onChange={(e) => handleItemEdit(idx, "received", e.target.value)} /></td>
+                  <td><input type="number" min={0} value={item.damaged} onChange={(e) => handleItemEdit(idx, "damaged", e.target.value)} /></td>
+                  <td><input type="text" value={item.batch} onChange={(e) => handleItemEdit(idx, "batch", e.target.value)} /></td>
+                  
+                  <td>
+                    <select value={item.rack_no || ""} onChange={(e) => handleItemEdit(idx, "rack_no", e.target.value)}>
+                      <option value="">Select Rack</option>
+                      {rackLocations.map((rack) => (<option key={rack.id} value={rack.name}>{rack.name}</option>))}
+                    </select>
+                  </td>
+                  <td><input type="number" step="0.01" value={item.unit_cost} onChange={(e) => handleItemEdit(idx, "unit_cost", e.target.value)} /></td>
+                  <td><input type="number" step="0.01" value={item.mrp} onChange={(e) => handleItemEdit(idx, "mrp", e.target.value)} /></td>
+                  <td><input type="date" value={item.mfg_date} onChange={(e) => handleItemEdit(idx, "mfg_date", e.target.value)} /></td>
+                  <td><input type="date" value={item.expiry_date} onChange={(e) => handleItemEdit(idx, "expiry_date", e.target.value)} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

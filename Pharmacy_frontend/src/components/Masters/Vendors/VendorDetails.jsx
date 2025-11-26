@@ -152,6 +152,8 @@ const VendorDetails = () => {
             <button className="action-btn" onClick={() => navigate(`/masters/products/vendor-catalog/${id}`, { state: { vendor } })}>View Catalog</button>
             <button className="action-btn" onClick={() => navigate(`/masters/vendors/edit/${id}`, { state: { vendor } })}>Edit Supplier</button>
             <button className="action-btn" onClick={() => navigate(`/masters/products/purchase-orders/`, { state: { vendor } })}>Purchase Orders</button>
+            <button className="action-btn" onClick={() => navigate(`/masters/vendors/import`, { state: { vendor } })}> Import</button>
+
           </div>
         </div>
 

@@ -3,130 +3,147 @@ import { useNavigate } from "react-router-dom";
 import "./customersdashboard.css";
 import { Eye, Trash2 } from "lucide-react";
 
-const API_BASE = "http://127.0.0.1:8000/api/v1";
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api/v1";
 
 const CustomersDashboard = () => {
   const [customers, setCustomers] = useState([]);
-  const [stats, setStats] = useState(null); // ⭐ dashboard stats
+  const [stats, setStats] = useState({
+    total_customers: 0,
+    avg_purchase_value: 0,
+    active_customers: 0,
+  });
+
   const [loading, setLoading] = useState(true);
+  const [loadingStats, setLoadingStats] = useState(false);
   const [error, setError] = useState(null);
+
   const fetchedOnce = useRef(false);
   const navigate = useNavigate();
+  const [kpiFilter, setKpiFilter] = useState("none");
 
-  // -------------------------------
-  // 1️⃣ Fetch Dashboard Stats (KPI)
-  // -------------------------------
-  const fetchStats = async () => {
+  const fetchStats = async (filter = "none") => {
     try {
-      const res = await fetch(`${API_BASE}/customers/?stats=true`);
-      if (!res.ok) throw new Error("Failed to fetch stats");
+      setLoadingStats(true);
+      let url = `${API_BASE}/customers/?stats=true`;
+      if (filter !== "none") url += `&filter=${filter}`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Stats fetch error");
 
       const data = await res.json();
-      setStats(data);
+
+      setStats({
+        total_customers: data.total_customers ?? 0,
+        avg_purchase_value: data.avg_purchase_value ?? 0,
+        active_customers: data.active_customers ?? 0,
+      });
     } catch (err) {
       console.error("Stats Error:", err);
-      setStats({
-        total_customers: 0,
-        avg_purchase_value: 0,
-        active_this_month: 0,
-      });
+    } finally {
+      setLoadingStats(false);
     }
   };
 
-  // -------------------------------
-  // 2️⃣ Fetch Customer List
-  // -------------------------------
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-
       const res = await fetch(`${API_BASE}/customers/`);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      if (!res.ok) throw new Error("Customers fetch error");
 
       const data = await res.json();
       const list = data.results || data;
-
       setCustomers(Array.isArray(list) ? list : []);
+      setError(null);
     } catch (err) {
-      console.error("Error fetching customers:", err);
-      setError("Failed to fetch customers from the backend.");
+      console.error("Fetch customers error:", err);
+      setError("Failed to fetch customers.");
       setCustomers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // -------------------------------
-  // INIT LOAD (prevent double fetch)
-  // -------------------------------
   useEffect(() => {
     if (fetchedOnce.current) return;
     fetchedOnce.current = true;
 
-    fetchStats();       // ⭐ Fetch KPI Stats
-    fetchCustomers();   // ⭐ Fetch Customer List
+    fetchStats(kpiFilter);
+    fetchCustomers();
   }, []);
 
-  // -------------------------------
-  // Delete Customer
-  // -------------------------------
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this customer?")) {
-      try {
-        const res = await fetch(`${API_BASE}/customers/${id}/`, {
-          method: "DELETE",
-        });
+  const handleKpiFilter = (e) => {
+    const filter = e.target.value;
+    setKpiFilter(filter);
+    fetchStats(filter);
+  };
 
-        if (res.ok) {
-          alert("Customer deleted successfully!");
-          fetchCustomers();
-          fetchStats(); // refresh KPI stats
-        } else {
-          alert("Failed to delete customer!");
-        }
-      } catch (error) {
-        alert("Backend not available. Cannot delete now.");
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this customer?")) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/customers/${id}/`, { method: "DELETE" });
+      if (res.ok) {
+        alert("Customer deleted!");
+        fetchCustomers();
+        fetchStats(kpiFilter);
+      } else {
+        alert("Delete failed!");
       }
+    } catch (err) {
+      alert("Error deleting customer.");
     }
   };
 
   return (
     <div className="customers-container">
-
-      {/* Header */}
+      {/* ------------------- HEADER WITH DROPDOWN ------------------- */}
       <div className="dashboard-header mb-4">
-        <h1 className="customers-title">Customer Management</h1>
-        <h2 className="customer-heading">
-          Manage customer information and history
-        </h2>
+        <div className="header-left">
+          <h1 className="customers-title">Customer Management</h1>
+          <h2 className="customer-heading">Manage customer information and history</h2>
+        </div>
+        <div className="header-right">
+          <select
+            className="kpi-dropdown-header"
+            value={kpiFilter}
+            onChange={handleKpiFilter}
+          >
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="none">All</option>
+          </select>
+        </div>
       </div>
 
-      {/* KPI CARDS */}
+      {/* ------------------- KPI CARD SECTION ------------------- */}
       <div className="kpi-directory-container bg-white shadow rounded-xl p-5 mb-6">
+        {loadingStats && <span className="small-loading">Loading KPIs…</span>}
 
-        <div className="grid grid-cols-3 gap-4 mb-4">
-
+        <div className="grid grid-cols-3 gap-4 mb-4 kpi-cards-wrap">
           <div className="kpi-card small">
             <h3>Total Customers</h3>
-            <p>{stats?.total_customers ?? 0}</p>
+            <p>{stats.total_customers}</p>
           </div>
 
-         <div className="kpi-card small">
-      <h3>Avg Purchase Value</h3>
-      <p>₹ {stats?.avg_purchase_value ?? 0}</p>
-    </div>
+          <div className="kpi-card small">
+            <h3>Avg Purchase Value</h3>
+            <p>₹ {stats.avg_purchase_value}</p>
+          </div>
 
-    {/* Active This Month */}
-    <div className="kpi-card small">
-      <h3>Active This Month</h3>
-      <p>{stats?.active_this_month ?? 0}</p>
-    </div>
+          <div className="kpi-card small">
+            <h3>Active Customers</h3>
+            <p>{stats.active_customers}</p>
+          </div>
         </div>
 
-        {/* Customer Table */}
+        {/* ------------------- CUSTOMER TABLE ------------------- */}
         <div className="customers-list">
           <div className="customer-directory-header mb-4">
             <h3>Customer Directory</h3>
+            <button className="add-btn" onClick={() => navigate("/masters/customers/add")}>
+              + Add Customer
+            </button>
           </div>
 
           {loading ? (
@@ -145,25 +162,21 @@ const CustomersDashboard = () => {
                   <th>Actions</th>
                 </tr>
               </thead>
-
               <tbody>
-                {customers.length > 0 ? (
+                {customers.length ? (
                   customers.map((c, index) => (
                     <tr key={c.id}>
                       <td>{index + 1}</td>
-
                       <td
                         className="customer-name-link"
                         onClick={() => navigate(`/masters/customers/${c.id}`)}
                       >
                         {c.name}
                       </td>
-
                       <td>{c.phone || "-"}</td>
                       <td>{c.email || "-"}</td>
                       <td>{c.type || "-"}</td>
                       <td>{c.city || "-"}</td>
-
                       <td>
                         {c.is_active ? (
                           <span className="status-active">Active</span>
@@ -171,7 +184,6 @@ const CustomersDashboard = () => {
                           <span className="status-inactive">Inactive</span>
                         )}
                       </td>
-
                       <td className="actions-cell">
                         <Eye
                           size={18}

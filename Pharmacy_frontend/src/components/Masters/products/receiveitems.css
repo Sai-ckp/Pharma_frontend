@@ -5,9 +5,9 @@
 }
 
 .page-title {
-  font-size: 28px; /* same as purchaseorders.css */
+  font-size: 28px;
   font-weight: 600;
-  margin-bottom: 5px; /* adjusted to match purchaseorders spacing */
+  margin-bottom: 5px;
 }
 
 /* KPI Cards Grid */
@@ -29,12 +29,11 @@
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 10px;
-  color: #111;       /* black for headings */
+  color: #111;
 }
 
-/* KPI Items */
 .kpi-item {
-  font-size: 14px; 
+  font-size: 14px;
   margin-bottom: 8px;
   color: #555;
 }
@@ -43,55 +42,10 @@
   color: #222;
 }
 
-/* Table wrapper */
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.items-received-table {
-  width: 100%;
-  min-width: 600px;
-  border-collapse: collapse;
-}
-
-.items-received-table th,
-.items-received-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-  font-size: 14px;
-  color: #111;
-}
-
-.items-received-table th {
-  background-color: #f5f5f5;
-  font-weight: 600;
-}
-
-/* Table inputs & selects */
-.items-received-table input,
-.items-received-table select {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 4px 6px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  outline: none;
-  transition: border-color 0.2s ease;
-}
-
-.items-received-table input:focus,
-.items-received-table select:focus {
-  border-color: #2ecc71;
-}
-
 /* Summary Card */
 .summary-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 
 .summary-row {
@@ -102,12 +56,6 @@
   color: #444;
 }
 
-.summary-icon {
-  margin-right: 8px;
-  color: #2ecc71;
-}
-
-/* Complete Receiving Button */
 .complete-btn {
   margin-top: 15px;
   background-color: #2ecc71;
@@ -144,21 +92,58 @@
   opacity: 0.7;
 }
 
-/* Responsive adjustments */
+/* Items Table Full Width */
+.items-table-card {
+  grid-column: 1 / -1; /* full width */
+}
+
+.items-received-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.items-received-table th,
+.items-received-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  font-size: 14px;
+  color: #111;
+  text-align: left;
+}
+
+.items-received-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+/* Table inputs & selects */
+.items-received-table input,
+.items-received-table select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 6px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.items-received-table input:focus,
+.items-received-table select:focus {
+  border-color: #2ecc71;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .kpi-cards-grid {
     grid-template-columns: 1fr;
   }
-
   .items-received-table th,
-  .items-received-table td {
-    font-size: 12px;
-    padding: 6px;
-  }
-
+  .items-received-table td,
   .items-received-table input,
   .items-received-table select {
     font-size: 12px;
-    padding: 3px 4px;
+    padding: 4px;
   }
 }

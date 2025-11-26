@@ -9,243 +9,276 @@
   font-size: 26px;
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
-.customers-heading {
-  font-size: 12px;
-  font-weight: 300;
-  color: #0f172a;
-  margin-bottom: 12px;
-}
-
-.customers-description {
-  font-size: 14px;
+.customer-heading {
+  font-size: 13px;
+  font-weight: 400;
   color: #475569;
-  margin-bottom: 22px;
-}
-
-/* KPI CARDS */
-.grid {
-  display: grid;
-}
-
-.bg-white {
-  background: #fff;
-}
-
-.shadow {
-  box-shadow: rgba(0,0,0,0.06) 0px 2px 8px;
-}
-
-.rounded-xl {
-  border-radius: 16px;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-lg {
-  font-size: 17px;
-  font-weight: 600;
-  color: #334155;
-}
-
-.text-3xl {
-  font-size: 32px;
-  font-weight: 700;
-  color: #0d9488;
-}
-
-/* FORM CARD */
-.customers-card {
-  background: #fff;
-  border-radius: 14px;
-  margin-top: 18px;
-  padding: 20px;
-  box-shadow: rgba(0,0,0,0.05) 0px 2px 8px;
-}
-
-.customers-card h3 {
-  font-size: 16px;
-  font-weight: 600;
   margin-bottom: 18px;
 }
 
-.customers-form {
+/* KPI + FILTER ROW */
+.kpi-filter-row {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 
-.form-row {
-  display: flex;
-  gap: 18px;
-}
-
-.form-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-group label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1e293b;
-}
-
-.form-group input,
-.form-group textarea {
-  border: 1px solid #10b981e6;
-  border-radius: 10px;
-  padding: 9px 12px;
-  font-size: 14px;
-  outline: none;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  border-color: #0d9488;
-}
-
-/* BUTTON SUBMIT */
-.submit-btn {
-  background: #0d9488;
-  color: white;
-  border: none;
-  padding: 12px 18px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 15px;
+.kpi-filter-label {
   font-weight: 600;
-  width: 180px;
-  transition: 0.2s;
+  color: #374151;
+  font-size: 14px;
 }
 
-.submit-btn:hover {
-  background: #0f766e;
+/* small chip buttons for filters */
+.kpi-filter-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-/* TABLE */
+.chip {
+  background: #f3f4f6;
+  color: #111827;
+  border: 1px solid transparent;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+
+.chip.active {
+  background: #0d9488;
+  color: #fff;
+  border-color: rgba(13,148,136,0.15);
+}
+
+/* small loading text near filter */
+.small-loading {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* KPI cards wrapper (grid) */
+.kpi-cards-wrap {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+/* KPI card styles */
+.kpi-card {
+  background: #fff;
+  padding: 14px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(2,6,23,0.04);
+  text-align: left;
+}
+
+.kpi-card.small h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #374151;
+}
+
+.kpi-card.small p {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Customer list container */
 .customers-list {
   background: #fff;
-  border-radius: 14px;
-  padding: 20px;
-  margin-top: 30px;
-  box-shadow: rgba(0,0,0,0.05) 0px 2px 8px;
-}
-
-.customers-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
-}
-
-.customers-table th,
-.customers-table td {
-  border-bottom: 1px solid #e2e8f0;
-  padding: 12px;
-  font-size: 14px;
-  color: #334155;
-  text-align: center;
-}
-
-.customers-table th {
-  background: #f8fafc;
-  font-weight: 600;
-}
-
-.no-data {
-  padding: 18px;
-  font-size: 14px;
-}
-
-/* ACTION BUTTONS */
-.edit-btn, .delete-btn {
-  border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  margin-right: 6px;
-}
-
-.edit-btn {
-  background: #facc15;
-  color: #1e293b;
-}
-
-.edit-btn:hover {
-  background: #eab308;
-}
-
-.delete-btn {
-  background: #ef4444;
-  color: #fff;
-}
-
-.delete-btn:hover {
-  background: #dc2626;
-}
-
-.add-btn {
-  background: #10b981;
-    color: white;
-    padding: 7px 8px;
-    border-radius: -13px;
-    font-size: 14px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.add-btn:hover {
-  background: #0d9488;
-}
-
-
-/* Smaller KPI cards */
-.kpi-card {
-  background: white;
-  padding: 15px;
-  text-align: center;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(2,6,23,0.04);
 }
 
-.kpi-card h3 {
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.kpi-card p {
-  font-size: 20px;
-  font-weight: bold;
-  margin: 0;
-}
-
-/* Customer Directory Header */
+/* directory header */
 .customer-directory-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 .add-btn {
-  background-color: #4CAF50;
+  background-color: #10b981;
   color: white;
-  padding: 6px 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
   border: none;
-  border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .add-btn:hover {
-  background-color: #45a049;
+  background-color: #0d9488;
 }
 
+/* Table */
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+}
+
+.customers-table th,
+.customers-table td {
+  border-bottom: 1px solid #e6eef2;
+  padding: 12px;
+  font-size: 14px;
+  color: #334155;
+  text-align: left;
+}
+
+.customers-table thead th {
+  background: #f8fafc;
+  font-weight: 700;
+  text-transform: none;
+}
+
+/* make some columns narrower */
+.customers-table th:nth-child(1),
+.customers-table td:nth-child(1) {
+  width: 40px;
+}
+.customers-table th:nth-child(8),
+.customers-table td:nth-child(8) {
+  width: 110px;
+  text-align: center;
+}
+
+.customer-name-link {
+  color: #0f172a;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.customer-name-link:hover {
+  text-decoration: underline;
+}
+
+/* Active / Inactive badges */
+.status-active {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.status-inactive {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Actions icons row */
+.actions-cell {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* small responsive tweaks */
+@media (max-width: 900px) {
+  .kpi-cards-wrap {
+    grid-template-columns: 1fr;
+  }
+  .customer-directory-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .customers-table th,
+  .customers-table td {
+    font-size: 13px;
+    padding: 8px;
+  }
+}
+
+/* KPI header row with dropdown */
+.kpi-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.kpi-dropdown {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.kpi-dropdown:focus {
+  outline: none;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
+}
+
+/* HEADER */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between; /* heading left, dropdown right */
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.header-left h1.customers-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.customer-heading {
+  font-size: 13px;
+  font-weight: 400;
+  color: #475569;
+}
+
+.header-right {
+  margin-left: auto;
+}
+
+.kpi-dropdown-header {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+  margin-right: 35px;
+}
+
+.kpi-dropdown-header:focus {
+  outline: none;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2);
+}
+
+/* KPI cards, table etc remain same */
