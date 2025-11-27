@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { authFetch } from "../../../api/http";
@@ -13,11 +13,11 @@ const VendorDetails = () => {
 
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
-
   const [purchaseHistory, setPurchaseHistory] = useState([]);
   const [suppliedProducts, setSuppliedProducts] = useState([]);
-
   const [activeTab, setActiveTab] = useState("purchase");
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Fetch Vendor Basic Details
   useEffect(() => {
@@ -25,7 +25,6 @@ const VendorDetails = () => {
       try {
         const res = await fetch(`${API_BASE_URL}/procurement/vendors/${id}/`);
         if (!res.ok) throw new Error("Vendor not found");
-
         const data = await res.json();
         setVendor(data);
       } catch (err) {
@@ -35,7 +34,6 @@ const VendorDetails = () => {
         setLoading(false);
       }
     };
-
     fetchVendor();
   }, [id]);
 
@@ -48,20 +46,16 @@ const VendorDetails = () => {
         const res = await authFetch(
           `${API_BASE_URL}/procurement/purchase-orders/?vendor=${vendor.id}`
         );
-
         const data = await res.json();
         const orders = data.results || data || [];
-
         const filteredOrders = orders.filter(
           (ord) => Number(ord.vendor) === Number(vendor.id)
         );
-
         setPurchaseHistory(filteredOrders);
       } catch (err) {
         console.error("Error loading purchase history:", err);
       }
     };
-
     loadPurchaseHistory();
   }, [vendor]);
 
@@ -74,29 +68,78 @@ const VendorDetails = () => {
         const res = await authFetch(
           `${API_BASE_URL}/catalog/products/?vendor=${vendor.id}`
         );
-
         const data = await res.json();
-        const productsList = data.results || data;
-
-        const filteredProducts = productsList.filter(
+        const filteredProducts = (data.results || data).filter(
           (prod) => Number(prod.vendor) === Number(vendor.id)
         );
-
         setSuppliedProducts(filteredProducts);
       } catch (err) {
         console.error("Failed to fetch vendor products:", err);
         setSuppliedProducts([]);
       }
     };
-
     loadSuppliedProducts();
   }, [vendor]);
+
+  const handleImportClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null; // reset
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImporting(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("vendor_id", vendor.id);
+    formData.append("location_id", vendor.default_location || 1); // adjust as needed
+
+    try {
+      const res = await authFetch(`${API_BASE_URL}/procurement/import-purchase-pdf/`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Import failed");
+
+      const data = await res.json();
+      alert(`Imported ${data.lines_created} lines successfully!`);
+
+      // refresh purchase history
+      const ordersRes = await authFetch(
+        `${API_BASE_URL}/procurement/purchase-orders/?vendor=${vendor.id}`
+      );
+      const ordersData = await ordersRes.json();
+      const filteredOrders = (ordersData.results || ordersData).filter(
+        (ord) => Number(ord.vendor) === Number(vendor.id)
+      );
+      setPurchaseHistory(filteredOrders);
+      setActiveTab("purchase");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to import PDF. Check console for details.");
+    } finally {
+      setImporting(false);
+    }
+  };
 
   if (loading) return <p className="loading-text">Loading vendor details...</p>;
   if (!vendor) return <p className="loading-text">Vendor not found!</p>;
 
   return (
     <div className="customers-container">
+      {/* Hidden File Input */}
+      <input
+        type="file"
+        accept="application/pdf"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
+
       {/* Page Header */}
       <div className="page-header">
         <button className="back-btn" onClick={() => navigate("/masters/vendors")}>
@@ -129,7 +172,6 @@ const VendorDetails = () => {
             <div className="contact-row"><strong>Payment Terms:</strong> {vendor.payment_terms || "-"}</div>
             <div className="contact-row"><strong>Rating:</strong> {vendor.rating || "N/A"}</div>
           </div>
-
           <div className="metrics-row">
             <div className="metric">
               <div className="metric-value">{suppliedProducts.length}</div>
@@ -147,22 +189,38 @@ const VendorDetails = () => {
           <h3 className="card-title">Quick Actions</h3>
           <div className="card-body quick-actions-body">
             {vendor.supplier_type === "OFFLINE" && (
-              <button className="action-btn" onClick={() => navigate(`/masters/products`, { state: { vendor } })}>
+              <button
+                className="action-btn"
+                onClick={() => navigate(`/masters/products`, { state: { vendor } })}
+              >
                 Create Order
               </button>
             )}
             {vendor.supplier_type === "ONLINE" && (
-              <button className="action-btn" onClick={() => navigate(`/masters/vendors/import`, { state: { vendor } })}>
-                Import
+              <button
+                className="action-btn"
+                disabled={importing}
+                onClick={handleImportClick}
+              >
+                {importing ? "Importing..." : "Import PDF"}
               </button>
             )}
-            <button className="action-btn" onClick={() => navigate(`/masters/products/vendor-catalog/${id}`, { state: { vendor } })}>
+            <button
+              className="action-btn"
+              onClick={() => navigate(`/masters/products/vendor-catalog/${id}`, { state: { vendor } })}
+            >
               View Catalog
             </button>
-            <button className="action-btn" onClick={() => navigate(`/masters/vendors/edit/${id}`, { state: { vendor } })}>
+            <button
+              className="action-btn"
+              onClick={() => navigate(`/masters/vendors/edit/${id}`, { state: { vendor } })}
+            >
               Edit Supplier
             </button>
-            <button className="action-btn" onClick={() => navigate(`/masters/products/purchase-orders/`, { state: { vendor } })}>
+            <button
+              className="action-btn"
+              onClick={() => navigate(`/masters/products/purchase-orders/`, { state: { vendor } })}
+            >
               Purchase Orders
             </button>
           </div>
@@ -185,7 +243,6 @@ const VendorDetails = () => {
             </div>
           </div>
 
-          {/* TAB CONTENT */}
           <div className="card-body">
             {activeTab === "purchase" && (
               <table className="table">
