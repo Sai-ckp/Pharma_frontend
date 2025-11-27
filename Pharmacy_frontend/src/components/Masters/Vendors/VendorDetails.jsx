@@ -52,7 +52,6 @@ const VendorDetails = () => {
         const data = await res.json();
         const orders = data.results || data || [];
 
-        // EXTRA SAFETY — React-side vendor filter
         const filteredOrders = orders.filter(
           (ord) => Number(ord.vendor) === Number(vendor.id)
         );
@@ -79,7 +78,6 @@ const VendorDetails = () => {
         const data = await res.json();
         const productsList = data.results || data;
 
-        // EXTRA SAFETY — React-side vendor filter
         const filteredProducts = productsList.filter(
           (prod) => Number(prod.vendor) === Number(vendor.id)
         );
@@ -119,6 +117,7 @@ const VendorDetails = () => {
             <div className="contact-row"><strong>Email:</strong> {vendor.email || "-"}</div>
             <div className="contact-row"><strong>Address:</strong> {vendor.address || "-"}</div>
             <div className="contact-row"><strong>GSTIN:</strong> {vendor.gstin || "-"}</div>
+            <div className="contact-row"><strong>Supplier Type:</strong> {vendor.supplier_type || "-"}</div>
           </div>
         </div>
 
@@ -136,11 +135,10 @@ const VendorDetails = () => {
               <div className="metric-value">{suppliedProducts.length}</div>
               <div className="metric-label">Products</div>
             </div>
-            <div className="metric ">
+            <div className="metric">
               <div className="metric-value">{purchaseHistory.length}</div>
               <div className="metric-label">Orders</div>
             </div>
-           
           </div>
         </div>
 
@@ -148,12 +146,25 @@ const VendorDetails = () => {
         <div className="vendor-card quick-actions-card">
           <h3 className="card-title">Quick Actions</h3>
           <div className="card-body quick-actions-body">
-            <button className="action-btn" onClick={() => navigate(`/masters/products`, { state: { vendor } })}>Create Order</button>
-            <button className="action-btn" onClick={() => navigate(`/masters/products/vendor-catalog/${id}`, { state: { vendor } })}>View Catalog</button>
-            <button className="action-btn" onClick={() => navigate(`/masters/vendors/edit/${id}`, { state: { vendor } })}>Edit Supplier</button>
-            <button className="action-btn" onClick={() => navigate(`/masters/products/purchase-orders/`, { state: { vendor } })}>Purchase Orders</button>
-            <button className="action-btn" onClick={() => navigate(`/masters/vendors/import`, { state: { vendor } })}> Import</button>
-
+            {vendor.supplier_type === "OFFLINE" && (
+              <button className="action-btn" onClick={() => navigate(`/masters/products`, { state: { vendor } })}>
+                Create Order
+              </button>
+            )}
+            {vendor.supplier_type === "ONLINE" && (
+              <button className="action-btn" onClick={() => navigate(`/masters/vendors/import`, { state: { vendor } })}>
+                Import
+              </button>
+            )}
+            <button className="action-btn" onClick={() => navigate(`/masters/products/vendor-catalog/${id}`, { state: { vendor } })}>
+              View Catalog
+            </button>
+            <button className="action-btn" onClick={() => navigate(`/masters/vendors/edit/${id}`, { state: { vendor } })}>
+              Edit Supplier
+            </button>
+            <button className="action-btn" onClick={() => navigate(`/masters/products/purchase-orders/`, { state: { vendor } })}>
+              Purchase Orders
+            </button>
           </div>
         </div>
 

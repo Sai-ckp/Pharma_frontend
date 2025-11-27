@@ -25,6 +25,7 @@ const AddVendor = () => {
     ifsc: "",
     notes: "",
     rating: "",
+    supplier_type: "",
     is_active: true,
   });
 
@@ -94,6 +95,10 @@ const AddVendor = () => {
             <div className="field">
               <label>Supplier Name *</label>
               <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+            </div>
+            <div className="field">
+              <label>Supplier Type </label>
+              <input type="text" name="supplier_type" value={formData.supplier_type} onChange={handleChange} required />
             </div>
             <div className="field">
               <label>Contact Person *</label>

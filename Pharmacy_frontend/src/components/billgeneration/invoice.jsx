@@ -80,10 +80,7 @@ export default function Invoice() {
     pdf.save(`${invoice?.invoice_no || "invoice"}.pdf`);
   };
 
-  const customer =
-    invoice && typeof invoice.customer === "object" && invoice.customer !== null
-      ? invoice.customer
-      : {};
+ const customer = invoice?.customer_detail || {};
 
   const search = new URLSearchParams(location.search);
   const shouldAutoPrint = search.get("print") === "1";

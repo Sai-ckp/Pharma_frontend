@@ -141,9 +141,9 @@ const CustomersDashboard = () => {
         <div className="customers-list">
           <div className="customer-directory-header mb-4">
             <h3>Customer Directory</h3>
-            <button className="add-btn" onClick={() => navigate("/masters/customers/add")}>
+            {/* <button className="add-btn" onClick={() => navigate("/masters/customers/add")}>
               + Add Customer
-            </button>
+            </button> */}
           </div>
 
           {loading ? (
@@ -152,7 +152,7 @@ const CustomersDashboard = () => {
             <table className="customers-table">
               <thead>
                 <tr>
-                  <th>#</th>
+                 <th>Customer ID</th>
                   <th>Name</th>
                   <th>Phone</th>
                   <th>Email</th>
@@ -166,7 +166,8 @@ const CustomersDashboard = () => {
                 {customers.length ? (
                   customers.map((c, index) => (
                     <tr key={c.id}>
-                      <td>{index + 1}</td>
+        {/* Customer Code */}
+        <td>{c.code || "-"}</td>
                       <td
                         className="customer-name-link"
                         onClick={() => navigate(`/masters/customers/${c.id}`)}

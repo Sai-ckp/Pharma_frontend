@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./billgeneration.css";
 import { authFetch } from "../../api/http";
-import QRCode from "react-qr-code";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api/v1";
 
@@ -23,20 +22,9 @@ export default function GenerateBill() {
 
   // Payment
   const [paymentMethods, setPaymentMethods] = useState([]);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+  const [selectedMethod, setSelectedMethod] = useState("");
+  const [amountPaying, setAmountPaying] = useState("");
 
-  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
-  const [showQRPopup, setShowQRPopup] = useState(false);
-  const [showCashPopup, setShowCashPopup] = useState(false);
-
-  const [upiStatus, setUpiStatus] = useState("pending"); // pending | paid | expired
-  const [timeLeft, setTimeLeft] = useState(180);
-
-  // Cash
-  const [cashPaid, setCashPaid] = useState("");
-  const [cashChange, setCashChange] = useState(0);
-
-  const timerRef = useRef(null);
   const locationId = 1;
 
   // ------------------ FETCH PAYMENT METHODS ------------------
@@ -144,87 +132,17 @@ export default function GenerateBill() {
   const gstAmount = (subtotal * gst) / 100;
   const total = subtotal + gstAmount;
 
-  // ------------------ PAYMENT POPUP ------------------
-  const openPaymentPopup = () => {
-    if (!customer.name || !customer.phone || cart.length === 0) {
-      alert("Please fill all customer info and add items to cart.");
-      return;
-    }
-    setShowPaymentPopup(true);
-  };
-
-  const handleSelectPayment = (pm) => {
-    setSelectedPaymentMethod(pm);
-    setShowPaymentPopup(false);
-
-    if (pm.name.toUpperCase() === "CASH") {
-      setCashPaid("");
-      setCashChange(0);
-      setShowCashPopup(true);
-    } else if (pm.name.toUpperCase() === "UPI") {
-      setUpiStatus("pending");
-      setTimeLeft(180);
-      setShowQRPopup(true);
-      startUPITimer();
-    } else {
-      submitInvoice(pm.id);
-    }
-  };
-
-  // ------------------ CASH PAYMENT ------------------
-  useEffect(() => {
-    const paid = parseFloat(cashPaid || "0");
-    const change = paid - total;
-    setCashChange(change > 0 ? change : 0);
-  }, [cashPaid, total]);
-
-  const handleCashSubmit = () => {
-    const paid = parseFloat(cashPaid || "0");
-    if (isNaN(paid) || paid <= 0) {
-      alert("Enter a valid amount paid.");
-      return;
-    }
-
-    setShowCashPopup(false);
-    submitInvoice(selectedPaymentMethod.id, paid);
-  };
-
-  // ------------------ UPI ------------------
-  const startUPITimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          setUpiStatus("expired");
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  useEffect(() => {
-    if (upiStatus !== "pending") return;
-
-    const poll = setInterval(() => {
-      if (timeLeft <= 165 && upiStatus === "pending") {
-        setUpiStatus("paid");
-        clearInterval(timerRef.current);
-      }
-    }, 3000);
-
-    return () => clearInterval(poll);
-  }, [upiStatus, timeLeft]);
-
-  const handleUPIConfirmed = () => {
-    setShowQRPopup(false);
-    submitInvoice(selectedPaymentMethod.id);
-  };
-
-  // ------------------ INVOICE ------------------
+  // ------------------ SUBMIT INVOICE ------------------
   const submitInvoice = async (paymentMethodId, amountPaid) => {
+    if (!customer.name || !customer.phone) {
+      alert("Please fill customer name and phone.");
+      return;
+    }
+    if (cart.length === 0) {
+      alert("Cart is empty. Please add products.");
+      return;
+    }
+
     const withoutBatch = cart.filter((item) => !item.batch_lot_id);
     if (withoutBatch.length) {
       alert("Some items do not have stock batches. Add stock before billing.");
@@ -287,84 +205,6 @@ export default function GenerateBill() {
         Billing & Invoicing
       </h1>
 
-      {/* PAYMENT POPUP */}
-      {showPaymentPopup && (
-        <div className="popup-overlay">
-          <div className="popup-card">
-            <h3>Select Payment Method</h3>
-
-            {paymentMethods.length === 0 && <p style={{ color: "#888" }}>No payment methods found.</p>}
-
-            {paymentMethods.map((pm) => (
-              <button
-                key={pm.id}
-                className="popup-btn cash"
-                onClick={() => handleSelectPayment(pm)}
-              >
-                {pm.name}
-              </button>
-            ))}
-
-            <button className="popup-close" onClick={() => setShowPaymentPopup(false)}>Cancel</button>
-          </div>
-        </div>
-      )}
-
-      {/* CASH POPUP */}
-      {showCashPopup && (
-        <div className="popup-overlay">
-          <div className="popup-card">
-            <h3>Cash Payment</h3>
-            <p>Total: ₹{total.toFixed(2)}</p>
-            <input
-              type="number"
-              placeholder="Enter amount paid"
-              value={cashPaid}
-              onChange={(e) => setCashPaid(e.target.value)}
-            />
-            <p>Change: ₹{cashChange.toFixed(2)}</p>
-            <button className="popup-btn" onClick={handleCashSubmit}>OK</button>
-            <button className="popup-close" onClick={() => setShowCashPopup(false)}>Cancel</button>
-          </div>
-        </div>
-      )}
-
-      {/* UPI POPUP */}
-      {showQRPopup && (
-        <div className="popup-overlay">
-          <div className="popup-card">
-            <h3>Scan & Pay (UPI)</h3>
-
-            {upiStatus === "pending" && (
-              <>
-                <QRCode
-                  value={`upi://pay?pa=9480084459@axl&pn=Shreyas%20P%20S&am=${total.toFixed(2)}&cu=INR`}
-                  size={200}
-                />
-                <p style={{ marginTop: "1rem" }}>
-                  Amount: <strong>₹{total.toFixed(2)}</strong>
-                </p>
-                <p style={{ marginTop: "0.5rem", color: "#6b7280" }}>Time left: {timeLeft} sec</p>
-              </>
-            )}
-
-            {upiStatus === "paid" && (
-              <>
-                <p style={{ fontSize: "1.2rem", color: "green", fontWeight: 600 }}>✅ Payment Received</p>
-                <button className="popup-btn cash" onClick={handleUPIConfirmed}>Continue</button>
-              </>
-            )}
-
-            {upiStatus === "expired" && (
-              <p style={{ fontSize: "1.2rem", color: "red", fontWeight: 600 }}>❌ Payment Expired</p>
-            )}
-
-            <button className="popup-close" onClick={() => setShowQRPopup(false)}>Cancel</button>
-          </div>
-        </div>
-      )}
-
-      {/* MAIN GRID */}
       <div className="grid-container" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "1rem", fontSize: "0.9rem" }}>
         {/* CUSTOMER INFO */}
         <div className="card" style={cardStyle}>
@@ -382,47 +222,15 @@ export default function GenerateBill() {
         {/* MEDICINES */}
         <div className="card" style={cardStyle}>
           <h3 style={{ marginBottom: "1rem", fontWeight: "600" }}>Select Medicines</h3>
-
-          <input
-            type="text"
-            placeholder="Search medicines..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-
+          <input type="text" placeholder="Search medicines..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           <div style={{ maxHeight: "360px", overflowY: "auto" }}>
             {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                style={{
-                  marginBottom: "0.5rem",
-                  padding: "0.75rem",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "6px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
+              <div key={product.id} style={{ marginBottom: "0.5rem", padding: "0.75rem", border: "1px solid #e5e7eb", borderRadius: "6px", display: "flex", justifyContent: "space-between" }}>
                 <div>
                   <strong>{product.name}</strong>
-                  <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>
-                    Stock: {product.stock} | ₹{product.mrp}
-                  </div>
+                  <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>Stock: {product.stock} | ₹{product.mrp}</div>
                 </div>
-
-                <button
-                  onClick={() => addToCart(product)}
-                  style={{
-                    backgroundColor: "#22c55e",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "999px",
-                    padding: "0.25rem 0.75rem",
-                    fontSize: "1.3rem",
-                  }}
-                >
-                  +
-                </button>
+                <button onClick={() => addToCart(product)} style={{ backgroundColor: "#22c55e", color: "white", border: "none", borderRadius: "999px", padding: "0.25rem 0.75rem", fontSize: "1.3rem" }}>+</button>
               </div>
             ))}
           </div>
@@ -431,7 +239,6 @@ export default function GenerateBill() {
         {/* CART */}
         <div className="card" style={cardStyle}>
           <h3 style={{ marginBottom: "1rem", fontWeight: "600" }}>Cart Items</h3>
-
           {cart.length === 0 ? (
             <p style={{ color: "#6b7280" }}>No items added.</p>
           ) : (
@@ -454,17 +261,9 @@ export default function GenerateBill() {
                       <span style={{ margin: "0 6px" }}>{item.qty}</span>
                       <button onClick={() => updateQty(item.id, 1)}>+</button>
                     </td>
-
                     <td>₹{item.mrp.toFixed(2)}</td>
                     <td>₹{(item.qty * item.mrp).toFixed(2)}</td>
-                    <td>
-                      <button
-                        style={{ color: "red", fontSize: "1.2rem" }}
-                        onClick={() => removeItem(item.id)}
-                      >
-                        ×
-                      </button>
-                    </td>
+                    <td><button style={{ color: "red", fontSize: "1.2rem" }} onClick={() => removeItem(item.id)}>×</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -479,35 +278,41 @@ export default function GenerateBill() {
           <p style={{ display: "flex", justifyContent: "space-between" }}>
             <span>Subtotal:</span> <strong>₹{subtotal.toFixed(2)}</strong>
           </p>
-
           <p style={{ display: "flex", justifyContent: "space-between" }}>
             <span>GST ({gst}%):</span> <strong>₹{gstAmount.toFixed(2)}</strong>
           </p>
-
           <hr />
-
           <p style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>
             <strong>Total:</strong> <strong>₹{total.toFixed(2)}</strong>
           </p>
 
-          <button
-            className="generate-btn"
-            style={{ width: "100%", marginTop: "1rem" }}
-            onClick={openPaymentPopup}
+          {/* PAYMENT METHOD */}
+          <div style={{ marginTop: "1rem" }}>
+            <label style={{ fontWeight: "600" }}>Select Payment Method</label>
+            <select style={{ width: "100%", padding: "0.6rem", marginTop: "0.4rem", borderRadius: "8px", border: "1px solid #ccc" }}
+              value={selectedMethod} onChange={(e) => setSelectedMethod(e.target.value)}>
+              <option value="">-- Choose Payment Method --</option>
+              {paymentMethods.map((method) => (
+                <option key={method.id} value={method.id}>{method.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* AMOUNT */}
+          <div style={{ marginTop: "1rem" }}>
+            <label style={{ fontWeight: "600" }}>Amount Paying</label>
+            <input type="number" placeholder="Enter Amount" value={amountPaying}
+              onChange={(e) => setAmountPaying(e.target.value)}
+              style={{ width: "100%", padding: "0.6rem", marginTop: "0.4rem", borderRadius: "8px", border: "1px solid #ccc" }}
+            />
+          </div>
+
+          {/* COMPLETE PAYMENT */}
+          <button className="generate-btn" style={{ width: "100%", marginTop: "1rem" }}
+            onClick={() => submitInvoice(selectedMethod, parseFloat(amountPaying))}
+            disabled={!selectedMethod || !amountPaying}
           >
             Complete Payment
-          </button>
-
-          <button
-            className="generate-btn"
-            style={{
-              width: "100%",
-              marginTop: "0.75rem",
-              backgroundColor: "#0f766e",
-            }}
-            onClick={() => submitInvoice(paymentMethods[0]?.id)}
-          >
-            Print Bill (Default Method)
           </button>
         </div>
       </div>
