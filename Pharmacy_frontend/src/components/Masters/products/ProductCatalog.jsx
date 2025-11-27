@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import "./productcatalog.css";
+import { authFetch } from "../../../api/http";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -18,13 +19,14 @@ const ProductCatalog = () => {
   useEffect(() => {
     if (!vendor?.id) return;
 
+    // Fetch vendor-specific products
     const fetchProducts = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/procurement/vendors/${vendor.id}/products/`);
+        const res = await authFetch(
+          `${API_BASE_URL}/procurement/vendors/${vendor.id}/products/`
+        );
         const data = await res.json();
         setProducts(data);
-        const uniqueCategories = [...new Set(data.map((item) => item.category || "Uncategorized"))];
-        setCategories(uniqueCategories);
       } catch (err) {
         console.error("Failed to fetch products:", err);
       }
@@ -33,9 +35,29 @@ const ProductCatalog = () => {
     fetchProducts();
   }, [vendor]);
 
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()) &&
-    (categoryFilter ? p.category === categoryFilter : true)
+  // ✅ Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await authFetch(`${API_BASE_URL}/catalog/categories/`);
+        const data = await res.json();
+
+        // API returns results? Use results format (depending on your backend)
+        const list = data.results ? data.results : data;
+
+        setCategories(list);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const filteredProducts = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(search.toLowerCase()) &&
+      (categoryFilter ? p.category === categoryFilter : true)
   );
 
   return (
@@ -44,7 +66,7 @@ const ProductCatalog = () => {
       <div className="catalog-header">
         <button className="back-btn" onClick={() => navigate(-1)}>
           <ArrowLeft size={18} />
-           <span>Back</span>
+          <span>Back</span>
         </button>
         <div className="catalog-header-text">
           <h1 className="catalog-title">Product Catalog</h1>
@@ -64,14 +86,20 @@ const ProductCatalog = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
+
+            {/* ✅ Dropdown now uses API categories */}
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <option value="">All Categories</option>
-              {categories.map((cat, idx) => (
-                <option key={idx} value={cat}>{cat}</option>
-              ))}
+
+              {categories.length > 0 &&
+                categories.map((cat) => (
+                  <option key={cat.id} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
             </select>
           </div>
         </div>
@@ -85,13 +113,18 @@ const ProductCatalog = () => {
               <th>Last Updated</th>
             </tr>
           </thead>
+
           <tbody>
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product, index) => (
                 <tr key={index}>
                   <td>{product.name}</td>
                   <td>{product.category || "Uncategorized"}</td>
-                  <td>{product.updated_at ? new Date(product.updated_at).toLocaleDateString() : "-"}</td>
+                  <td>
+                    {product.updated_at
+                      ? new Date(product.updated_at).toLocaleDateString()
+                      : "-"}
+                  </td>
                 </tr>
               ))
             ) : (

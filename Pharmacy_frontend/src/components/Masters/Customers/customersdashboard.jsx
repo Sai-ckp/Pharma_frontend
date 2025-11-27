@@ -98,12 +98,12 @@ const CustomersDashboard = () => {
         <div className="customers-list">
           <div className="customer-directory-header flex justify-between items-center mb-4">
             <h3>Customer Directory</h3>
-            <button
+            {/* <button
               className="add-btn"
               onClick={() => navigate("/masters/customers/add")}
             >
               + Add Customer
-            </button>
+            </button> */}
           </div>
 
           {/* Table */}

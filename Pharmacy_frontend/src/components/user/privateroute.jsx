@@ -1,9 +1,8 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-
-const SESSION_TOKEN_KEY = "session_token";
+import { getAccessToken } from "../../api/auth";
 
 export default function PrivateRoute() {
-  const token = sessionStorage.getItem(SESSION_TOKEN_KEY);
+  const token = getAccessToken();
   const location = useLocation();
 
   return token

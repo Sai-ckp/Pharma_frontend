@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Eye, Trash2, ArrowLeft } from "lucide-react";
 import "./purchaseorders.css";
+import { formatDateDDMMYYYY } from "../../../utils/dateFormat";
+import { authFetch } from "../../../api/http";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -21,7 +23,7 @@ const PurchaseOrders = () => {
 
     const fetchOrders = async () => {
       try {
-        const res = await fetch(
+        const res = await authFetch(
           `${API_BASE_URL}/purchaseorders/?vendor=${vendor.id}`
         );
         const data = await res.json();
@@ -104,8 +106,8 @@ const PurchaseOrders = () => {
               orders.map((order) => (
                 <tr key={order.id}>
                   <td>{order.po_number}</td>
-                  <td>{order.order_date}</td>
-                  <td>{order.expected_date}</td>
+                  <td>{formatDateDDMMYYYY(order.order_date)}</td>
+                  <td>{formatDateDDMMYYYY(order.expected_date)}</td>
                   <td>{order.items_count}</td>
                   <td>₹ {order.total_amount?.toFixed(2)}</td>
                   <td>{order.status}</td>

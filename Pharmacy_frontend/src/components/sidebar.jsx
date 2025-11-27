@@ -39,6 +39,7 @@ import "./Sidebar.css";
 const Sidebar = () => {
 
   const otherMenuItems = [
+    {path: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { path: "/inventory/medicines/", label: "Inventory Management", icon: <Boxes size={18} /> },
     { path: "/billgeneration/billlist", label: "Billing", icon: <FileText size={18} /> },
 

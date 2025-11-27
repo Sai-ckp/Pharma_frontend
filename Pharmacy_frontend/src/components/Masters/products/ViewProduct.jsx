@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./addproducts.css"; // same CSS as AddProduct / EditProduct
+import { authFetch } from "../../../api/http";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const ViewProduct = () => {
@@ -24,7 +25,7 @@ const ViewProduct = () => {
   });
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/catalog/products/${id}/`)
+    authFetch(`${API_BASE_URL}/catalog/products/${id}/`)
       .then((res) => res.json())
       .then((data) => setProduct(data))
       .catch(err => console.error("Error fetching product:", err));

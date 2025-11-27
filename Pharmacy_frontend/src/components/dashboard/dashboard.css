@@ -1,3 +1,11 @@
-.dashboard {
-  
+.dashboard-main {
+  padding: 20px;
+}
+
+.summary-card {
+  transition: 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-3px);
 }
