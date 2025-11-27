@@ -1,9 +1,14 @@
+// Base API URL cleanup
 const rawBase = import.meta.env.VITE_API_URL || "";
 const API_BASE = rawBase.replace(/\/+$/g, "");
 
+// Token Keys
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
 
+// ------------------------------
+// Token Helpers
+// ------------------------------
 export function getAccessToken() {
   return localStorage.getItem(ACCESS_TOKEN_KEY);
 }
@@ -22,6 +27,9 @@ export function clearTokens() {
   localStorage.removeItem(REFRESH_TOKEN_KEY);
 }
 
+// ------------------------------
+// Login
+// ------------------------------
 export async function login(username, password) {
   const response = await fetch(`${API_BASE}/auth/token/`, {
     method: "POST",
@@ -49,6 +57,9 @@ export async function login(username, password) {
   return data;
 }
 
+// ------------------------------
+// Refresh Access Token
+// ------------------------------
 export async function refreshAccessToken() {
   const refresh = getRefreshToken();
   if (!refresh) {
@@ -79,6 +90,40 @@ export async function refreshAccessToken() {
   return null;
 }
 
+// ------------------------------
+// Reset Password (email + new password + confirm)
+// ------------------------------
+export async function resetPassword(email, newPassword, confirmPassword) {
+  const response = await fetch(`${API_BASE}/auth/password/reset/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      new_password: newPassword,
+      confirm_password: confirmPassword,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    const message =
+      errorBody.detail ||
+      errorBody.error ||
+      "Password reset failed. Please try again.";
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
+  }
+
+  return await response.json();
+}
+
+// ------------------------------
+// Logout
+// ------------------------------
 export function logout() {
   clearTokens();
 }

@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./users.css";
+
+const STORAGE_KEY = "app_users";
 
 const Users = () => {
   const [idCounter, setIdCounter] = useState(1);
@@ -8,30 +10,83 @@ const Users = () => {
   const generateUserId = (counter) => `USR${String(counter).padStart(3, "0")}`;
 
   const [formData, setFormData] = useState({
-    userId: generateUserId(idCounter),
+    userId: generateUserId(1),
     fullName: "",
     email: "",
+    password: "",
+    confirmPassword: "",
     createdAt: "",
     isActive: false,
   });
 
+  // Load saved users from localStorage on first render
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setUsers(parsed);
+          if (parsed.length > 0) {
+            const last = parsed[parsed.length - 1];
+            const num = parseInt(String(last.userId || "").replace("USR", ""), 10);
+            const next = !isNaN(num) ? num + 1 : 1;
+            setIdCounter(next);
+            setFormData((prev) => ({
+              ...prev,
+              userId: generateUserId(next),
+            }));
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load users from localStorage", e);
+    }
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCheckboxChange = (e) => {
-    setFormData({ ...formData, isActive: e.target.checked });
+    setFormData((prev) => ({ ...prev, isActive: e.target.checked }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (!formData.fullName.trim() || !formData.email.trim()) {
+      alert("Full name and email are required.");
+      return;
+    }
+
+    if (!formData.password || !formData.confirmPassword) {
+      alert("Please enter password and confirm password.");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
     const now = new Date();
     const createdAt = now.toLocaleString();
-    const newUser = { ...formData, createdAt };
 
-    setUsers([...users, newUser]);
+    // Do not store confirmPassword in list
+    const { confirmPassword, ...userWithoutConfirm } = formData;
+    const newUser = { ...userWithoutConfirm, createdAt };
+
+    const updatedUsers = [...users, newUser];
+    setUsers(updatedUsers);
+
+    // Save to localStorage so Login & ResetPassword can use
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUsers));
+    } catch (e) {
+      console.error("Failed to save users to localStorage", e);
+    }
 
     alert(
       `✅ User Created Successfully!\n
@@ -49,6 +104,8 @@ Status: ${newUser.isActive ? "Active" : "Inactive"}`
       userId: generateUserId(nextCounter),
       fullName: "",
       email: "",
+      password: "",
+      confirmPassword: "",
       createdAt: "",
       isActive: false,
     });
@@ -77,11 +134,33 @@ Status: ${newUser.isActive ? "Active" : "Inactive"}`
         </div>
 
         <div className="formGroup">
-          <label>Email:</label>
+          <label>Email (Login ID):</label>
           <input
             type="email"
             name="email"
             value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="formGroup">
+          <label>Password:</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="formGroup">
+          <label>Confirm Password:</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
             onChange={handleChange}
             required
           />
