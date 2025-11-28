@@ -1,151 +1,133 @@
-import React, { useEffect, useState } from "react";
+// src/components/user/ResetPassword.jsx
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { resetPassword as apiResetPassword } from "../../api/auth";
-
-const STORAGE_KEY = "app_users";
+import { forgotPassword, verifyOtp, resetPassword } from "../../api/auth";
 
 export default function ResetPassword() {
-  const navigate = useNavigate();
   const location = useLocation();
-  const prefilledUsername = location.state?.username || "";
+  const navigate = useNavigate();
+  const prefillEmail = location.state?.username || location.state?.email || "";
 
-  const [userList, setUserList] = useState([]);
-  const [form, setForm] = useState({
-    username: prefilledUsername, // email
-    newPassword: "",
-    confirmPassword: "",
-  });
+  const [step, setStep] = useState(1);
+  const [email, setEmail] = useState(prefillEmail);
+  const [otp, setOtp] = useState("");
+  const [uid, setUid] = useState(null);
+  const [token, setToken] = useState(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
 
-  // Load users for dropdown
+  const RESEND_SECONDS = 60;
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const intervalRef = useRef(null);
+
   useEffect(() => {
+    if (secondsLeft <= 0) { clearInterval(intervalRef.current); intervalRef.current = null; return; }
+    if (!intervalRef.current) {
+      intervalRef.current = setInterval(() => setSecondsLeft(s => Math.max(0, s - 1)), 1000);
+    }
+    return () => { clearInterval(intervalRef.current); intervalRef.current = null; };
+  }, [secondsLeft]);
+
+  const startCountdown = () => setSecondsLeft(RESEND_SECONDS);
+
+  const handleSendOtp = async () => {
+    setError(""); setInfo("");
+    if (!email || !email.includes("@")) { setError("Please enter a valid email."); return; }
+    setLoading(true);
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setUserList(parsed);
-        }
-      }
-    } catch (e) {
-      console.error("Failed to load users from localStorage", e);
-    }
-  }, []);
+      const res = await forgotPassword(email);
+      setInfo(res?.detail || "If an account exists, an OTP was sent.");
+      setStep(2);
+      startCountdown();
+    } catch (err) {
+      setError(err.message || "Failed to request OTP.");
+      console.error("forgotPassword error:", err);
+    } finally { setLoading(false); }
+  };
 
-  const onChange = (e) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    setErr("");
-    setSuccess("");
-
-    if (!form.username) {
-      setErr("Please select a user.");
-      return;
-    }
-    if (!form.newPassword || !form.confirmPassword) {
-      setErr("Please fill all password fields.");
-      return;
-    }
-    if (form.newPassword !== form.confirmPassword) {
-      setErr("New password and confirm password do not match.");
-      return;
-    }
-
+  const handleVerifyOtp = async () => {
+    setError(""); setInfo("");
+    if (!otp || otp.length !== 6) { setError("Please enter the 6-digit OTP."); return; }
+    setLoading(true);
     try {
-      setLoading(true);
-      // backend: email + newPassword + confirmPassword
-      await apiResetPassword(
-        form.username,
-        form.newPassword,
-        form.confirmPassword
-      );
-      setSuccess("Password reset successfully. Redirecting to login...");
-      setTimeout(() => navigate("/login", { replace: true }), 1500);
-    } catch (error) {
-      setErr(error.message || "Unable to reset password.");
-    } finally {
-      setLoading(false);
-    }
+      const data = await verifyOtp(email, otp);
+      setUid(data.uid); setToken(data.token);
+      setStep(3); setInfo("OTP verified — set a new password.");
+    } catch (err) {
+      setError(err.message || "OTP verification failed."); console.error("verifyOtp error:", err);
+    } finally { setLoading(false); }
+  };
+
+  const handleReset = async () => {
+    setError(""); setInfo("");
+    if (!newPassword || newPassword.length < 8) { setError("Password must be at least 8 characters."); return; }
+    if (newPassword !== confirmPassword) { setError("Passwords do not match."); return; }
+    if (!uid || !token) { setError("Missing verification data. Restart the flow."); return; }
+    setLoading(true);
+    try {
+      const res = await resetPassword(uid, token, newPassword);
+      setInfo(res?.detail || "Password updated successfully. Redirecting to login...");
+      setTimeout(() => navigate("/login"), 1200);
+    } catch (err) {
+      setError(err.message || "Failed to reset password."); console.error("resetPassword error:", err);
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-semibold text-slate-800 mb-2 text-center">
-          Reset your password
-        </h2>
-        <p className="text-xs text-gray-600 mb-4 text-center">
-          Select a user and set a new password.
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+      <div className="w-full max-w-md bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">Reset Password</h2>
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              User (Name / Email)
-            </label>
-            <select
-              name="username"
-              value={form.username}
-              onChange={onChange}
-              className="mt-2 block w-full rounded-md border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            >
-              <option value="">Select user</option>
-              {userList.map((u, idx) => (
-                <option key={idx} value={u.email}>
-                  {u.fullName ? `${u.fullName} (${u.email})` : u.email}
-                </option>
-              ))}
-            </select>
-          </div>
+        {step === 1 && (
+          <>
+            <p className="text-sm text-gray-600 mb-4">Enter the email associated with your account. We'll send a 6-digit OTP to that email.</p>
+            <label className="block text-sm mb-1">Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border rounded px-3 py-2 mb-4" placeholder="you@example.com" />
+            <button onClick={handleSendOtp} disabled={loading} className="w-full bg-indigo-600 text-white py-2 rounded">{loading ? "Sending..." : "Send OTP"}</button>
+          </>
+        )}
 
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              New Password
-            </label>
-            <input
-              type="password"
-              name="newPassword"
-              value={form.newPassword}
-              onChange={onChange}
-              className="mt-2 block w-full rounded-md border border-gray-200 px-3 py-2"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={form.confirmPassword}
-              onChange={onChange}
-              className="mt-2 block w-full rounded-md border border-gray-200 px-3 py-2"
-            />
-          </div>
+        {step === 2 && (
+          <>
+            <p className="text-sm text-gray-600 mb-3">Enter the 6-digit OTP sent to <strong>{email}</strong>.</p>
+            <label className="block text-sm mb-1">OTP</label>
+            <input type="text" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g,"").slice(0,6))} maxLength={6} className="w-full border rounded px-3 py-2 mb-3" placeholder="123456" />
+            <div className="flex gap-3">
+              <button onClick={handleVerifyOtp} disabled={loading} className="flex-1 bg-indigo-600 text-white py-2 rounded">{loading ? "Verifying..." : "Verify OTP"}</button>
+              <button onClick={() => { setStep(1); setOtp(""); setError(""); setInfo(""); }} className="px-3 py-2 border rounded">Edit Email</button>
+            </div>
+            <div className="mt-3 flex justify-between items-center text-sm">
+              {secondsLeft > 0 ? <span>Resend in {secondsLeft}s</span> : <button onClick={handleSendOtp} className="text-indigo-600 underline">Resend OTP</button>}
+              <button onClick={() => navigate("/login")} className="text-gray-600 hover:underline">Cancel</button>
+            </div>
+          </>
+        )}
 
-          {err && <p className="text-xs text-red-600">{err}</p>}
-          {success && <p className="text-xs text-emerald-600">{success}</p>}
+        {step === 3 && (
+          <>
+            <p className="text-sm text-gray-600 mb-3">Set a new password for <strong>{email}</strong>.</p>
+            <label className="block text-sm mb-1">New Password</label>
+            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full border rounded px-3 py-2 mb-3" placeholder="Minimum 8 characters" />
+            <label className="block text-sm mb-1">Confirm Password</label>
+            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full border rounded px-3 py-2 mb-4" />
+            <div className="flex gap-3">
+              <button onClick={handleReset} disabled={loading} className="flex-1 bg-indigo-600 text-white py-2 rounded">{loading ? "Saving..." : "Save Password"}</button>
+              <button onClick={() => { setStep(1); setEmail(""); setOtp(""); setUid(null); setToken(null); setNewPassword(""); setConfirmPassword(""); setError(""); setInfo(""); }} className="px-3 py-2 border rounded">Start Over</button>
+            </div>
+          </>
+        )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-md bg-emerald-600 text-white py-2.5 text-sm font-medium"
-          >
-            {loading ? "Resetting..." : "Reset Password"}
-          </button>
+        <div className="mt-4 min-h-[1.25rem]">
+          {error && <div className="text-sm text-rose-600">{error}</div>}
+          {!error && info && <div className="text-sm text-emerald-600">{info}</div>}
+        </div>
 
-          <button
-            type="button"
-            onClick={() => navigate("/login")}
-            className="mt-2 w-full text-xs text-gray-600 hover:underline"
-          >
-            Back to Login
-          </button>
-        </form>
+        <div className="mt-5 text-center">
+          <button onClick={() => navigate("/login")} className="text-gray-600 hover:underline">Back to login</button>
+        </div>
       </div>
     </div>
   );

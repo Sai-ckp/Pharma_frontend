@@ -1,3 +1,4 @@
+// src/App.jsx
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
@@ -7,8 +8,8 @@ import Footer from "./components/Footer";
 
 // Public
 import Login from "./components/user/login";
-import Users from "./components/users/users.jsx";              // ✅ new
-import ResetPassword from "./components/user/ResetPassword.jsx"; // ✅ new
+import Users from "./components/users/users.jsx";
+import ResetPassword from "./components/user/ResetPassword"; // ensure file: src/components/user/ResetPassword.jsx
 
 // Guard
 import PrivateRoute from "./components/user/privateroute";
@@ -114,10 +115,7 @@ function AppLayout() {
             <Route path="/masters/vendors/add" element={<AddVendors />} />
             <Route path="/masters/vendors/view/:id" element={<ViewVendor />} />
             <Route path="/masters/vendors/edit/:id" element={<EditVendor />} />
-            <Route
-              path="/masters/vendors/viewdetails/:id"
-              element={<VendorDetails />}
-            />
+            <Route path="/masters/vendors/viewdetails/:id" element={<VendorDetails />} />
 
             <Route path="/masters/customers" element={<CustomersDashboard />} />
             <Route path="/masters/customers/add" element={<AddCustomers />} />
@@ -134,23 +132,11 @@ function AppLayout() {
             <Route path="/masters/products/add" element={<AddProduct />} />
             <Route path="/masters/products/view/:id" element={<ViewProduct />} />
             <Route path="/masters/products/edit/:id" element={<EditProduct />} />
-            <Route
-              path="/masters/products/purchase-orders"
-              element={<PurchaseOrders />}
-            />
-            <Route
-              path="/masters/products/receive-items"
-              element={<ReceiveItems />}
-            />
-            <Route
-              path="/masters/products/vendor-catalog/:id"
-              element={<ProductCatalog />}
-            />
+            <Route path="/masters/products/purchase-orders" element={<PurchaseOrders />} />
+            <Route path="/masters/products/receive-items" element={<ReceiveItems />} />
+            <Route path="/masters/products/vendor-catalog/:id" element={<ProductCatalog />} />
 
-            <Route
-              path="/masters/payment-methods"
-              element={<PaymentMethods />}
-            />
+            <Route path="/masters/payment-methods" element={<PaymentMethods />} />
             <Route path="/masters/payment-terms" element={<PaymentTerms />} />
             <Route path="/masters/rack-locations" element={<RackLocations />} />
 
