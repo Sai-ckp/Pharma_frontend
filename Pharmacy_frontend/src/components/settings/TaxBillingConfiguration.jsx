@@ -22,50 +22,53 @@ const TaxBilling = () => {
     creditSales: false,
   });
 
-  // ✅ Fetch from /settings/app/
+  // ---------------------------------------------
+  // FETCH tax & billing settings from backend
+  // ---------------------------------------------
   useEffect(() => {
     const fetchTaxData = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/settings/app/`);
-        if (!response.ok) return;
+        const res = await fetch(`${API_BASE_URL}/settings/tax-billing/`);
+        if (!res.ok) return;
 
-        const data = await response.json();
+        const data = await res.json();
 
         setTaxData({
-          gstRate: data.tax?.TAX_GST_RATE || "",
-          taxMethod: data.tax?.TAX_CALC_METHOD?.toLowerCase() || "inclusive",
-          cgstRate: data.tax?.TAX_CGST_RATE || "",
-          sgstRate: data.tax?.TAX_SGST_RATE || "",
-          invoicePrefix: data.invoice?.INVOICE_PREFIX || "",
-          invoiceStart: data.invoice?.INVOICE_START || "",
-          invoiceTemplate: data.invoice?.INVOICE_TEMPLATE || "standard",
-          invoiceFooter: data.invoice?.INVOICE_FOOTER || "",
-          cashPayment: data.notifications?.CASH_PAYMENT === "true",
-          cardPayment: data.notifications?.CARD_PAYMENT === "true",
-          upiPayment: data.notifications?.UPI_PAYMENT === "true",
-          creditSales: data.notifications?.CREDIT_SALES === "true",
+          gstRate: data.gst_rate || "",
+          taxMethod: data.tax_method || "inclusive",
+          cgstRate: data.cgst_rate || "",
+          sgstRate: data.sgst_rate || "",
+          invoicePrefix: data.invoice_prefix || "",
+          invoiceStart: data.invoice_start || "",
+          invoiceTemplate: data.invoice_template || "standard",
+          invoiceFooter: data.invoice_footer || "",
+          cashPayment: data.cash_payment ?? true,
+          cardPayment: data.card_payment ?? false,
+          upiPayment: data.upi_payment ?? false,
+          creditSales: data.credit_sales ?? false,
         });
-      } catch (err) {
-        console.error("Error fetching app settings:", err);
+      } catch (error) {
+        console.error("Error fetching tax billing:", error);
       }
     };
 
     fetchTaxData();
   }, []);
 
-  // Input handler
+  // ---------------------------------------------
+  // FORM HANDLERS
+  // ---------------------------------------------
   const handleTaxChange = (e) => {
     const { name, value } = e.target;
     setTaxData({ ...taxData, [name]: value });
   };
 
-  // Toggle handler
   const togglePayment = (key) => {
     setTaxData({ ...taxData, [key]: !taxData[key] });
   };
 
   // ----------------------------------------------------
-  //  SAVE FUNCTION: sends 1 KEY at a time to backend
+  // POST METHOD — Save individual key/value
   // ----------------------------------------------------
   const saveKeyValue = async (key, value) => {
     await fetch(`${API_BASE_URL}/settings/settings/`, {
@@ -75,36 +78,67 @@ const TaxBilling = () => {
     });
   };
 
-  // Save all fields
+  // ----------------------------------------------------
+  // PUT METHOD — Save FULL TaxBillingSettings
+  // ----------------------------------------------------
+  const saveFullTaxBilling = async () => {
+    const payload = {
+      gst_rate: taxData.gstRate,
+      tax_method: taxData.taxMethod,
+      cgst_rate: taxData.cgstRate,
+      sgst_rate: taxData.sgstRate,
+      invoice_prefix: taxData.invoicePrefix,
+      invoice_start: taxData.invoiceStart,
+      invoice_template: taxData.invoiceTemplate,
+      invoice_footer: taxData.invoiceFooter,
+      cash_payment: taxData.cashPayment,
+      card_payment: taxData.cardPayment,
+      upi_payment: taxData.upiPayment,
+      credit_sales: taxData.creditSales,
+    };
+
+    await fetch(`${API_BASE_URL}/settings/tax-billing/`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  };
+
+  // ----------------------------------------------------
+  // SAVE FUNCTION — Runs BOTH POST + PUT
+  // ----------------------------------------------------
   const handleTaxSave = async () => {
     setLoading(true);
 
-    // mapping React fields → backend keys
-    const mappings = {
-      gstRate: "TAX_GST_RATE",
-      taxMethod: "TAX_CALC_METHOD",
-      cgstRate: "TAX_CGST_RATE",
-      sgstRate: "TAX_SGST_RATE",
-      invoicePrefix: "INVOICE_PREFIX",
-      invoiceStart: "INVOICE_START",
-      invoiceTemplate: "INVOICE_TEMPLATE",
-      invoiceFooter: "INVOICE_FOOTER",
-      cashPayment: "CASH_PAYMENT",
-      cardPayment: "CARD_PAYMENT",
-      upiPayment: "UPI_PAYMENT",
-      creditSales: "CREDIT_SALES",
-    };
-
     try {
-      // save each one separately
-      for (let field in mappings) {
-        await saveKeyValue(mappings[field], String(taxData[field]));
+      // ----- POST Save (Key-Value) -----
+      const kvMappings = {
+        gstRate: "TAX_GST_RATE",
+        taxMethod: "TAX_CALC_METHOD",
+        cgstRate: "TAX_CGST_RATE",
+        sgstRate: "TAX_SGST_RATE",
+        invoicePrefix: "INVOICE_PREFIX",
+        invoiceStart: "INVOICE_START",
+        invoiceTemplate: "INVOICE_TEMPLATE",
+        invoiceFooter: "INVOICE_FOOTER",
+        cashPayment: "CASH_PAYMENT",
+        cardPayment: "CARD_PAYMENT",
+        upiPayment: "UPI_PAYMENT",
+        creditSales: "CREDIT_SALES",
+      };
+
+      for (let field in kvMappings) {
+        await saveKeyValue(kvMappings[field], String(taxData[field]));
       }
 
-      alert("✅ Tax & Billing Configuration Saved!");
+      // ----- PUT Save (Full TaxBillingSettings) -----
+      await saveFullTaxBilling();
+
+      alert("✅ Tax & Billing Settings Saved Successfully!");
+
     } catch (err) {
-      console.error("Save error:", err);
-      alert("⚠️ Failed to save settings");
+      console.error("Save Error:", err);
+      alert("❌ Failed to save settings");
     }
 
     setLoading(false);
@@ -116,7 +150,10 @@ const TaxBilling = () => {
         <FileText size={28} /> Tax & Billing Configuration
       </h2>
 
+      {/* UI Layout Same as your original */}
+      {/* ------------- TAX FORM ------------- */}
       <div className="tax-card">
+
         <h3>Tax Settings</h3>
 
         <div className="alert-row-horizontal">
@@ -247,9 +284,10 @@ const TaxBilling = () => {
             onClick={handleTaxSave}
             disabled={loading}
           >
-            {loading ? "Saving..." : "Save"}
+            {loading ? "Saving..." : "Save Settings"}
           </button>
         </div>
+
       </div>
     </div>
   );

@@ -5,19 +5,16 @@ import { authFetch } from "../../api/http";
 
 const LS_KEY = "medicines";
 
-// Normalize VITE_API_URL so both of these work:
-//  - http://127.0.0.1:8000
-//  - http://127.0.0.1:8000/api/v1
+// Normalize VITE_API_URL
 const rawBase = import.meta.env.VITE_API_URL || "";
 const normalizeBase = (u) =>
-  u
-    .trim()
-    .replace(/\/+$/g, "")
-    .replace(/\/api\/v1$/i, "");
+  u.trim().replace(/\/+$/g, "").replace(/\/api\/v1$/i, "");
 const API_BASE = normalizeBase(rawBase);
-const LIST_API = API_BASE
-  ? `${API_BASE}/api/v1/inventory/medicines/?location_id=1`
-  : "/api/v1/inventory/medicines/?location_id=1";
+
+// API URLs
+const API_ALL = `${API_BASE}/api/v1/inventory/medicines/?location_id=1`;
+const API_LOW = `${API_BASE}/api/v1/inventory/low-stock/?location_id=1`;
+const API_EXPIRING = `${API_BASE}/api/v1/inventory/expiring/?window=warning&location_id=1`;
 
 export default function MedicineInventory() {
   const nav = useNavigate();
@@ -30,22 +27,41 @@ export default function MedicineInventory() {
   const [serverError, setServerError] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  // load medicines from backend (falls back to localStorage if backend fails)
+  // -----------------------------
+  // GET API URL BASED ON TAB
+  // -----------------------------
+  const getListAPI = () => {
+    if (tab === "low") return API_LOW;
+    if (tab === "expiring") return API_EXPIRING;
+    return API_ALL;
+  };
+
+  // -----------------------------
+  // FETCH MEDICINES
+  // -----------------------------
   useEffect(() => {
     const fetchList = async () => {
       setLoading(true);
       setServerError(null);
+
+      const URL = getListAPI();
       try {
-        const res = await authFetch(LIST_API, { headers: { Accept: "application/json" } });
+        const res = await authFetch(URL, { headers: { Accept: "application/json" } });
+
         if (!res.ok) throw new Error(`Failed to load (${res.status})`);
+
         const data = await res.json();
         const list = Array.isArray(data) ? data : data?.results || [];
+
         setRows(list);
-        try { localStorage.setItem(LS_KEY, JSON.stringify(list)); } catch {}
+
+        try {
+          localStorage.setItem(LS_KEY, JSON.stringify(list));
+        } catch {}
       } catch (err) {
         console.error(err);
-        setServerError(err.message || "Error loading medicines, falling back to localStorage");
-        // fallback to localStorage
+        setServerError("Backend offline → Showing saved data");
+
         try {
           const raw = localStorage.getItem(LS_KEY);
           setRows(raw ? JSON.parse(raw) : []);
@@ -56,12 +72,13 @@ export default function MedicineInventory() {
         setLoading(false);
       }
     };
-    fetchList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
+    fetchList();
+  }, [tab]); // <----- IMPORTANT: refetch again when tab changes
+
+  // -----------------------------
   const categories = useMemo(() => {
-    const set = new Set(rows.map(r => r.category).filter(Boolean));
+    const set = new Set(rows.map((r) => r.category).filter(Boolean));
     return ["All", ...Array.from(set)];
   }, [rows]);
 
@@ -79,7 +96,10 @@ export default function MedicineInventory() {
     return diff >= 0 && diff <= 60; // within 60 days
   };
 
-  const filtered = rows.filter(r => {
+  // -----------------------------
+  // FILTERS
+  // -----------------------------
+  const filtered = rows.filter((r) => {
     const matchesSearch =
       !query ||
       `${r.medicine_id || ""} ${r.batch_number || ""} ${r.medicine_name || ""} ${r.category || ""} ${r.manufacturer || ""}`
@@ -99,25 +119,28 @@ export default function MedicineInventory() {
     return matchesSearch && matchesCategory && matchesStatus && tabOk;
   });
 
+  // -----------------------------
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this medicine?")) return;
     setDeleting(true);
     setServerError(null);
+
     try {
-      // backend delete is not wired yet; keep local delete only
-      if (!res.ok && res.status !== 204) throw new Error(`Delete failed (${res.status})`);
-      const next = rows.filter(r => r.id !== id);
+      const next = rows.filter((r) => r.id !== id);
       setRows(next);
-      try { localStorage.setItem(LS_KEY, JSON.stringify(next)); } catch {}
+
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify(next));
+      } catch {}
     } catch (err) {
       console.error(err);
-      setServerError(err.message || "Delete failed");
+      setServerError("Delete failed");
     } finally {
       setDeleting(false);
     }
   };
 
-  const currency = (n) => (n === "" || n == null ? "" : `₹${Number(n).toFixed(2)}`);
+  const currency = (n) => (n == null || n === "" ? "" : `₹${Number(n).toFixed(2)}`);
 
   return (
     <div className="inv-wrap">
@@ -132,8 +155,8 @@ export default function MedicineInventory() {
       </div>
 
       <div className="inv-card">
-        {/* Server error / Filters row */}
         {serverError && <div style={{ color: "crimson", padding: 8 }}>{serverError}</div>}
+
         <div className="inv-filters">
           <div className="inv-search">
             <span className="inv-search-icon">🔍</span>
@@ -145,23 +168,15 @@ export default function MedicineInventory() {
             />
           </div>
 
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="inv-select"
-          >
+          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="inv-select">
             {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c}>{c}</option>
             ))}
           </select>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="inv-select"
-          >
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="inv-select">
             {["All", "In Stock", "Low Stock", "Out of Stock"].map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s}>{s}</option>
             ))}
           </select>
 
@@ -171,29 +186,20 @@ export default function MedicineInventory() {
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* TABS */}
         <div className="inv-tabs">
-          <button
-            className={`inv-tab ${tab === "all" ? "active" : ""}`}
-            onClick={() => setTab("all")}
-          >
+          <button className={`inv-tab ${tab === "all" ? "active" : ""}`} onClick={() => setTab("all")}>
             All Products
           </button>
-          <button
-            className={`inv-tab ${tab === "low" ? "active" : ""}`}
-            onClick={() => setTab("low")}
-          >
+          <button className={`inv-tab ${tab === "low" ? "active" : ""}`} onClick={() => setTab("low")}>
             Low Stock
           </button>
-          <button
-            className={`inv-tab ${tab === "expiring" ? "active" : ""}`}
-            onClick={() => setTab("expiring")}
-          >
+          <button className={`inv-tab ${tab === "expiring" ? "active" : ""}`} onClick={() => setTab("expiring")}>
             Expiring Stock
           </button>
         </div>
 
-        {/* Table */}
+        {/* TABLE */}
         <div className="inv-table-wrap">
           {loading ? (
             <div style={{ padding: 20 }}>Loading...</div>
@@ -207,15 +213,17 @@ export default function MedicineInventory() {
                   <th>Category</th>
                   <th>Stock</th>
                   <th>Price (₹)</th>
-                  <th>Expiry Date</th>
+                  <th>Expiry</th>
                   <th>Status</th>
                   <th style={{ width: 96, textAlign: "center" }}>Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filtered.length ? (
                   filtered.map((r) => {
                     const status = getStatus(r);
+
                     return (
                       <tr key={r.id}>
                         <td>{r.medicine_id}</td>
@@ -225,6 +233,7 @@ export default function MedicineInventory() {
                         <td>{r.quantity}</td>
                         <td>{currency(r.mrp)}</td>
                         <td>{r.expiry_date ? new Date(r.expiry_date).toLocaleDateString() : ""}</td>
+
                         <td>
                           <span
                             className={`badge ${
@@ -238,59 +247,28 @@ export default function MedicineInventory() {
                             {status}
                           </span>
                         </td>
-<td className="inv-actions-cell">
-  <button
-    className="inv-icon"
-    title="View"
-    onClick={() => alert(JSON.stringify(r, null, 2))}
-  >
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#136FD7"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path>
-      <circle cx="12" cy="12" r="3"></circle>
-    </svg>
-  </button>
 
-  <button
-    className="inv-icon danger"
-    title="Delete"
-    onClick={() => handleDelete(r.id)}
-    disabled={deleting}
-  >
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#E23636"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="3 6 5 6 21 6"></polyline>
-      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-      <path d="M10 11v6"></path>
-      <path d="M14 11v6"></path>
-      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-    </svg>
-  </button>
-</td>
+                        <td className="inv-actions-cell">
+                          <button className="inv-icon" title="View" onClick={() => alert(JSON.stringify(r, null, 2))}>
+                            👁️
+                          </button>
 
+                          <button
+                            className="inv-icon danger"
+                            title="Delete"
+                            onClick={() => handleDelete(r.id)}
+                            disabled={deleting}
+                          >
+                            🗑️
+                          </button>
+                        </td>
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
                     <td colSpan={9} style={{ textAlign: "center", padding: 14 }}>
-                      No medicines yet. Click <strong>Add Medicine</strong>.
+                      No medicines found
                     </td>
                   </tr>
                 )}

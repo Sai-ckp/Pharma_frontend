@@ -136,6 +136,19 @@ const EditVendor = () => {
               <label>Supplier Name *</label>
               <input type="text" name="name" value={formData.name} onChange={handleChange} required />
             </div>
+             <div className="field">
+  <label>Supplier Type *</label>
+  <select
+    name="supplier_type"
+    value={formData.supplier_type}
+    onChange={handleChange}
+    required
+  >
+    <option value="">-- Select Supplier Type --</option>
+    <option value="OFFLINE">Manual Order in ERP</option>
+    <option value="ONLINE">External Website (PDF Import)</option>
+  </select>
+</div>
             <div className="field">
               <label>Contact Person *</label>
               <input type="text" name="contact_person" value={formData.contact_person} onChange={handleChange} />

@@ -10,7 +10,9 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 const SettingsDashboard = () => {
   const [activeSection, setActiveSection] = useState(null);
   const [loading, setLoading] = useState(false);
+
   const [businessExists, setBusinessExists] = useState(false);
+  const [alertExists, setAlertExists] = useState(false); // ⭐ NEW — to choose POST/PUT
 
   const settingsSections = [
     { name: "Business Details", icon: <Home size={24} /> },
@@ -42,7 +44,7 @@ const SettingsDashboard = () => {
   });
 
   // ---------------------------------------------------------
-  // 🚀 FETCH BUSINESS DETAILS & ALERT SETTINGS
+  // FETCH BUSINESS DETAILS & ALERT SETTINGS
   // ---------------------------------------------------------
   useEffect(() => {
     const fetchBusinessDetails = async () => {
@@ -70,19 +72,18 @@ const SettingsDashboard = () => {
 
     const fetchAlertSettings = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/settings/app/`);
+        const res = await fetch(`${API_BASE_URL}/settings/alert-thresholds/`);
         if (res.ok) {
           const data = await res.json();
-
-          const alerts = data.alerts || {};
+          setAlertExists(true);
 
           setAlertData({
-            low_stock_threshold: alerts.ALERT_LOW_STOCK_DEFAULT || "",
-            out_of_stock_alert: alerts.OUT_OF_STOCK_ACTION || "No",
-            critical_expiry_days: alerts.ALERT_EXPIRY_CRITICAL_DAYS || "",
-            warning_expiry_days: alerts.ALERT_EXPIRY_WARNING_DAYS || "",
-            check_frequency: alerts.ALERT_CHECK_FREQUENCY || "",
-            auto_remove_expired: alerts.AUTO_REMOVE_EXPIRED || "Manually only",
+            low_stock_threshold: data.low_stock_threshold || "",
+            out_of_stock_alert: data.out_of_stock_alert || "No",
+            critical_expiry_days: data.critical_expiry_days || "",
+            warning_expiry_days: data.warning_expiry_days || "",
+            check_frequency: data.check_frequency || "",
+            auto_remove_expired: data.auto_remove_expired || "Manually only",
           });
         }
       } catch (error) {
@@ -95,7 +96,7 @@ const SettingsDashboard = () => {
   }, []);
 
   // ---------------------------------------------------------
-  // 🚀 FORM HANDLERS
+  // FORM HANDLERS
   // ---------------------------------------------------------
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -106,7 +107,7 @@ const SettingsDashboard = () => {
   };
 
   // ---------------------------------------------------------
-  // 🚀 SAVE BUSINESS DETAILS
+  // SAVE BUSINESS DETAILS (POST or PUT)
   // ---------------------------------------------------------
   const handleSave = async () => {
     setLoading(true);
@@ -133,52 +134,36 @@ const SettingsDashboard = () => {
   };
 
   // ---------------------------------------------------------
-  // 🚀 HELPER: SAVE ONE SETTING KEY
-  // ---------------------------------------------------------
-  const saveSetting = async (key, value) => {
-    const response = await fetch(`${API_BASE_URL}/settings/settings/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key, value }),
-    });
-
-    if (!response.ok) {
-      const msg = await response.text();
-      console.error(`❌ Failed to save ${key}:`, msg);
-    }
-  };
-
-  // ---------------------------------------------------------
-  // 🚀 SAVE ALERT SETTINGS (Correct: multiple POST calls)
+  // SAVE ALERT THRESHOLDS (POST or PUT)
   // ---------------------------------------------------------
   const handleAlertSave = async () => {
     setLoading(true);
 
     try {
-      await saveSetting("ALERT_LOW_STOCK_DEFAULT", alertData.low_stock_threshold);
-      await saveSetting("OUT_OF_STOCK_ACTION", alertData.out_of_stock_alert);
-      await saveSetting(
-        "ALERT_EXPIRY_CRITICAL_DAYS",
-        alertData.critical_expiry_days
-      );
-      await saveSetting(
-        "ALERT_EXPIRY_WARNING_DAYS",
-        alertData.warning_expiry_days
-      );
-      await saveSetting("ALERT_CHECK_FREQUENCY", alertData.check_frequency);
-      await saveSetting("AUTO_REMOVE_EXPIRED", alertData.auto_remove_expired);
+      const method = alertExists ? "PUT" : "POST";
 
-      alert("✅ Alert thresholds saved!");
+      const response = await fetch(`${API_BASE_URL}/settings/alert-thresholds/`, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(alertData),
+      });
+
+      if (response.ok) {
+        alert("✅ Alert thresholds saved!");
+        setAlertExists(true);
+      } else {
+        alert("❌ Failed to save alert settings");
+      }
     } catch (err) {
       console.error(err);
-      alert("❌ Failed to save alerts");
+      alert("❌ Failed to save alert settings");
     } finally {
       setLoading(false);
     }
   };
 
   // ---------------------------------------------------------
-  // 🚀 UI
+  // UI
   // ---------------------------------------------------------
   return (
     <div className="settings-container">
@@ -251,6 +236,7 @@ const SettingsDashboard = () => {
 
             <div className="alert-card">
               <h3>Inventory Alerts</h3>
+
               <div className="alert-row-horizontal">
                 <div className="alert-field">
                   <label>Low Stock Threshold</label>
